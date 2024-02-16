@@ -1,0 +1,59 @@
+{
+    "name": "jspreadsheet-ce",
+    "title": "The Javascript Spreadsheet",
+    "description": "Jspreadsheet is a lightweight, vanilla javascript plugin to create amazing web-based interactive data grids with spreadsheet like controls compatible with Excel, Google Spreadsheets and any other spreadsheet software.",
+    "repository": {
+        "type": "git",
+        "url": "https://github.com/jspreadsheet/ce.git"
+    },
+    "author": {
+        "name": "Contact <contact@jspreadsheet.com>"
+    },
+    "keywords": [
+        "spreadsheet",
+        "online spreadsheet",
+        "jspreadsheet",
+        "jexcel",
+        "tables",
+        "table",
+        "excel",
+        "grid",
+        "javascript grid",
+        "grid-editor",
+        "data tables",
+        "data grid",
+        "spreadsheet"
+    ],
+    "dependencies": {
+        "@jspreadsheet/formula": "^2.0.2",
+        "jsuites": "^5.0.17",
+        "nodemon": "^3.0.3"
+    },
+    "devDependencies": {
+        "c8": "^7.13.0",
+        "chai": "^4.3.7",
+        "faker": "^5.5.3",
+        "imports-loader": "^4.0.1",
+        "jsdom": "^20.0.3",
+        "jsdom-global": "^3.0.2",
+        "mocha": "^8.4.0",
+        "webpack": "^5.70.0",
+        "webpack-cli": "^4.9.2",
+        "webpack-dev-server": "^4.7.2",
+        "webpack-sources": "^3.2.3"
+    },
+    "main": "dist/index.js",
+    "types": "dist/index.d.ts",
+    "version": "4.13.3",
+    "bugs": "https://github.com/jspreadsheet/ce/issues",
+    "homepage": "https://github.com/jspreadsheet/ce",
+    "download": "https://github.com/jspreadsheet/ce/archive/master.zip",
+    "scripts": {
+        "test": "mocha --recursive --require=mocha.config.cjs",
+        "test:watch": "mocha --recursive --watch --parallel --reporter min",
+        "test:coverage": "c8 mocha --recursive",
+        "build": "npx webpack --config webpack.config.cjs",
+        "start": "npx webpack serve --history-api-fallback",
+        "build:watch": "nodemon --watch ./src/index.js --ext ts --exec \"npm run build\""
+    }
+}
