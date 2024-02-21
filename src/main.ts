@@ -1,5 +1,5 @@
 import { renderHtml } from './ui/render.ts'
-import { sheet } from './core/sheet.ts'
+import sheet from './core/sheet.ts'
 
 export default class main {
 
