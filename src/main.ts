@@ -1,24 +1,13 @@
-import './style.css'
-import { setupCounter } from './ui/counter.ts'
+import { renderHtml } from './ui/render.ts'
+import { sheet } from './core/sheet.ts'
 
 export default class main {
 
-  constructor(targetElement: String, options: any, data: any) {
+  constructor(targetElementId: string) {
 
-    document.querySelector<HTMLDivElement>('#app')!.innerHTML = `
-  <div>
-    <h1>Vite + TypeScript</h1>
-    <div class="card">
-      <button id="counter" type="button"></button>
-    </div>
-    <p class="read-the-docs">
-      Click on the Vite and TypeScript logos to learn more
-    </p>
-  </div>
-`
+    document.getElementById(targetElementId)!.innerHTML = renderHtml();
 
-    setupCounter(document.querySelector<HTMLButtonElement>('#counter')!)
+    const newSheet = new sheet();
+    console.log(newSheet.test());
   }
 }
-
-const app = new main('#app', {}, {});
