@@ -63,7 +63,9 @@ export default class main {
       const rowDom = document.createElement('tr');
       for (let col = 0; col < this.options.columns.length; col++) {
         const cell = document.createElement('td');
-        cell.innerHTML = this.options.data[row][this.options.columns[col].name]
+        const inputDom = document.createElement('input');
+        inputDom.value = this.options.data[row][this.options.columns[col].name]
+        cell.appendChild(inputDom)
         rowDom.appendChild(cell)
       }
       tBodyDom.appendChild(rowDom)
