@@ -1,76 +1,46 @@
-import { renderHtml } from './ui/render.ts'
-import sheet from './core/sheet.ts'
+import UI from './ui/render.ts'
 import { LightSheetOptions } from './main.types.ts';
+import Sheet from './definations/sheet.ts';
 
 export default class main {
-  tableEl: any;
+  ui: UI
   options: LightSheetOptions;
+  sheet: Sheet
+
   constructor(targetElement: Element | HTMLDocument, options: LightSheetOptions) {
     this.options = options;
+    this.sheet = new Sheet();
+
     if (!(targetElement instanceof Element || targetElement instanceof HTMLDocument)) {
       console.error('Jspreadsheet: el is not a valid DOM element');
     }
-    this.tableEl = targetElement;
-    this.prepareTable();
+
+    this.ui = new UI(targetElement); //this should have 3 arguments?
+    this.initializeData();
   }
 
-  prepareTable() {
-    let size = this.options.columns.length;
-    if (this.options.data && typeof this.options.data[0] !== 'undefined') {
-      // Data keys
-      var keys = Object.keys(this.options.data[0]);
+  initializeData() {
+    for (let i = 0; this.options.data.length; i++) {
+      const data = this.options.data[i];
+      let colIndex = 0
+      let rowKey = ''
+      const row = new Map()
+      for (var key in data) {
+        colIndex++
+        if (data[key]) {
+          const cell = this.sheet.setCellAt(colIndex, i, data[key])
+          // cell = { cell, column, row }
 
-      if (keys.length > size) {
-        size = keys.length;
+          rowKey = cell.row.key
+          row.set(colIndex, cell)
+        }
       }
+      this.ui.addRow(rowKey, row)
     }
 
-    for (let i = 0; i < size; i++) {
-      if (!this.options.columns[i]) {
-        this.options.columns[i] = { type: 'text', name: '', title: '' };
-      } else if (!this.options.columns[i].type) {
-        this.options.columns[i].type = 'text';
-      }
-
-      if (!this.options.columns[i].title) {
-        this.options.columns[i].title = '';
-      }
-    }
-
-
-    this.createTable();
 
   }
 
-  createTable() {
-    const tableDom = document.createElement('table');
-    const theadDom = document.createElement('thead');
-    const tBodyDom = document.createElement('tbody');
 
-    let headerContainer = document.createElement('tr');
-
-    for (let i = 0; i < this.options.columns.length; i++) {
-      const cell = document.createElement('th');
-      cell.innerHTML = this.options.columns[i].title
-      // Append cell to the container
-      headerContainer.appendChild(cell);
-    }
-    theadDom.appendChild(headerContainer);
-    tableDom.appendChild(theadDom)
-    this.tableEl.appendChild(tableDom)
-
-    for (let row = 0; row < this.options.data.length; row++) {
-      const rowDom = document.createElement('tr');
-      for (let col = 0; col < this.options.columns.length; col++) {
-        const cell = document.createElement('td');
-        const inputDom = document.createElement('input');
-        inputDom.value = this.options.data[row][this.options.columns[col].name]
-        cell.appendChild(inputDom)
-        rowDom.appendChild(cell)
-      }
-      tBodyDom.appendChild(rowDom)
-    }
-    tableDom.appendChild(tBodyDom)
-  }
 
 }
