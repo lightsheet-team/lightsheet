@@ -3,5 +3,5 @@ export function renderHtml() {
   <div> 
   <h1>Hello from Light sheet package!</h1>
   </div>
-  `
+  `;
 }
