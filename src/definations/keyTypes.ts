@@ -1,6 +1,6 @@
 import { v4 as uuidv4 } from 'uuid';
 // OPTION 1, class based structure
-// slight runtime overhead due to object creation 
+// - very slight runtime overhead due to object creation 
 class Key<T> {
     private key: string;
 
@@ -23,8 +23,10 @@ export class ColumnKey extends Key<ColumnKey> {}
 
 
 // OPTION 2 using tagged types (or branded)
-// Also string literal types are possible, 
-// We could also use tagged or branded types -> these are treated as unique types by the type system
+// Also string literal types would be possible, 
+// these are treated as unique types by the type system
+// + no runtime-overhead 
+// - not as intuitive and doesn't align with OOP
 
 // export type Tagged<Type, Tag> = Type & { readonly __tag__: Tag };
 
