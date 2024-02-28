@@ -15,7 +15,7 @@ export default class UI {
     tableContainerDom.appendChild(this.tableBodyDom);
   }
   //rowCells= {rowKey,[{cell, columnKey},{cell, columnKey},{cell, columnKey},{cell, columnKey}]}
-  addRow(rowKey: string, rowCells: Map<number, any>) {
+  addRow(rowKey: string, rowCells: Map<number, any>, onChange) {
     const rowDom = document.createElement('tr')
     rowDom.id = rowKey
     this.tableBodyDom.appendChild(rowDom)
@@ -29,6 +29,8 @@ export default class UI {
         cellDom.id = rowCells.get(i).columnKey
         inputDom.value = rowCells.get(i).cell.value
       }
+
+      inputDom.onchange = (onChange(rowCells.get(i).columnKey, rowKey, value))
     }
 
   }

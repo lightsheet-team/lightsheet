@@ -35,10 +35,12 @@ export default class main {
           row.set(colIndex, cell)
         }
       }
-      this.ui.addRow(rowKey, row)
+      this.ui.addRow(rowKey, row, setCell)
     }
+  }
 
-
+  setCell(columnKey, rowKey, value) {
+    this.sheet.setCell(columnKey, rowKey, value)
   }
 
 
