@@ -1,6 +1,7 @@
 import UI from './ui/render.ts'
 import { LightSheetOptions } from './main.types.ts';
 import Sheet from './definations/sheet.ts';
+import { ColumnKey, RowKey } from './definations/keyTypes.ts';
 
 export default class LightSheet {
   ui: UI
@@ -20,10 +21,10 @@ export default class LightSheet {
   }
 
   initializeData() {
-    for (let i = 0; this.options.data.length; i++) {
+    for (let i = 0; i < this.options.data.length; i++) {
       const data = this.options.data[i];
       let colIndex = 0
-      let rowKey = ''
+      let rowKey: string = '';
       const row = new Map()
       for (var key in data) {
         colIndex++
@@ -31,18 +32,18 @@ export default class LightSheet {
           const cell = this.sheet.setCellAt(colIndex, i, data[key])
           // cell = { cell, column, row }
 
-          rowKey = cell.row.key
-          row.set(colIndex, cell)
+          rowKey = cell.rowKey.toString()
+          row.set(colIndex, { cell, value: data[key] })
         }
       }
-      this.ui.addRow(rowKey, row)
+      this.ui.addRow(rowKey.toString(), row)
     }
   }
 
-  setCell(columnKey, rowKey, value) {
-    this.sheet.setCell(columnKey, rowKey, value)
+  setCell(columnKey: string, rowKey: string, value: any) {
+    const column = this.sheet.columns.get(new ColumnKey(columnKey))!!
+    const row = this.sheet.rows.get(new RowKey(rowKey))!!
+    this.sheet.setCell(column, row, value)
   }
-
-
 
 }

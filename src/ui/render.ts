@@ -11,13 +11,16 @@ export default class UI {
     this.colCount = colCount;
     this.rowCount = rowCount;
     this.core = core;
+    this.initializeTableContainer();
   }
 
   initializeTableContainer() {
     const tableContainerDom = document.createElement('table');
+    this.tableEl.appendChild(tableContainerDom)
     this.tableBodyDom = document.createElement('tbody');
     tableContainerDom.appendChild(this.tableBodyDom);
   }
+
   //rowCells= {rowKey,[{cell, columnKey},{cell, columnKey},{cell, columnKey},{cell, columnKey}]}
   addRow(rowKey: string, rowCells: Map<number, any>) {
     const rowDom = document.createElement('tr')
@@ -30,12 +33,12 @@ export default class UI {
       inputDom.value = ''
       cellDom.appendChild(inputDom);
       if (rowCells.has(i)) {
-        cellDom.id = rowCells.get(i).columnKey
-        inputDom.value = rowCells.get(i).cell.value
+        cellDom.id = rowCells.get(i).cell.columnKey
+        inputDom.value = rowCells.get(i).value
       }
       inputDom.onchange = (e: Event) => {
         const value = (e.target as HTMLInputElement)?.value ?? '';
-        this.core.setCell(rowCells.get(i).columnKey, rowKey, value)
+        this.core.setCell(rowCells.get(i).cell.columnKey, rowKey, value)
       }
     }
 
