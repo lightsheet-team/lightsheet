@@ -11,7 +11,7 @@ export default class Sheet {
 
     }
 
-    setCellAt(row: number, col: number, value: string): {
+    setCellAt(col: number, row: number, value: string): {
         return { cell, column, row }
     }
 
