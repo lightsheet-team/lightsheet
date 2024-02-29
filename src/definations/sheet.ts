@@ -24,12 +24,12 @@ export default class Sheet {
     }
 
     // @ts-ignore
-    setCellAt(rowPos: number, colPos: number, value: string): [RowKey, ColumnKey, CellKey] {
+    setCellAt(rowPos: number, colPos: number, value: string): {rowKey: RowKey, columnKey: ColumnKey, cellKey: CellKey} {
         if(!this.rowPositions.has(rowPos) || !this.columnPositions.has(colPos)){
             this.initializePosition(rowPos, colPos)
         }
 
-        return [new RowKey(), new ColumnKey(), new CellKey()]
+        return {rowKey: new RowKey(), columnKey: new ColumnKey(), cellKey: new CellKey()}
     }
 
     getCellAt(rowPos: number, colPos: number): Cell | null {
@@ -37,7 +37,6 @@ export default class Sheet {
         const row = this.getRowAt(rowPos);
 
         if(!col || !row) return null
-
     }
 
     getColumnAt(colPos: number): Column | null {
