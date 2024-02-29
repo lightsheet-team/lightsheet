@@ -21,7 +21,7 @@ export default class LightSheet {
   }
 
   initializeData() {
-    for (let i = 0; this.options.data.length; i++) {
+    for (let i = 0; i < this.options.data.length; i++) {
       const data = this.options.data[i];
       let colIndex = 0
       let rowKey: string = '';
@@ -33,7 +33,7 @@ export default class LightSheet {
           // cell = { cell, column, row }
 
           rowKey = cell.rowKey.toString()
-          row.set(colIndex, cell)
+          row.set(colIndex, { cell, value: data[key] })
         }
       }
       this.ui.addRow(rowKey.toString(), row)
@@ -45,7 +45,5 @@ export default class LightSheet {
     const row = this.sheet.rows.get(new RowKey(rowKey))!!
     this.sheet.setCell(column, row, value)
   }
-
-
 
 }
