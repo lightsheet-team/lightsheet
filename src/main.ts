@@ -2,7 +2,7 @@ import UI from './ui/render.ts'
 import { LightSheetOptions } from './main.types.ts';
 import Sheet from './definations/sheet.ts';
 
-export default class main {
+export default class LightSheet {
   ui: UI
   options: LightSheetOptions;
   sheet: Sheet
@@ -15,7 +15,7 @@ export default class main {
       console.error('Jspreadsheet: el is not a valid DOM element');
     }
 
-    this.ui = new UI(targetElement); //this should have 3 arguments?
+    this.ui = new UI(targetElement, this, 10, 10); //this should have 3 arguments?
     this.initializeData();
   }
 
@@ -35,7 +35,7 @@ export default class main {
           row.set(colIndex, cell)
         }
       }
-      this.ui.addRow(rowKey, row, setCell)
+      this.ui.addRow(rowKey, row)
     }
   }
 
