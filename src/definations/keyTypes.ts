@@ -1,32 +1,31 @@
-import { v4 as uuidv4 } from 'uuid';
+import { v4 as uuidv4 } from "uuid";
 // OPTION 1, class based structure
-// - very slight runtime overhead due to object creation 
+// - very slight runtime overhead due to object creation
 class Key<T> {
-    private key: string;
+  private key: string;
 
-    constructor(key: string = '') {
-        this.key = key != '' ? key : uuidv4();
-    }
+  constructor(key: string = "") {
+    this.key = key != "" ? key : uuidv4();
+  }
 
-    //  different types cannot be considered equal
-    equals(other: Key<T>): boolean {
-        return this.key === other.key;
-    }
+  //  different types cannot be considered equal
+  equals(other: Key<T>): boolean {
+    return this.key === other.key;
+  }
 
-    toString(): string {
-        return `${this.key}`;
-    }
+  toString(): string {
+    return `${this.key}`;
+  }
 }
 // TODO: separate files for clarity, if we choose option 1
 export class CellKey extends Key<CellKey> {}
 export class ColumnKey extends Key<ColumnKey> {}
 export class RowKey extends Key<RowKey> {}
 
-
 // OPTION 2 using tagged types (or branded)
-// Also string literal types would be possible, 
+// Also string literal types would be possible,
 // these are treated as unique types by the type system
-// + no runtime-overhead 
+// + no runtime-overhead
 // - not as intuitive and doesn't align with OOP
 
 // export type Tagged<Type, Tag> = Type & { readonly __tag__: Tag };

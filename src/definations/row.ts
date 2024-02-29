@@ -1,21 +1,21 @@
 import CellGroup from "./cellGroup.ts";
 import CellStyle from "./cellStyle";
-import { CellKey }from "./keyTypes";
+import { CellKey } from "./keyTypes";
 import { ColumnKey } from "./keyTypes";
 import { RowKey } from "./keyTypes";
 
 export default class Row extends CellGroup<RowKey> {
-    cellIndex: Map<ColumnKey, CellKey>;
-    cellFormatting: Map<ColumnKey, CellStyle>;
+  cellIndex: Map<ColumnKey, CellKey>;
+  cellFormatting: Map<ColumnKey, CellStyle>;
 
-    constructor(width: number, position: number) {
-        super(width, position);
-        this.key = new RowKey();
-        this.cellIndex = new Map<ColumnKey, CellKey>();
-        this.cellFormatting = new Map<ColumnKey, CellStyle>();
-    }
+  constructor(width: number, position: number) {
+    super(width, position);
+    this.key = new RowKey();
+    this.cellIndex = new Map<ColumnKey, CellKey>();
+    this.cellFormatting = new Map<ColumnKey, CellStyle>();
+  }
 
-    getHeight(): number {
-        return this.size_;
-    }
+  getHeight(): number {
+    return this.size_;
+  }
 }

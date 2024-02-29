@@ -1,6 +1,4 @@
-
 export default abstract class Formatter {
-    constructor() {
-    }
-    abstract format(value: string): string | null;
+  constructor() {}
+  abstract format(value: string): string | null;
 }

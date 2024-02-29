@@ -1,8 +1,7 @@
 export type LightSheetOptions = {
-    data: any[],
-    columns: LightSheetColumn[],
-    onCellChange?: (colIndex: number, rowIndex: number, value: any) => {}
-}
+  data: any[];
+  columns: LightSheetColumn[];
+  onCellChange?: (colIndex: number, rowIndex: number, value: any) => void;
+};
 
-type LightSheetColumn =
-    { type: string, title: string, name: string }
+type LightSheetColumn = { type: string; title: string; name: string };
