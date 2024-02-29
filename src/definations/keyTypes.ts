@@ -19,7 +19,7 @@ class Key<T> {
 // TODO: separate files for clarity, if we choose option 1
 export class CellKey extends Key<CellKey> {}
 export class ColumnKey extends Key<ColumnKey> {}
-
+export class RowKey extends Key<RowKey> {}
 
 
 // OPTION 2 using tagged types (or branded)
