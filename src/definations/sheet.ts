@@ -29,8 +29,8 @@ export default class Sheet {
         this.default_height = 20
     }
 
-    setCellAt(rowPos: number, colPos: number, value: string): {rowKey: RowKey, columnKey: ColumnKey, cellKey: CellKey} {
-        const position = this.initializePosition(rowPos, colPos)
+    setCellAt(colKey: number, rowKey: number, value: string): {rowKey: RowKey, columnKey: ColumnKey, cellKey: CellKey} {
+        const position = this.initializePosition(colKey, rowKey)
         const row = this.rows.get(position.rowKey);
         const column = this.columns.get(position.columnKey);
 
@@ -49,8 +49,8 @@ export default class Sheet {
         return {rowKey: row.key, columnKey: column.key, cellKey: cell.key}
     }
 
-    createCellAt(rowPos: number, colPos: number, value: string): Cell {
-        const position = this.initializePosition(rowPos, colPos)
+    createCellAt(colPos: number, rowPos: number, value: string): Cell {
+        const position = this.initializePosition(colPos, rowPos)
         const col = this.columns.get(position.columnKey);
         const row = this.rows.get(position.rowKey);
 
@@ -71,12 +71,12 @@ export default class Sheet {
         return cell;
     }
 
-    getCellAt(rowPos: number, colPos: number): Cell | null {
+    getCellAt(colPos: number, rowPos: number): Cell | null {
         const col = this.getColumnAt(colPos);
         const row = this.getRowAt(rowPos);
 
         if(!col || !row) return null;
-        return this.getCell(row.key, col.key)
+        return this.getCell(col.key, row.key)
     }
 
     getCell(rowKey: RowKey, colKey: ColumnKey): Cell | null {
@@ -107,7 +107,7 @@ export default class Sheet {
         return this.rows.get(rowKey) ?? null;
     }
 
-    private initializePosition(rowPos: number, colPos: number): {rowKey: RowKey, columnKey: ColumnKey} {
+    private initializePosition(colPos: number, rowPos: number): {rowKey: RowKey, columnKey: ColumnKey} {
         let rowKey;
         let colKey;
 
