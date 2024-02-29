@@ -6,6 +6,6 @@ export default class main {
     document.getElementById(targetElementId)!.innerHTML = renderHtml();
 
     const newSheet = new sheet();
-    console.log(newSheet.test())
+    console.log(newSheet.test());
   }
 }
