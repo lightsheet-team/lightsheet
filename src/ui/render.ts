@@ -21,13 +21,13 @@ export default class UI {
     tableContainerDom.appendChild(this.tableBodyDom);
   }
 
-  //rowCells= {rowKey,[{cell, columnKey},{cell, columnKey},{cell, columnKey},{cell, columnKey}]}
   addRow(rowKey: string, rowCells: Map<number, any>) {
     const rowDom = document.createElement('tr')
     rowDom.id = rowKey
     this.tableBodyDom.appendChild(rowDom)
     for (let i = 0; i < this.colCount; i++) {
       const cellDom = document.createElement('td')
+      rowDom.appendChild(cellDom);
       cellDom.id = `${rowKey}-${i}`
       const inputDom = document.createElement('input')
       inputDom.value = ''
