@@ -1,7 +1,7 @@
 import UI from './ui/render.ts'
 import { LightSheetOptions } from './main.types.ts';
 import Sheet from './definations/sheet.ts';
-import { RowKey } from './definations/keyTypes.ts';
+import { ColumnKey, RowKey } from './definations/keyTypes.ts';
 
 export default class LightSheet {
   ui: UI
@@ -41,7 +41,9 @@ export default class LightSheet {
   }
 
   setCell(columnKey: string, rowKey: string, value: any) {
-    this.sheet.setCell(columnKey, rowKey, value)
+    const column = this.sheet.columns.get(new ColumnKey(columnKey))!!
+    const row = this.sheet.rows.get(new RowKey(rowKey))!!
+    this.sheet.setCell(column, row, value)
   }
 
 
