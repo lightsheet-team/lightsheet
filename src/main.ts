@@ -7,40 +7,46 @@ export default class LightSheet {
   ui: UI
   options: LightSheetOptions;
   sheet: Sheet
+  onCellChange: Function = () => { };
 
   constructor(targetElement: Element | HTMLDocument, options: LightSheetOptions) {
     this.options = options;
     this.sheet = new Sheet();
-
-    if (!(targetElement instanceof Element || targetElement instanceof HTMLDocument)) {
-      console.error('Jspreadsheet: el is not a valid DOM element');
-    }
-
-    this.ui = new UI(targetElement, this, this.options.data.length, this.options.data[0].length); //this should have 3 arguments?
+    this.ui = new UI(targetElement, this, this.options.data.length, this.options.data[0].length);
     this.initializeData();
+    if (options.onCellChange) {
+      this.onCellChange = options.onCellChange
+    }
   }
 
   initializeData() {
     for (let i = 0; i < this.options.data.length; i++) {
-      const rowData = this.options.data[i];
-      let rowKey: string = '';
-      const row = new Map()
-      for (let j = 0; j < rowData.length; j++) {
-        if (rowData[j]) {
-          const cell = this.sheet.setCellAt(j, i, rowData[j])
-          rowKey = cell.rowKey.toString()
-          row.set(j, { cell, value: rowData[j] })
+      const item = this.options.data[i];
+      //create new row
+      const rowDom = this.ui.addRow();
+
+      for (let j = 0; j < item.length; j++) {
+        //if data is not empty add cell to core and render ui, otherwise render only ui
+        if (item[j]) {
+          const cell = this.sheet.setCellAt(j, i, item[j])
+          if (!rowDom.id) rowDom.id = cell.rowKey.toString();
+          this.ui.addColumn(rowDom, j, i, item[j], cell.columnKey.toString())
+
+        } else {
+          this.ui.addColumn(rowDom, j, i, "")
         }
+
+
       }
-      this.ui.addRow(rowKey.toString(), row, i)
     }
   }
 
   setCell(columnKey: string, rowKey: string, value: any) {
     const column = this.sheet.columns.get(new ColumnKey(columnKey))!!
     const row = this.sheet.rows.get(new RowKey(rowKey))!!
-    this.sheet.setCell(column, row, value)
+    this.sheet.setCell(column, row, value) //todo this method is throughing error on update
   }
+
   setCellAt(columnKey: number, rowKey: number, value: any) {
     return this.sheet.setCellAt(columnKey, rowKey, value)
   }
