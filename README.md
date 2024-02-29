@@ -10,3 +10,5 @@
 - Run ```npm install ```
 - Run ```npm run build ```
 - Use the content of ``` dist ```, check the folder ```pure_js_runner_sample``` for an example
+
+SOme text
