@@ -25,7 +25,35 @@ export default class Sheet {
 
     // @ts-ignore
     setCellAt(rowPos: number, colPos: number, value: string): [RowKey, ColumnKey, CellKey] {
+        if(!this.rowPositions.has(rowPos) || !this.columnPositions.has(colPos)){
+            this.initializePosition(rowPos, colPos)
+        }
+
         return [new RowKey(), new ColumnKey(), new CellKey()]
+    }
+
+    getCellAt(rowPos: number, colPos: number): Cell | null {
+        const col = this.getColumnAt(colPos);
+        const row = this.getRowAt(rowPos);
+
+        if(!col || !row) return null
+
+    }
+
+    getColumnAt(colPos: number): Column | null {
+        if(!this.columnPositions.has(colPos)) {
+            return null;
+        }
+
+        return this.columns[this.columnPositions[colPos]]
+    }
+
+    getRowAt(rowPos: number): Row | null {
+        if(!this.rowPositions.has(rowPos)) {
+            return null;
+        }
+
+        return this.rows[this.rowPositions[rowPos]]
     }
 
     // @ts-ignore
@@ -33,4 +61,21 @@ export default class Sheet {
         return new CellKey()
     }
 
+    private initializePosition(rowPos: number, colPos: number) {
+        if(!this.rowPositions.has(rowPos)){
+            // Create a new row
+            const row = new Row();
+            // this.rows.set(row.key, row);
+            //this.rowPositions.set(rowPos, row.key);
+        }
+
+        if(!this.columnPositions.has(colPos)){
+            // Create a new row
+            const col = new Column();
+            // this.rows.set(row.key, row);
+            //this.rowPositions.set(rowPos, row.key);
+        }
+
+
+    }
 }
