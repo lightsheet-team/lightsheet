@@ -1,21 +1,18 @@
 import LightSheet from "../main";
 
 export default class UI {
-  tableEl: any;
-  tableBodyDom: any
+  tableEl: Element;
+  tableBodyDom: Element;
   rowCount: number;
   colCount: number;
-  core: LightSheet;
+  lightSheet: LightSheet;
 
-  constructor(el: Element | HTMLDocument, core: LightSheet, rowCount: number, colCount: number) {
+  constructor(el: Element, lightSheet: LightSheet, rowCount: number, colCount: number) {
     this.tableEl = el;
     this.colCount = colCount;
     this.rowCount = rowCount;
-    this.core = core;
-    this.initializeTableContainer();
-  }
+    this.lightSheet = lightSheet;
 
-  initializeTableContainer() {
     const tableContainerDom = document.createElement('table');
     this.tableEl.appendChild(tableContainerDom)
     this.tableBodyDom = document.createElement('tbody');
@@ -50,15 +47,15 @@ export default class UI {
 
     //if it was enpty value previously then the keyparts lenth will be 2, hence we create a cell in core and update ui with new keys
     if (keyParts.length == 2) {
-      const cell = this.core.setCellAt(parseInt(keyParts[0]), parseInt(keyParts[1]), newValue)
+      const cell = this.lightSheet.setCellAt(parseInt(keyParts[0]), parseInt(keyParts[1]), newValue)
       rowDom.id = cell.rowKey.toString()
       cellDom.id = cell.columnKey.toString()
     } else {
-      this.core.setCell(cellDom.id, rowDom.id, newValue)
+      this.lightSheet.setCell(cellDom.id, rowDom.id, newValue)
     }
 
     //fire cell onchange event to client callback
-    this.core.onCellChange(colIndex, rowIndex, newValue)
+    this.lightSheet.onCellChange(colIndex, rowIndex, newValue)
   }
 
 }

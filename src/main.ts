@@ -9,7 +9,7 @@ export default class LightSheet {
   sheet: Sheet
   onCellChange: Function = () => { };
 
-  constructor(targetElement: Element | HTMLDocument, options: LightSheetOptions) {
+  constructor(targetElement: Element, options: LightSheetOptions) {
     this.options = options;
     this.sheet = new Sheet();
     this.ui = new UI(targetElement, this, this.options.data.length, this.options.data[0].length);
