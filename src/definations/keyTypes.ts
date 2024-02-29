@@ -13,7 +13,7 @@ class Key<T> {
     }
 
     toString(): string {
-        return `${this.constructor.name}: ${this.key}`;
+        return `${this.key}`;
     }
 }
 // TODO: separate files for clarity, if we choose option 1
