@@ -27,12 +27,12 @@ export default class LightSheet {
       let rowKey: string = '';
       const row = new Map()
       for (let j = 0; j < rowData.length; j++) {
-        colIndex++;
         if (rowData[j]) {
           const cell = this.sheet.setCellAt(colIndex, i, rowData[j])
           rowKey = cell.rowKey.toString()
           row.set(colIndex, { cell, value: rowData[j] })
         }
+        colIndex++;
       }
       this.ui.addRow(rowKey.toString(), row)
     }
