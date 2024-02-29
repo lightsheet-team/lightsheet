@@ -4,9 +4,10 @@ import { v4 as uuidv4 } from 'uuid';
 class Key<T> {
     private key: string;
 
-    constructor() {
-        this.key = uuidv4();
+    constructor(key: string = '') {
+        this.key = key != '' ? key : uuidv4();
     }
+
     //  different types cannot be considered equal
     equals(other: Key<T>): boolean {
         return this.key === other.key;
