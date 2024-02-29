@@ -23,18 +23,16 @@ export default class LightSheet {
   initializeData() {
     for (let i = 0; i < this.options.data.length; i++) {
       const rowData = this.options.data[i];
-      let colIndex = 0;
       let rowKey: string = '';
       const row = new Map()
       for (let j = 0; j < rowData.length; j++) {
         if (rowData[j]) {
-          const cell = this.sheet.setCellAt(colIndex, i, rowData[j])
+          const cell = this.sheet.setCellAt(j, i, rowData[j])
           rowKey = cell.rowKey.toString()
-          row.set(colIndex, { cell, value: rowData[j] })
+          row.set(j, { cell, value: rowData[j] })
         }
-        colIndex++;
       }
-      this.ui.addRow(rowKey.toString(), row)
+      this.ui.addRow(rowKey.toString(), row, i)
     }
   }
 
@@ -42,6 +40,9 @@ export default class LightSheet {
     const column = this.sheet.columns.get(new ColumnKey(columnKey))!!
     const row = this.sheet.rows.get(new RowKey(rowKey))!!
     this.sheet.setCell(column, row, value)
+  }
+  setCellAt(columnKey: number, rowKey: number, value: any) {
+    return this.sheet.setCellAt(columnKey, rowKey, value)
   }
 
 }
