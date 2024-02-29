@@ -1,6 +1,7 @@
 import UI from './ui/render.ts'
 import { LightSheetOptions } from './main.types.ts';
 import Sheet from './definations/sheet.ts';
+import { RowKey } from './definations/keyTypes.ts';
 
 export default class LightSheet {
   ui: UI
@@ -23,7 +24,7 @@ export default class LightSheet {
     for (let i = 0; this.options.data.length; i++) {
       const data = this.options.data[i];
       let colIndex = 0
-      let rowKey = ''
+      let rowKey: string = '';
       const row = new Map()
       for (var key in data) {
         colIndex++
@@ -31,15 +32,15 @@ export default class LightSheet {
           const cell = this.sheet.setCellAt(colIndex, i, data[key])
           // cell = { cell, column, row }
 
-          rowKey = cell.row.key
+          rowKey = cell.rowKey.toString()
           row.set(colIndex, cell)
         }
       }
-      this.ui.addRow(rowKey, row)
+      this.ui.addRow(rowKey.toString(), row)
     }
   }
 
-  setCell(columnKey, rowKey, value) {
+  setCell(columnKey: string, rowKey: string, value: any) {
     this.sheet.setCell(columnKey, rowKey, value)
   }
 
