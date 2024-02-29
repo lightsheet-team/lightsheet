@@ -16,24 +16,22 @@ export default class LightSheet {
       console.error('Jspreadsheet: el is not a valid DOM element');
     }
 
-    this.ui = new UI(targetElement, this, 10, 10); //this should have 3 arguments?
+    this.ui = new UI(targetElement, this, this.options.data.length, this.options.data[0].length); //this should have 3 arguments?
     this.initializeData();
   }
 
   initializeData() {
     for (let i = 0; i < this.options.data.length; i++) {
-      const data = this.options.data[i];
-      let colIndex = 0
+      const rowData = this.options.data[i];
+      let colIndex = 0;
       let rowKey: string = '';
       const row = new Map()
-      for (var key in data) {
-        colIndex++
-        if (data[key]) {
-          const cell = this.sheet.setCellAt(colIndex, i, data[key])
-          // cell = { cell, column, row }
-
+      for (let j = 0; j < rowData.length; j++) {
+        colIndex++;
+        if (rowData[j]) {
+          const cell = this.sheet.setCellAt(colIndex, i, rowData[j])
           rowKey = cell.rowKey.toString()
-          row.set(colIndex, { cell, value: data[key] })
+          row.set(colIndex, { cell, value: rowData[j] })
         }
       }
       this.ui.addRow(rowKey.toString(), row)
