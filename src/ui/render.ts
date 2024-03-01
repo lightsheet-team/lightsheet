@@ -83,6 +83,6 @@ export default class UI {
     }
 
     //fire cell onchange event to client callback
-    this.lightSheet.onCellChange(colIndex, rowIndex, newValue);
+    this.lightSheet.onCellChange?.(colIndex, rowIndex, newValue);
   }
 }
