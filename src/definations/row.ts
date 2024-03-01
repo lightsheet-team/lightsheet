@@ -1,6 +1,6 @@
 import CellGroup from "./cellGroup.ts";
 import CellStyle from "./cellStyle";
-import { CellKey } from "./keyTypes";
+import {CellKey, generateRowKey} from "./keyTypes";
 import { ColumnKey } from "./keyTypes";
 import { RowKey } from "./keyTypes";
 
@@ -10,7 +10,7 @@ export default class Row extends CellGroup<RowKey> {
 
   constructor(width: number, position: number) {
     super(width, position);
-    this.key = new RowKey();
+    this.key = generateRowKey();
     this.cellIndex = new Map<ColumnKey, CellKey>();
     this.cellFormatting = new Map<ColumnKey, CellStyle>();
   }

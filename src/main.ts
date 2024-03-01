@@ -1,7 +1,7 @@
 import UI from "./ui/render.ts";
 import { LightSheetOptions } from "./main.types.ts";
 import Sheet from "./definations/sheet.ts";
-import { ColumnKey, RowKey } from "./definations/keyTypes.ts";
+import {generateColumnKey, generateRowKey} from "./definations/keyTypes.ts";
 
 export default class LightSheet {
   ui: UI;
@@ -44,8 +44,8 @@ export default class LightSheet {
   }
 
   setCell(columnKey: string, rowKey: string, value: any) {
-    const column = this.sheet.columns.get(new ColumnKey(columnKey))!;
-    const row = this.sheet.rows.get(new RowKey(rowKey))!;
+    const column = this.sheet.columns.get(generateColumnKey(columnKey))!;
+    const row = this.sheet.rows.get(generateRowKey(rowKey))!;
     this.sheet.setCell(column, row, value); //todo this method is throughing error on update
   }
 

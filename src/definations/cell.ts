@@ -1,4 +1,4 @@
-import { CellKey } from "./keyTypes";
+import {CellKey, generateCellKey} from "./keyTypes";
 
 export default class Cell {
   key: CellKey;
@@ -9,7 +9,7 @@ export default class Cell {
   referencesOut: CellKey[];
 
   constructor() {
-    this.key = new CellKey();
+    this.key = generateCellKey();
     this.formula = "";
     this.value = "";
     this.state = CellState.CELL_OK;
