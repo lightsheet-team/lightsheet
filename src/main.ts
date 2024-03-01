@@ -1,7 +1,7 @@
 import UI from "./ui/render.ts";
 import { LightSheetOptions } from "./main.types.ts";
 import Sheet from "./definations/sheet.ts";
-import {generateColumnKey, generateRowKey} from "./definations/keyTypes.ts";
+import { generateColumnKey, generateRowKey } from "./definations/keyTypes.ts";
 
 export default class LightSheet {
   ui: UI;

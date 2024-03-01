@@ -1,6 +1,6 @@
 import CellGroup from "./cellGroup.ts";
 import CellStyle from "./cellStyle";
-import {CellKey, generateRowKey} from "./keyTypes";
+import { CellKey, generateRowKey } from "./keyTypes";
 import { ColumnKey } from "./keyTypes";
 import { RowKey } from "./keyTypes";
 

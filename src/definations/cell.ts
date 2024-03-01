@@ -1,4 +1,4 @@
-import {CellKey, generateCellKey} from "./keyTypes";
+import { CellKey, generateCellKey } from "./keyTypes";
 
 export default class Cell {
   key: CellKey;
