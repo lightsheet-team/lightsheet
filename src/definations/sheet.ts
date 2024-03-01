@@ -49,7 +49,7 @@ export default class Sheet {
     row: Row,
     value: string,
   ): { rowKey: RowKey; columnKey: ColumnKey; cellKey: CellKey } {
-    let cell = this.getCell(row.key, column.key);
+    let cell = this.getCell(column.key, row.key);
     if (!cell) {
       cell = this.createCell(column, row, value);
     }
@@ -87,7 +87,7 @@ export default class Sheet {
     return this.getCell(col.key, row.key);
   }
 
-  getCell(rowKey: RowKey, colKey: ColumnKey): Cell | null {
+  getCell(colKey: ColumnKey, rowKey: RowKey): Cell | null {
     const col = this.columns.get(colKey);
     const row = this.rows.get(rowKey);
 
