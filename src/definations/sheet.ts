@@ -2,6 +2,7 @@ import { CellKey, ColumnKey, RowKey } from "./keyTypes.ts";
 import Cell from "./cell.ts";
 import Column from "./column.ts";
 import Row from "./row.ts";
+import { PositionInfo } from "./sheet.types.ts";
 
 export default class Sheet {
   defaultStyle: any;
@@ -29,11 +30,7 @@ export default class Sheet {
     this.default_height = 20;
   }
 
-  setCellAt(
-    colKey: number,
-    rowKey: number,
-    value: string,
-  ): { rowKey: RowKey; columnKey: ColumnKey; cellKey: CellKey } {
+  setCellAt(colKey: number, rowKey: number, value: string): PositionInfo {
     const position = this.initializePosition(colKey, rowKey);
     const row = this.rows.get(position.rowKey);
     const column = this.columns.get(position.columnKey);
@@ -44,17 +41,13 @@ export default class Sheet {
     return this.setCell(column, row, value);
   }
 
-  setCell(
-    column: Column,
-    row: Row,
-    value: string,
-  ): { rowKey: RowKey; columnKey: ColumnKey; cellKey: CellKey } {
+  setCell(column: Column, row: Row, value: string): PositionInfo {
     let cell = this.getCell(column.key, row.key);
     if (!cell) {
       cell = this.createCell(column, row, value);
     }
 
-    return { rowKey: row.key, columnKey: column.key, cellKey: cell.key };
+    return { rowKey: row.key, columnKey: column.key };
   }
 
   createCellAt(colPos: number, rowPos: number, value: string): Cell {
@@ -115,10 +108,7 @@ export default class Sheet {
     return this.rows.get(rowKey) ?? null;
   }
 
-  private initializePosition(
-    colPos: number,
-    rowPos: number,
-  ): { rowKey: RowKey; columnKey: ColumnKey } {
+  private initializePosition(colPos: number, rowPos: number): PositionInfo {
     let rowKey;
     let colKey;
 
