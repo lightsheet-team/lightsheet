@@ -82,11 +82,12 @@ export default class UI {
     } else {
       const position = this.lightSheet.setCell(cellDom.id, rowDom.id, newValue);
 
-      // The row or column may be deleted if the cell is cleared.
+      // The row may be deleted if the cell is cleared.
       if (!position.rowKey) {
         rowDom.id = `row-${rowIndex}`;
       }
-      if (!position.columnKey) {
+      // Empty cells should not hold a column key.
+      if (newValue == "") {
         cellDom.id = `${colIndex}-${rowIndex}`;
       }
     }
