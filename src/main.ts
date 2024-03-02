@@ -44,9 +44,11 @@ export default class LightSheet {
   }
 
   setCell(columnKey: string, rowKey: string, value: any) {
-    const column = this.sheet.columns.get(generateColumnKey(columnKey))!;
-    const row = this.sheet.rows.get(generateRowKey(rowKey))!;
-    this.sheet.setCell(column, row, value);
+    this.sheet.setCell(
+      generateColumnKey(columnKey),
+      generateRowKey(rowKey),
+      value,
+    );
   }
 
   setCellAt(columnKey: number, rowKey: number, value: any) {

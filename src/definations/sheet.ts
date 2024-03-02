@@ -30,38 +30,39 @@ export default class Sheet {
     this.default_height = 20;
   }
 
-  setCellAt(colKey: number, rowKey: number, value: string): PositionInfo {
-    const position = this.initializePosition(colKey, rowKey);
-    const row = this.rows.get(position.rowKey);
-    const column = this.columns.get(position.columnKey);
-
-    if (!row || !column)
-      throw new Error(`Failed to set cell at col: ${column} row: ${row}.`);
-
-    return this.setCell(column, row, value);
+  setCellAt(colPos: number, rowPos: number, value: string): PositionInfo {
+    const position = this.initializePosition(colPos, rowPos);
+    return this.setCell(position.columnKey, position.rowKey, value);
   }
 
-  setCell(column: Column, row: Row, value: string): PositionInfo {
-    let cell = this.getCell(column.key, row.key);
-    if (!cell) {
-      cell = this.createCell(column, row, value);
+  setCell(colKey: ColumnKey, rowKey: RowKey, value: string): PositionInfo {
+    if (!this.getCell(colKey, rowKey)) {
+      this.createCell(colKey, rowKey, value);
     }
 
-    return { rowKey: row.key, columnKey: column.key };
+    return { rowKey: rowKey, columnKey: colKey };
   }
 
   createCellAt(colPos: number, rowPos: number, value: string): Cell {
     const position = this.initializePosition(colPos, rowPos);
-    const col = this.columns.get(position.columnKey);
-    const row = this.rows.get(position.rowKey);
-
-    if (!col || !row)
-      throw new Error(`Failed to create cell at col: ${col} row: ${row}.`);
-
-    return this.createCell(col, row, value);
+    return this.createCell(position.columnKey, position.rowKey, value);
   }
 
-  createCell(col: Column, row: Row, value: string): Cell {
+  createCell(colKey: ColumnKey, rowKey: RowKey, value: string): Cell {
+    const col = this.columns.get(colKey);
+    const row = this.rows.get(rowKey);
+    if (!col || !row) {
+      throw new Error(
+        `Failed to create cell at col: ${col} row: ${row}: Column or Row not found.`,
+      );
+    }
+
+    if (col.cellIndex.has(row.key)) {
+      throw new Error(
+        `Failed to create cell at col: ${col} row: ${row}: Cell already exists.`,
+      );
+    }
+
     const cell = new Cell();
     cell.formula = value;
     this.cell_data.set(cell.key, cell);
@@ -87,11 +88,8 @@ export default class Sheet {
     if (!col || !row) return null;
 
     if (!col.cellIndex.has(row.key)) return null;
-    const cellKey = col.cellIndex.get(row.key);
-
-    if (!cellKey) return null;
-    const cell = this.cell_data.get(cellKey);
-    return cell ?? null;
+    const cellKey = col.cellIndex.get(row.key)!;
+    return this.cell_data.get(cellKey)!;
   }
 
   getColumnAt(colPos: number): Column | null {
