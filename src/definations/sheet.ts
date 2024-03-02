@@ -66,6 +66,7 @@ export default class Sheet {
     const cell = new Cell();
     cell.formula = value;
     this.cell_data.set(cell.key, cell);
+    this.resolveCell(cell);
 
     col.cellIndex.set(row.key, cell.key);
     row.cellIndex.set(col.key, cell.key);
@@ -106,36 +107,35 @@ export default class Sheet {
     return this.rows.get(rowKey) ?? null;
   }
 
+  private resolveCell(cell: Cell) {
+    cell.value = cell.formula; // TODO
+  }
+
   private initializePosition(colPos: number, rowPos: number): PositionInfo {
     let rowKey;
     let colKey;
 
+    // Create row and column if they don't exist yet.
     if (!this.rowPositions.has(rowPos)) {
-      // Create a new row
       const row = new Row(this.default_height, rowPos);
       this.rows.set(row.key, row);
       this.rowPositions.set(rowPos, row.key);
 
       rowKey = row.key;
     } else {
-      rowKey = this.rowPositions.get(rowPos);
+      rowKey = this.rowPositions.get(rowPos)!;
     }
 
     if (!this.columnPositions.has(colPos)) {
-      // Create a new row
+      // Create a new column
       const col = new Column(this.default_width, colPos);
       this.columns.set(col.key, col);
       this.columnPositions.set(colPos, col.key);
 
       colKey = col.key;
     } else {
-      colKey = this.columnPositions.get(colPos);
+      colKey = this.columnPositions.get(colPos)!;
     }
-
-    if (!rowKey || !colKey)
-      throw new Error(
-        `Failed to initialize position at col: ${colKey} row: ${rowKey}.`,
-      );
 
     return { rowKey: rowKey, columnKey: colKey };
   }
