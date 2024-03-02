@@ -2,6 +2,7 @@ import UI from "./ui/render.ts";
 import { LightSheetOptions } from "./main.types.ts";
 import Sheet from "./definations/sheet.ts";
 import { generateColumnKey, generateRowKey } from "./definations/keyTypes.ts";
+import { PositionInfo } from "./definations/sheet.types.ts";
 
 export default class LightSheet {
   ui: UI;
@@ -34,8 +35,8 @@ export default class LightSheet {
         //if data is not empty add cell to core and render ui, otherwise render only ui
         if (item[j]) {
           const cell = this.sheet.setCellAt(j, i, item[j]);
-          if (!rowDom.id) rowDom.id = cell.rowKey.toString();
-          this.ui.addColumn(rowDom, j, i, item[j], cell.columnKey.toString());
+          if (!rowDom.id) rowDom.id = cell.rowKey!.toString();
+          this.ui.addColumn(rowDom, j, i, item[j], cell.columnKey!.toString());
         } else {
           this.ui.addColumn(rowDom, j, i, "");
         }
@@ -43,15 +44,15 @@ export default class LightSheet {
     }
   }
 
-  setCell(columnKey: string, rowKey: string, value: any) {
-    this.sheet.setCell(
+  setCell(columnKey: string, rowKey: string, value: any): PositionInfo {
+    return this.sheet.setCell(
       generateColumnKey(columnKey),
       generateRowKey(rowKey),
       value,
     );
   }
 
-  setCellAt(columnKey: number, rowKey: number, value: any) {
+  setCellAt(columnKey: number, rowKey: number, value: any): PositionInfo {
     return this.sheet.setCellAt(columnKey, rowKey, value);
   }
 }

@@ -76,10 +76,19 @@ export default class UI {
         parseInt(keyParts[1]),
         newValue,
       );
-      rowDom.id = cell.rowKey.toString();
-      cellDom.id = cell.columnKey.toString();
+      // Keys will be valid as value shouldn't be empty at this point.
+      rowDom.id = cell.rowKey!.toString();
+      cellDom.id = cell.columnKey!.toString();
     } else {
-      this.lightSheet.setCell(cellDom.id, rowDom.id, newValue);
+      const position = this.lightSheet.setCell(cellDom.id, rowDom.id, newValue);
+
+      // The row or column may be deleted if the cell is cleared.
+      if (!position.rowKey) {
+        rowDom.id = `row-${rowIndex}`;
+      }
+      if (!position.columnKey) {
+        cellDom.id = `${colIndex}-${rowIndex}`;
+      }
     }
 
     //fire cell onchange event to client callback

@@ -1,4 +1,10 @@
-import { CellKey, ColumnKey, RowKey } from "./keyTypes.ts";
+import {
+  CellKey,
+  ColumnKey,
+  generateColumnKey,
+  generateRowKey,
+  RowKey,
+} from "./keyTypes.ts";
 import Cell from "./cell.ts";
 import Column from "./column.ts";
 import Row from "./row.ts";
@@ -32,12 +38,25 @@ export default class Sheet {
 
   setCellAt(colPos: number, rowPos: number, value: string): PositionInfo {
     const position = this.initializePosition(colPos, rowPos);
-    return this.setCell(position.columnKey, position.rowKey, value);
+    return this.setCell(position.columnKey!, position.rowKey!, value);
   }
 
   setCell(colKey: ColumnKey, rowKey: RowKey, value: string): PositionInfo {
-    if (!this.getCell(colKey, rowKey)) {
-      this.createCell(colKey, rowKey, value);
+    let cell = this.getCell(colKey, rowKey);
+    if (!cell) {
+      cell = this.createCell(colKey, rowKey, value);
+    } else if (value == "") {
+      // Cell exists but is being cleared.
+      this.deleteCell(colKey, rowKey);
+
+      // Invalidate column/row keys if they were deleted.
+      colKey = this.columns.has(colKey) ? colKey : generateColumnKey("null");
+      rowKey = this.rows.has(rowKey) ? rowKey : generateRowKey("null");
+    }
+
+    if (cell) {
+      cell.formula = value;
+      this.resolveCell(cell);
     }
 
     return { rowKey: rowKey, columnKey: colKey };
@@ -45,7 +64,7 @@ export default class Sheet {
 
   createCellAt(colPos: number, rowPos: number, value: string): Cell {
     const position = this.initializePosition(colPos, rowPos);
-    return this.createCell(position.columnKey, position.rowKey, value);
+    return this.createCell(position.columnKey!, position.rowKey!, value);
   }
 
   createCell(colKey: ColumnKey, rowKey: RowKey, value: string): Cell {
@@ -72,6 +91,38 @@ export default class Sheet {
     row.cellIndex.set(col.key, cell.key);
 
     return cell;
+  }
+
+  deleteCell(colKey: ColumnKey, rowKey: RowKey): boolean {
+    const col = this.columns.get(colKey);
+    const row = this.rows.get(rowKey);
+    if (!col || !row) return false;
+
+    if (!col.cellIndex.has(row.key)) return false;
+    const cellKey = col.cellIndex.get(row.key)!;
+
+    // Delete cell data and all references to it in its column and row.
+    this.cell_data.delete(cellKey);
+
+    col.cellIndex.delete(row.key);
+    col.cellFormatting.delete(row.key);
+    row.cellIndex.delete(col.key);
+    row.cellFormatting.delete(col.key);
+
+    // Clean up empty rows and columns unless they're the first ones.
+    if (col.cellIndex.size == 0 && col.position != 0) {
+      this.columns.delete(colKey);
+      this.columnPositions.delete(col.position);
+    }
+
+    if (row.cellIndex.size == 0 && row.position != 0) {
+      this.rows.delete(rowKey);
+      this.rowPositions.delete(row.position);
+    }
+
+    // TODO References should also be checked here.
+
+    return true;
   }
 
   getCellAt(colPos: number, rowPos: number): Cell | null {
