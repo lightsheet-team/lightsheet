@@ -46,7 +46,7 @@ export default class LightSheet {
   setCell(columnKey: string, rowKey: string, value: any) {
     const column = this.sheet.columns.get(generateColumnKey(columnKey))!;
     const row = this.sheet.rows.get(generateRowKey(rowKey))!;
-    this.sheet.setCell(column, row, value); //todo this method is throughing error on update
+    this.sheet.setCell(column, row, value);
   }
 
   setCellAt(columnKey: number, rowKey: number, value: any) {
