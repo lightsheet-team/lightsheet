@@ -107,6 +107,27 @@ export default class Sheet {
     return this.rows.get(rowKey) ?? null;
   }
 
+  // <Row index, <Column index, value>>
+  exportData(): Map<number, Map<number, string>> {
+    const data = new Map<number, Map<number, string>>();
+
+    for (const [rowPos, rowKey] of this.rowPositions) {
+      const rowData = new Map<number, string>();
+      const row = this.rows.get(rowKey)!;
+
+      // Use row's cell index to get keys for each cell and their corresponding columns.
+      for (const [colKey, cellKey] of row.cellIndex) {
+        const cell = this.cell_data.get(cellKey)!;
+        const column = this.columns.get(colKey)!;
+        rowData.set(column.position, cell.value);
+      }
+
+      data.set(rowPos, rowData);
+    }
+
+    return data;
+  }
+
   private resolveCell(cell: Cell) {
     cell.value = cell.formula; // TODO
   }
