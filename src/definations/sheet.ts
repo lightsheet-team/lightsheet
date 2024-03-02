@@ -1,10 +1,4 @@
-import {
-  CellKey,
-  ColumnKey,
-  generateColumnKey,
-  generateRowKey,
-  RowKey,
-} from "./keyTypes.ts";
+import { CellKey, ColumnKey, RowKey } from "./keyTypes.ts";
 import Cell from "./cell.ts";
 import Column from "./column.ts";
 import Row from "./row.ts";
@@ -48,10 +42,6 @@ export default class Sheet {
     } else if (value == "") {
       // Cell exists but is being cleared.
       this.deleteCell(colKey, rowKey);
-
-      // Invalidate column/row keys if they were deleted.
-      colKey = this.columns.has(colKey) ? colKey : generateColumnKey("null");
-      rowKey = this.rows.has(rowKey) ? rowKey : generateRowKey("null");
     }
 
     if (cell) {
@@ -59,7 +49,10 @@ export default class Sheet {
       this.resolveCell(cell);
     }
 
-    return { rowKey: rowKey, columnKey: colKey };
+    return {
+      rowKey: this.rows.has(rowKey) ? rowKey : undefined,
+      columnKey: this.columns.has(colKey) ? colKey : undefined,
+    };
   }
 
   createCellAt(colPos: number, rowPos: number, value: string): Cell {
