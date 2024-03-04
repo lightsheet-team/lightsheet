@@ -15,7 +15,14 @@ module.exports = {
   rules: {
     // Add custom rules here
     'prettier/prettier': 'error',
+    "@typescript-eslint/no-explicit-any": "off"
     // 'line-comment-postion': 'above',
+  },
+  globals: {
+    "document": false
+  },
+  env: {
+    "browser": true,
   },
   ignorePatterns: ['vite.config.js'],
 };

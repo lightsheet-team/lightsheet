@@ -6,7 +6,9 @@
   "scripts": {
     "dev": "vite",
     "lint": "eslint .",
-    "build": "tsc && vite build || echo 'Build failed'"
+    "lint:fix": "npm run lint -- --fix",
+    "build": "tsc && vite build || echo 'Build failed'",
+    "build:watch": "tsc && vite build --watch"
   },
   "devDependencies": {
     "@typescript-eslint/eslint-plugin": "^7.0.2",
@@ -15,7 +17,11 @@
     "eslint-config-prettier": "^9.1.0",
     "eslint-plugin-prettier": "^5.1.3",
     "prettier": "^3.2.5",
+    "@types/uuid": "^9.0.8",
     "typescript": "^5.2.2",
     "vite": "^5.1.0"
+  },
+  "dependencies": {
+    "uuid": "^9.0.1"
   }
 }
