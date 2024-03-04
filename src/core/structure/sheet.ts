@@ -55,7 +55,6 @@ export default class Sheet {
     };
   }
 
-
   private createCell(colKey: ColumnKey, rowKey: RowKey, value: string): Cell {
     const col = this.columns.get(colKey);
     const row = this.rows.get(rowKey);
@@ -113,7 +112,6 @@ export default class Sheet {
 
     return true;
   }
-
 
   private getCell(colKey: ColumnKey, rowKey: RowKey): Cell | null {
     const col = this.columns.get(colKey);
