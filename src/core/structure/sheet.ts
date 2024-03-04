@@ -55,12 +55,8 @@ export default class Sheet {
     };
   }
 
-  createCellAt(colPos: number, rowPos: number, value: string): Cell {
-    const position = this.initializePosition(colPos, rowPos);
-    return this.createCell(position.columnKey!, position.rowKey!, value);
-  }
 
-  createCell(colKey: ColumnKey, rowKey: RowKey, value: string): Cell {
+  private createCell(colKey: ColumnKey, rowKey: RowKey, value: string): Cell {
     const col = this.columns.get(colKey);
     const row = this.rows.get(rowKey);
     if (!col || !row) {
@@ -118,15 +114,8 @@ export default class Sheet {
     return true;
   }
 
-  getCellAt(colPos: number, rowPos: number): Cell | null {
-    const col = this.getColumnAt(colPos);
-    const row = this.getRowAt(rowPos);
 
-    if (!col || !row) return null;
-    return this.getCell(col.key, row.key);
-  }
-
-  getCell(colKey: ColumnKey, rowKey: RowKey): Cell | null {
+  private getCell(colKey: ColumnKey, rowKey: RowKey): Cell | null {
     const col = this.columns.get(colKey);
     const row = this.rows.get(rowKey);
 
@@ -135,20 +124,6 @@ export default class Sheet {
     if (!col.cellIndex.has(row.key)) return null;
     const cellKey = col.cellIndex.get(row.key)!;
     return this.cell_data.get(cellKey)!;
-  }
-
-  getColumnAt(colPos: number): Column | null {
-    const colKey = this.columnPositions.get(colPos);
-    if (!colKey) return null;
-
-    return this.columns.get(colKey) ?? null;
-  }
-
-  getRowAt(rowPos: number): Row | null {
-    const rowKey = this.rowPositions.get(rowPos);
-    if (!rowKey) return null;
-
-    return this.rows.get(rowKey) ?? null;
   }
 
   // <Row index, <Column index, value>>
