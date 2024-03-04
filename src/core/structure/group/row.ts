@@ -1,8 +1,6 @@
 import CellGroup from "./cellGroup.ts";
-import CellStyle from "./cellStyle";
-import { CellKey, generateRowKey } from "./keyTypes";
-import { ColumnKey } from "./keyTypes";
-import { RowKey } from "./keyTypes";
+import { CellKey, ColumnKey, generateRowKey, RowKey } from "../key/keyTypes.ts";
+import CellStyle from "../cellStyle.ts";
 
 export default class Row extends CellGroup<RowKey> {
   cellIndex: Map<ColumnKey, CellKey>;

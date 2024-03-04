@@ -1,7 +1,5 @@
-import CellStyle from "./cellStyle";
-import { CellKey } from "./keyTypes";
-import { ColumnKey } from "./keyTypes";
-import { RowKey } from "./keyTypes";
+import { CellKey, ColumnKey, RowKey } from "../key/keyTypes.ts";
+import CellStyle from "../cellStyle.ts";
 
 export default abstract class CellGroup<TKey extends ColumnKey | RowKey> {
   key!: TKey;

@@ -1,4 +1,4 @@
-import { ColumnKey, RowKey } from "./keyTypes.ts";
+import { ColumnKey, RowKey } from "./key/keyTypes.ts";
 
 export type PositionInfo = {
   columnKey?: ColumnKey;

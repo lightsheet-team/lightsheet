@@ -1,7 +1,7 @@
-import { CellKey, ColumnKey, RowKey } from "./keyTypes.ts";
-import Cell from "./cell.ts";
-import Column from "./column.ts";
-import Row from "./row.ts";
+import { CellKey, ColumnKey, RowKey } from "./key/keyTypes.ts";
+import Cell from "./cell/cell.ts";
+import Column from "./group/column.ts";
+import Row from "./group/row.ts";
 import { PositionInfo } from "./sheet.types.ts";
 
 export default class Sheet {

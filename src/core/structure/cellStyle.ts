@@ -1,4 +1,4 @@
-import Formatter from "./formatter";
+import Formatter from "../evaluation/formatter";
 
 export default class CellStyle {
   formatter: Formatter | null;

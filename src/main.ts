@@ -1,8 +1,11 @@
 import UI from "./ui/render.ts";
 import { LightSheetOptions } from "./main.types.ts";
-import Sheet from "./definations/sheet.ts";
-import { generateColumnKey, generateRowKey } from "./definations/keyTypes.ts";
-import { PositionInfo } from "./definations/sheet.types.ts";
+import Sheet from "./core/structure/sheet.ts";
+import {
+  generateColumnKey,
+  generateRowKey,
+} from "./core/structure/key/keyTypes.ts";
+import { PositionInfo } from "./core/structure/sheet.types.ts";
 
 export default class LightSheet {
   ui: UI;
