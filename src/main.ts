@@ -12,6 +12,7 @@ export default class LightSheet {
   options: LightSheetOptions;
   sheet: Sheet;
   onCellChange?;
+  // onCellClick?;
 
   constructor(targetElement: Element, options: LightSheetOptions) {
     this.options = options;

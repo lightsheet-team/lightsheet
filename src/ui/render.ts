@@ -1,4 +1,8 @@
 import LightSheet from "../main";
+import {
+  generateColumnKey,
+  generateRowKey,
+} from "../core/structure/key/keyTypes";
 
 export default class UI {
   tableEl: Element;
@@ -6,6 +10,7 @@ export default class UI {
   rowCount: number;
   colCount: number;
   lightSheet: LightSheet;
+  selectedCell: String;
 
   constructor(
     el: Element,
@@ -17,6 +22,7 @@ export default class UI {
     this.colCount = colCount;
     this.rowCount = rowCount;
     this.lightSheet = lightSheet;
+    this.selectedCell = "";
 
     const tableContainerDom = document.createElement("table");
     this.tableEl.appendChild(tableContainerDom);
@@ -42,6 +48,8 @@ export default class UI {
     cellDom.id = `${colIndex}-${rowIndex}`;
     const inputDom = document.createElement("input");
     inputDom.value = "";
+    inputDom.style.outline = "none";
+    inputDom.style.backgroundColor = "transparent";
 
     cellDom.appendChild(inputDom);
 
@@ -58,6 +66,43 @@ export default class UI {
         colIndex,
         rowIndex,
       );
+
+    inputDom.onfocus = (e: Event) => {
+      // this.selectedCell =
+      // console.log(cellDom);
+      cellDom.style.backgroundColor = "yellow";
+      let x = cellDom.id.split("-");
+
+      console.log(x);
+      console.log(this.lightSheet.sheet.getRowIndex(generateRowKey(x[0])));
+      // console.log(
+      //   this.lightSheet.sheet.getColumnIndex(
+      //     generateColumnKey(cellDom.id.split("-")[1])
+      //   )
+      // );
+    };
+
+    inputDom.onblur = (e: Event) => {
+      this.selectedCell = "";
+      cellDom.style.backgroundColor = "white";
+    };
+
+    cellDom.onclick = (e: Event) => {
+      // console.log("cell clicked");
+      // console.log(cellDom.id);
+      // cellDom.style.backgroundColor = "yellow";
+      // this.lightSheet.onCellClick?.(colIndex, rowIndex);
+    };
+
+    // cellDom.onfocus = (e: Event) => {
+    //   this.selectedCell = cellDom.id;
+    //   cellDom.style.backgroundColor = "yellow";
+    // };
+
+    // cellDom.onblur = (e: Event) => {
+    //   this.selectedCell = "";
+    //   cellDom.style.backgroundColor = "white";
+    // };
   }
 
   onCellValueChange(
@@ -74,7 +119,7 @@ export default class UI {
       const cell = this.lightSheet.setCellAt(
         parseInt(keyParts[0]),
         parseInt(keyParts[1]),
-        newValue,
+        newValue
       );
       // Keys will be valid as value shouldn't be empty at this point.
       rowDom.id = cell.rowKey!.toString();

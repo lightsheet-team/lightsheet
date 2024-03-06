@@ -30,6 +30,19 @@ export default class Sheet {
     this.default_height = 20;
   }
 
+  // We have the cell key, but we need to use that to find the relevant
+  // row key and column key. And then use the, to find and return
+  // the position of the cell
+
+  getRowIndex(rowKey: RowKey): number | undefined {
+    console.log(this.rows.get(rowKey));
+    return this.rows.get(rowKey)?.position;
+  }
+
+  getColumnIndex(colKey: ColumnKey): number | undefined {
+    return this.columns.get(colKey)?.position;
+  }
+
   setCellAt(colPos: number, rowPos: number, value: string): PositionInfo {
     const position = this.initializePosition(colPos, rowPos);
     return this.setCell(position.columnKey!, position.rowKey!, value);
