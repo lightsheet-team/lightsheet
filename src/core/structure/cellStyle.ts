@@ -2,10 +2,10 @@ import Formatter from "../evaluation/formatter";
 
 export default class CellStyle {
   formatter: Formatter | null;
-  width: number;
-  height: number;
-  color: [number, number, number];
-  borders: [boolean, boolean, boolean, boolean];
+  width?: number;
+  height?: number;
+  color?: [number, number, number];
+  borders?: [boolean, boolean, boolean, boolean];
 
   constructor(
     formatter: Formatter | null = null,
@@ -17,5 +17,35 @@ export default class CellStyle {
     this.height = height;
     this.color = [255, 255, 255];
     this.borders = [false, false, false, false];
+  }
+
+  applyStylesOf(other: CellStyle | null): CellStyle {
+    if(!other) return this;
+
+    // If a style is set in other but not in this, apply it to this.
+    for(const key in this) {
+      if (other.hasOwnProperty(key)) {
+        const otherProp = Reflect.get(other, key);
+        Reflect.set(this, key, otherProp);
+      }
+    }
+
+    return this;
+  }
+
+  clearStylingSetBy(other: CellStyle | null) {
+    if(!other) return false;
+    let isEmpty = true;
+
+    // If a property is set in other, clear it from this.
+    for(const key in this) {
+      if (other.hasOwnProperty(key) && Reflect.get(other, key)) {
+        Reflect.set(this, key, undefined);
+      }
+
+      if(isEmpty && Reflect.get(this, key)) isEmpty = false;
+    }
+
+    return isEmpty;
   }
 }
