@@ -95,25 +95,32 @@ export default class Sheet {
     if (!col || !row) return this.defaultStyle;
 
     let cellStyle = col.cellFormatting.get(row.key);
-    if(!cellStyle) {
+    if (!cellStyle) {
       cellStyle = new CellStyle();
     } else {
       cellStyle = structuredClone(cellStyle)!;
     }
 
     // Apply style properties with priority: cell style > column style > row style > default style.
-    cellStyle.applyStylesOf(col.defaultStyle).applyStylesOf(row.defaultStyle).applyStylesOf(this.defaultStyle);
+    cellStyle
+      .applyStylesOf(col.defaultStyle)
+      .applyStylesOf(row.defaultStyle)
+      .applyStylesOf(this.defaultStyle);
 
     return cellStyle;
   }
 
-  setStyle(colKey: ColumnKey, rowKey: RowKey, style: CellStyle | null): boolean {
+  setStyle(
+    colKey: ColumnKey,
+    rowKey: RowKey,
+    style: CellStyle | null,
+  ): boolean {
     const col = this.columns.get(colKey);
     const row = this.rows.get(rowKey);
     if (!col || !row) return false;
 
     style = structuredClone(style)!;
-    if(style == null) {
+    if (style == null) {
       col.cellFormatting.delete(row.key);
       row.cellFormatting.delete(col.key);
       return true;
@@ -140,22 +147,24 @@ export default class Sheet {
     return true;
   }
 
-  private setCellGroupStyle(group: CellGroup<ColumnKey | RowKey>, style: CellStyle | null) {
+  private setCellGroupStyle(
+    group: CellGroup<ColumnKey | RowKey>,
+    style: CellStyle | null,
+  ) {
     style = style ? structuredClone(style)! : null;
     group.defaultStyle = style;
 
     // Iterate through cells in this column and clear any styling properties set by the new style.
     for (const [opposingKey, cellStyle] of group.cellFormatting) {
       const shouldClear = cellStyle.clearStylingSetBy(style);
-      if(!shouldClear) continue;
+      if (!shouldClear) continue;
 
       // The cell's style will have no properties after applying this group's new style; clear it.
-      if(group instanceof Column)
-      {
-        this.clearStyle(group.key, opposingKey as RowKey)
+      if (group instanceof Column) {
+        this.clearStyle(group.key, opposingKey as RowKey);
         continue;
       }
-      this.clearStyle(opposingKey as ColumnKey, group.key as RowKey)
+      this.clearStyle(opposingKey as ColumnKey, group.key as RowKey);
     }
   }
 

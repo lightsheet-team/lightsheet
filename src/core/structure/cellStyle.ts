@@ -20,11 +20,11 @@ export default class CellStyle {
   }
 
   applyStylesOf(other: CellStyle | null): CellStyle {
-    if(!other) return this;
+    if (!other) return this;
 
     // If a style is set in other but not in this, apply it to this.
-    for(const key in this) {
-      if (other.hasOwnProperty(key)) {
+    for (const key in this) {
+      if (Object.prototype.hasOwnProperty.call(other, key)) {
         const otherProp = Reflect.get(other, key);
         Reflect.set(this, key, otherProp);
       }
@@ -34,16 +34,19 @@ export default class CellStyle {
   }
 
   clearStylingSetBy(other: CellStyle | null) {
-    if(!other) return false;
+    if (!other) return false;
     let isEmpty = true;
 
     // If a property is set in other, clear it from this.
-    for(const key in this) {
-      if (other.hasOwnProperty(key) && Reflect.get(other, key)) {
+    for (const key in this) {
+      if (
+        Object.prototype.hasOwnProperty.call(other, key) &&
+        Reflect.get(other, key)
+      ) {
         Reflect.set(this, key, undefined);
       }
 
-      if(isEmpty && Reflect.get(this, key)) isEmpty = false;
+      if (isEmpty && Reflect.get(this, key)) isEmpty = false;
     }
 
     return isEmpty;
