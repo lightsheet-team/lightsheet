@@ -55,32 +55,6 @@ export default class Sheet {
     };
   }
 
-  private createCell(colKey: ColumnKey, rowKey: RowKey, value: string): Cell {
-    const col = this.columns.get(colKey);
-    const row = this.rows.get(rowKey);
-    if (!col || !row) {
-      throw new Error(
-        `Failed to create cell at col: ${col} row: ${row}: Column or Row not found.`,
-      );
-    }
-
-    if (col.cellIndex.has(row.key)) {
-      throw new Error(
-        `Failed to create cell at col: ${col} row: ${row}: Cell already exists.`,
-      );
-    }
-
-    const cell = new Cell();
-    cell.formula = value;
-    this.cell_data.set(cell.key, cell);
-    this.resolveCell(cell);
-
-    col.cellIndex.set(row.key, cell.key);
-    row.cellIndex.set(col.key, cell.key);
-
-    return cell;
-  }
-
   deleteCell(colKey: ColumnKey, rowKey: RowKey): boolean {
     const col = this.columns.get(colKey);
     const row = this.rows.get(rowKey);
@@ -113,17 +87,6 @@ export default class Sheet {
     return true;
   }
 
-  private getCell(colKey: ColumnKey, rowKey: RowKey): Cell | null {
-    const col = this.columns.get(colKey);
-    const row = this.rows.get(rowKey);
-
-    if (!col || !row) return null;
-
-    if (!col.cellIndex.has(row.key)) return null;
-    const cellKey = col.cellIndex.get(row.key)!;
-    return this.cell_data.get(cellKey)!;
-  }
-
   // <Row index, <Column index, value>>
   exportData(): Map<number, Map<number, string>> {
     const data = new Map<number, Map<number, string>>();
@@ -143,6 +106,43 @@ export default class Sheet {
     }
 
     return data;
+  }
+
+  private createCell(colKey: ColumnKey, rowKey: RowKey, value: string): Cell {
+    const col = this.columns.get(colKey);
+    const row = this.rows.get(rowKey);
+    if (!col || !row) {
+      throw new Error(
+        `Failed to create cell at col: ${col} row: ${row}: Column or Row not found.`,
+      );
+    }
+
+    if (col.cellIndex.has(row.key)) {
+      throw new Error(
+        `Failed to create cell at col: ${col} row: ${row}: Cell already exists.`,
+      );
+    }
+
+    const cell = new Cell();
+    cell.formula = value;
+    this.cell_data.set(cell.key, cell);
+    this.resolveCell(cell);
+
+    col.cellIndex.set(row.key, cell.key);
+    row.cellIndex.set(col.key, cell.key);
+
+    return cell;
+  }
+
+  private getCell(colKey: ColumnKey, rowKey: RowKey): Cell | null {
+    const col = this.columns.get(colKey);
+    const row = this.rows.get(rowKey);
+
+    if (!col || !row) return null;
+
+    if (!col.cellIndex.has(row.key)) return null;
+    const cellKey = col.cellIndex.get(row.key)!;
+    return this.cell_data.get(cellKey)!;
   }
 
   private resolveCell(cell: Cell) {
