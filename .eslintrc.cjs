@@ -30,5 +30,5 @@ module.exports = {
   env: {
     "browser": true,
   },
-  ignorePatterns: ['vite.config.js'],
+  ignorePatterns: ['vite.config.js', '/dist/'],
 };
