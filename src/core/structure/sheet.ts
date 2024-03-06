@@ -4,6 +4,7 @@ import Column from "./group/column.ts";
 import Row from "./group/row.ts";
 import { PositionInfo } from "./sheet.types.ts";
 import CellStyle from "./cellStyle.ts";
+import CellGroup from "./group/cellGroup.ts";
 
 export default class Sheet {
   defaultStyle: any;
@@ -94,43 +95,77 @@ export default class Sheet {
     if (!col || !row) return this.defaultStyle;
 
     let cellStyle = col.cellFormatting.get(row.key);
-    // Return with priority: cell style > column style > row style > default style
-    cellStyle =
-      cellStyle ?? col.defaultStyle ?? row.defaultStyle ?? this.defaultStyle;
+    if (!cellStyle) {
+      cellStyle = new CellStyle();
+    } else {
+      cellStyle = structuredClone(cellStyle)!;
+    }
 
-    return structuredClone(cellStyle)!;
+    // Apply style properties with priority: cell style > column style > row style > default style.
+    cellStyle
+      .applyStylesOf(col.defaultStyle)
+      .applyStylesOf(row.defaultStyle)
+      .applyStylesOf(this.defaultStyle);
+
+    return cellStyle;
   }
 
-  setStyle(colKey: ColumnKey, rowKey: RowKey, style: CellStyle): boolean {
+  setStyle(
+    colKey: ColumnKey,
+    rowKey: RowKey,
+    style: CellStyle | null,
+  ): boolean {
     const col = this.columns.get(colKey);
     const row = this.rows.get(rowKey);
     if (!col || !row) return false;
 
     style = structuredClone(style)!;
+    if (style == null) {
+      col.cellFormatting.delete(row.key);
+      row.cellFormatting.delete(col.key);
+      return true;
+    }
+
     col.cellFormatting.set(row.key, style);
     row.cellFormatting.set(col.key, style);
-
     return true;
   }
 
-  setColumnStyle(colKey: ColumnKey, style: CellStyle): boolean {
+  setColumnStyle(colKey: ColumnKey, style: CellStyle | null): boolean {
     const col = this.columns.get(colKey);
     if (!col) return false;
 
-    style = structuredClone(style)!;
-    col.defaultStyle = style;
-
+    this.setCellGroupStyle(col, style);
     return true;
   }
 
-  setRowStyle(rowKey: RowKey, style: CellStyle): boolean {
+  setRowStyle(rowKey: RowKey, style: CellStyle | null): boolean {
     const row = this.rows.get(rowKey);
     if (!row) return false;
 
-    style = structuredClone(style)!;
-    row.defaultStyle = style;
-
+    this.setCellGroupStyle(row, style);
     return true;
+  }
+
+  private setCellGroupStyle(
+    group: CellGroup<ColumnKey | RowKey>,
+    style: CellStyle | null,
+  ) {
+    style = style ? structuredClone(style)! : null;
+    group.defaultStyle = style;
+
+    // Iterate through cells in this column and clear any styling properties set by the new style.
+    for (const [opposingKey, cellStyle] of group.cellFormatting) {
+      const shouldClear = cellStyle.clearStylingSetBy(style);
+      if (!shouldClear) continue;
+
+      // The cell's style will have no properties after applying this group's new style; clear it.
+      if (group instanceof Column) {
+        this.clearStyle(group.key, opposingKey as RowKey);
+        continue;
+      }
+      this.clearStyle(opposingKey as ColumnKey, group.key as RowKey);
+    }
   }
 
   clearStyle(colKey: ColumnKey, rowKey: RowKey): boolean {
@@ -141,22 +176,6 @@ export default class Sheet {
     col.cellFormatting.delete(row.key);
     row.cellFormatting.delete(col.key);
 
-    return true;
-  }
-
-  clearColumnStyle(colKey: ColumnKey): boolean {
-    const col = this.columns.get(colKey);
-    if (!col) return false;
-
-    col.defaultStyle = null;
-    return true;
-  }
-
-  clearRowStyle(rowKey: RowKey): boolean {
-    const row = this.rows.get(rowKey);
-    if (!row) return false;
-
-    row.defaultStyle = null;
     return true;
   }
 
