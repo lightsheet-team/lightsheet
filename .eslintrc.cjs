@@ -14,7 +14,13 @@ module.exports = {
   ],
   rules: {
     // Add custom rules here
-    'prettier/prettier': 'error',
+    'prettier/prettier': [
+     'error',
+      {
+        "endOfLine": "auto"
+      }
+    ],
+
     "@typescript-eslint/no-explicit-any": "off"
     // 'line-comment-postion': 'above',
   },
