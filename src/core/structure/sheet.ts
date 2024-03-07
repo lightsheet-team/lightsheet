@@ -19,7 +19,14 @@ export default class Sheet {
   default_height: number;
 
   constructor() {
-    this.defaultStyle = null;
+    this.defaultStyle = new CellStyle(
+      null,
+      30,
+      10,
+      [0, 0, 0],
+      [false, false, false, false],
+    ); // TODO This should be configurable.
+
     this.settings = null;
     this.cell_data = new Map<CellKey, Cell>();
     this.rows = new Map<RowKey, Row>();

@@ -9,14 +9,16 @@ export default class CellStyle {
 
   constructor(
     formatter: Formatter | null = null,
-    width: number = 30,
-    height: number = 10,
+    width?: number,
+    height?: number,
+    color?: [number, number, number],
+    borders?: [boolean, boolean, boolean, boolean],
   ) {
     this.formatter = formatter;
     this.width = width;
     this.height = height;
-    this.color = [255, 255, 255];
-    this.borders = [false, false, false, false];
+    this.color = color;
+    this.borders = borders;
   }
 
   applyStylesOf(other: CellStyle | null): CellStyle {
