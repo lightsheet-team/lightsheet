@@ -101,12 +101,8 @@ export default class Sheet {
     const row = this.rows.get(rowKey);
     if (!col || !row) return this.defaultStyle;
 
-    let cellStyle = col.cellFormatting.get(row.key);
-    if (!cellStyle) {
-      cellStyle = new CellStyle();
-    } else {
-      cellStyle = structuredClone(cellStyle)!;
-    }
+    const existingStyle = col.cellFormatting.get(row.key);
+    const cellStyle = new CellStyle().clone(existingStyle);
 
     // Apply style properties with priority: cell style > column style > row style > default style.
     cellStyle
@@ -126,12 +122,10 @@ export default class Sheet {
     const row = this.rows.get(rowKey);
     if (!col || !row) return false;
 
-    style = structuredClone(style)!;
     if (style == null) {
-      col.cellFormatting.delete(row.key);
-      row.cellFormatting.delete(col.key);
-      return true;
+      return this.clearStyle(colKey, rowKey);
     }
+    style = new CellStyle().clone(style);
 
     col.cellFormatting.set(row.key, style);
     row.cellFormatting.set(col.key, style);
@@ -158,7 +152,7 @@ export default class Sheet {
     group: CellGroup<ColumnKey | RowKey>,
     style: CellStyle | null,
   ) {
-    style = style ? structuredClone(style)! : null;
+    style = style ? new CellStyle().clone(style) : null;
     group.defaultStyle = style;
 
     // Iterate through cells in this column and clear any styling properties set by the new style.

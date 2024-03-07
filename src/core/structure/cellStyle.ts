@@ -1,6 +1,7 @@
 import Formatter from "../evaluation/formatter";
+import Cloneable from "../cloneable.ts";
 
-export default class CellStyle {
+export default class CellStyle extends Cloneable<CellStyle> {
   formatter: Formatter | null;
   width?: number;
   height?: number;
@@ -14,6 +15,7 @@ export default class CellStyle {
     color?: [number, number, number],
     borders?: [boolean, boolean, boolean, boolean],
   ) {
+    super();
     this.formatter = formatter;
     this.width = width;
     this.height = height;
