@@ -26,7 +26,10 @@ export default class CellStyle {
 
     // If a style is set in other but not in this, apply it to this.
     for (const key in this) {
-      if (Object.prototype.hasOwnProperty.call(other, key)) {
+      if (
+        Object.prototype.hasOwnProperty.call(other, key) &&
+        !Reflect.get(this, key)
+      ) {
         const otherProp = Reflect.get(other, key);
         Reflect.set(this, key, otherProp);
       }
