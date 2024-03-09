@@ -8,7 +8,6 @@ export default class UI {
   colCount: number;
   lightSheet: LightSheet;
 
-
   constructor(
     el: Element,
     lightSheet: LightSheet,

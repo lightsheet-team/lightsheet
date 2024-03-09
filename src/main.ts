@@ -29,6 +29,13 @@ export default class LightSheet {
   }
 
   initializeData() {
+    // Create header row and add headers
+    const headerData = Array.from(
+      { length: this.options.data[0].length + 1 }, // Adding 1 for the row number column
+      (_, i) => (i === 0 ? "" : String.fromCharCode(64 + i)), // A for the first column
+    );
+    this.ui.addHeader(headerData);
+
     for (let i = 0; i < this.options.data.length; i++) {
       const item = this.options.data[i];
       //create new row
