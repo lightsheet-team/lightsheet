@@ -24,9 +24,16 @@ export default class UI {
     tableContainerDom.appendChild(this.tableBodyDom);
   }
 
-  addRow(): Element {
+  addRow(i: number): Element {
     const rowDom = document.createElement("tr");
     this.tableBodyDom.appendChild(rowDom);
+
+    //row number
+    const rowNumberCell = document.createElement("td");
+    rowNumberCell.innerHTML = `${i + 1}`; // Row numbers start from 1
+    rowNumberCell.className = "light_sheet_table_row"; // Add class for styling
+    rowDom.appendChild(rowNumberCell); // Append the row number cell to the row
+
     return rowDom;
   }
 
