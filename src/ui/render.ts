@@ -2,10 +2,12 @@ import LightSheet from "../main";
 
 export default class UI {
   tableEl: Element;
+  tableHeadDom: Element;
   tableBodyDom: Element;
   rowCount: number;
   colCount: number;
   lightSheet: LightSheet;
+
 
   constructor(
     el: Element,
@@ -18,8 +20,24 @@ export default class UI {
     this.rowCount = rowCount;
     this.lightSheet = lightSheet;
 
+    this.tableEl.classList.add("light_sheet_table_container");
+
+    const lightSheetContainerDom = document.createElement("div");
+    lightSheetContainerDom.classList.add("light_sheet_table_content");
+    this.tableEl.appendChild(lightSheetContainerDom);
+
     const tableContainerDom = document.createElement("table");
-    this.tableEl.appendChild(tableContainerDom);
+    tableContainerDom.classList.add("light_sheet_table");
+    tableContainerDom.setAttribute("cellpadding", "0");
+    tableContainerDom.setAttribute("cellspacing", "0");
+    tableContainerDom.setAttribute("unselectable", "yes");
+    lightSheetContainerDom.appendChild(tableContainerDom);
+
+    //thead
+    this.tableHeadDom = document.createElement("thead");
+    tableContainerDom.appendChild(this.tableHeadDom);
+
+    //tbody
     this.tableBodyDom = document.createElement("tbody");
     tableContainerDom.appendChild(this.tableBodyDom);
   }
