@@ -42,6 +42,17 @@ export default class UI {
     tableContainerDom.appendChild(this.tableBodyDom);
   }
 
+  addHeader(headerData: string[]) {
+    const headerRowDom = document.createElement("tr");
+    this.tableHeadDom.appendChild(headerRowDom);
+
+    for (let i = 0; i < headerData.length; i++) {
+      const headerCellDom = document.createElement("td");
+      headerCellDom.textContent = headerData[i];
+      headerRowDom.appendChild(headerCellDom);
+    }
+  }
+
   addRow(i: number): Element {
     const rowDom = document.createElement("tr");
     this.tableBodyDom.appendChild(rowDom);
