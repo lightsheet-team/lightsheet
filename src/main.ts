@@ -39,7 +39,7 @@ export default class LightSheet {
     for (let i = 0; i < this.options.data.length; i++) {
       const item = this.options.data[i];
       //create new row
-      const rowDom = this.ui.addRow();
+      const rowDom = this.ui.addRow(i);
 
       for (let j = 0; j < item.length; j++) {
         //if data is not empty add cell to core and render ui, otherwise render only ui
