@@ -64,7 +64,7 @@ export default class UI {
     const rowDom = document.getElementById(rowKey);
     if (!rowDom) return;
     // TODO This method is working around duplicate IDs. (issue #47)
-    // TODO Cell formula should be preserved
+    // TODO Cell formula should be preserved. (Issue #49)
     for (let i = 0; i < rowDom.children.length; i++) {
       const cellDom = rowDom.children.item(i)!;
       if (cellDom.id == colKey) {
