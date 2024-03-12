@@ -17,6 +17,8 @@ export default class Sheet {
   default_width: number;
   default_height: number;
 
+  private expressionHandler: ExpressionHandler;
+
   constructor() {
     this.defaultStyle = null;
     this.settings = null;
@@ -29,6 +31,8 @@ export default class Sheet {
 
     this.default_width = 40;
     this.default_height = 20;
+
+    this.expressionHandler = new ExpressionHandler(this);
   }
 
   setCellAt(colPos: number, rowPos: number, value: string): CellInfo {
@@ -57,6 +61,15 @@ export default class Sheet {
         columnKey: this.columns.has(colKey) ? colKey : undefined,
       },
     };
+  }
+
+  public getCellValueAt(colPos: number, rowPos: number): string {
+    const colKey = this.columnPositions.get(colPos);
+    const rowKey = this.rowPositions.get(rowPos);
+    if (!colKey || !rowKey) return "";
+
+    const cell = this.getCell(colKey, rowKey);
+    return cell ? cell.value : "";
   }
 
   private createCell(colKey: ColumnKey, rowKey: RowKey, value: string): Cell {
@@ -149,7 +162,7 @@ export default class Sheet {
   }
 
   private resolveCell(cell: Cell): boolean {
-    const value = ExpressionHandler.evaluate(cell.formula);
+    const value = this.expressionHandler.evaluate(cell.formula);
     if (!value) {
       cell.state = CellState.INVALID_EXPRESSION;
       return false;
