@@ -1,8 +1,9 @@
 import { CellKey, ColumnKey, RowKey } from "./key/keyTypes.ts";
-import Cell from "./cell/cell.ts";
+import Cell, { CellState } from "./cell/cell.ts";
 import Column from "./group/column.ts";
 import Row from "./group/row.ts";
 import { PositionInfo } from "./sheet.types.ts";
+import ExpressionHandler from "../evaluation/expressionHandler.ts";
 
 export default class Sheet {
   defaultStyle: any;
@@ -145,8 +146,18 @@ export default class Sheet {
     return data;
   }
 
-  private resolveCell(cell: Cell) {
-    cell.value = cell.formula; // TODO
+  private resolveCell(cell: Cell): boolean {
+    const value = ExpressionHandler.evaluate(cell.value);
+    if (!value) {
+      cell.state = CellState.INVALID_EXPRESSION;
+      return false;
+    }
+
+    // this.getStyle...
+
+    cell.state = CellState.OK;
+    cell.value = value;
+    return true;
   }
 
   private initializePosition(colPos: number, rowPos: number): PositionInfo {

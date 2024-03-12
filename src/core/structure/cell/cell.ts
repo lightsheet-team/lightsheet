@@ -12,7 +12,7 @@ export default class Cell {
     this.key = generateCellKey();
     this.formula = "";
     this.value = "";
-    this.state = CellState.CELL_OK;
+    this.state = CellState.OK;
     this.referencesIn = [];
     this.referencesOut = [];
   }
@@ -20,5 +20,7 @@ export default class Cell {
 
 // Initial structure, move to separate file
 export enum CellState {
-  CELL_OK,
+  OK,
+  INVALID_EXPRESSION,
+  INVALID_FORMAT,
 }
