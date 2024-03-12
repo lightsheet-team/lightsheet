@@ -2,7 +2,7 @@ import { CellKey, ColumnKey, RowKey } from "./key/keyTypes.ts";
 import Cell, { CellState } from "./cell/cell.ts";
 import Column from "./group/column.ts";
 import Row from "./group/row.ts";
-import { PositionInfo } from "./sheet.types.ts";
+import { CellInfo, PositionInfo } from "./sheet.types.ts";
 import ExpressionHandler from "../evaluation/expressionHandler.ts";
 
 export default class Sheet {
@@ -31,12 +31,12 @@ export default class Sheet {
     this.default_height = 20;
   }
 
-  setCellAt(colPos: number, rowPos: number, value: string): PositionInfo {
+  setCellAt(colPos: number, rowPos: number, value: string): CellInfo {
     const position = this.initializePosition(colPos, rowPos);
     return this.setCell(position.columnKey!, position.rowKey!, value);
   }
 
-  setCell(colKey: ColumnKey, rowKey: RowKey, value: string): PositionInfo {
+  setCell(colKey: ColumnKey, rowKey: RowKey, value: string): CellInfo {
     let cell = this.getCell(colKey, rowKey);
     if (!cell) {
       cell = this.createCell(colKey, rowKey, value);
@@ -51,8 +51,11 @@ export default class Sheet {
     }
 
     return {
-      rowKey: this.rows.has(rowKey) ? rowKey : undefined,
-      columnKey: this.columns.has(colKey) ? colKey : undefined,
+      value: cell ? cell.value : undefined,
+      position: {
+        rowKey: this.rows.has(rowKey) ? rowKey : undefined,
+        columnKey: this.columns.has(colKey) ? colKey : undefined,
+      },
     };
   }
 
@@ -74,7 +77,6 @@ export default class Sheet {
     const cell = new Cell();
     cell.formula = value;
     this.cell_data.set(cell.key, cell);
-    this.resolveCell(cell);
 
     col.cellIndex.set(row.key, cell.key);
     row.cellIndex.set(col.key, cell.key);
@@ -147,7 +149,7 @@ export default class Sheet {
   }
 
   private resolveCell(cell: Cell): boolean {
-    const value = ExpressionHandler.evaluate(cell.value);
+    const value = ExpressionHandler.evaluate(cell.formula);
     if (!value) {
       cell.state = CellState.INVALID_EXPRESSION;
       return false;
@@ -157,7 +159,7 @@ export default class Sheet {
 
     cell.state = CellState.OK;
     cell.value = value;
-    return true;
+    return cell.formula != cell.value;
   }
 
   private initializePosition(colPos: number, rowPos: number): PositionInfo {
