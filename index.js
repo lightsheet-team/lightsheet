@@ -1,6 +1,6 @@
 import Lightsheet from "./src/main.ts";
 var data = [
-  ["1", "=1+2/3*6", "img/nophoto.jpg", "Marketing", "3120"],
+  ["1", "=1+2/3*6+A1", "img/nophoto.jpg", "Marketing", "3120"],
   ["2", "Jorge", "img/nophoto.jpg", "Marketing", "3120"],
   ["3", "Jorge", "img/nophoto.jpg", "Marketing", "3120"],
 ];
