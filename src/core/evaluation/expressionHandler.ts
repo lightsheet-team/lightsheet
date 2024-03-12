@@ -1,5 +1,24 @@
-import { FunctionNode, parse, SymbolNode } from "mathjs";
+import {
+  create,
+  parseDependencies,
+  addDependencies,
+  subtractDependencies,
+  multiplyDependencies,
+  divideDependencies,
+  SymbolNodeDependencies,
+  FunctionNodeDependencies,
+} from "mathjs/number";
+
 import Sheet from "../structure/sheet.ts";
+const math = create({
+  parseDependencies,
+  addDependencies,
+  subtractDependencies,
+  multiplyDependencies,
+  divideDependencies,
+  SymbolNodeDependencies,
+  FunctionNodeDependencies,
+});
 
 export default class ExpressionHandler {
   sheet: Sheet;
@@ -8,16 +27,17 @@ export default class ExpressionHandler {
     this.sheet = sheet; // TODO The scope of this class should be all sheets, not just one.
 
     // Add our symbol resolving methods to mathjs.
-    FunctionNode.onUndefinedFunction = (name: string) =>
+    math.FunctionNode.onUndefinedFunction = (name: string) =>
       this.resolveFunction(name);
 
-    SymbolNode.onUndefinedSymbol = (name: string) => this.resolveSymbol(name);
+    math.SymbolNode.onUndefinedSymbol = (name: string) =>
+      this.resolveSymbol(name);
   }
 
   evaluate(expression: string): string {
     if (!expression.startsWith("=")) return expression;
     expression = expression.substring(1);
-    const parsed = parse(expression);
+    const parsed = math.parse(expression);
     return parsed.evaluate();
   }
 
