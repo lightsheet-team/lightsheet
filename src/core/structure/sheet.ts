@@ -168,7 +168,7 @@ export default class Sheet {
       return false;
     }
 
-    // this.getStyle...
+    // TODO Resolve restrictions from cell formatting here (CellState.INVALID_FORMAT).
 
     cell.state = CellState.OK;
     cell.value = value;
