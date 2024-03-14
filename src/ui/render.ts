@@ -11,19 +11,19 @@ export default class UI {
   rowCount: number;
   colCount: number;
   lightSheet: LightSheet;
-  selectedCell: String;
+  selectedCell: Number[] | undefined;
 
   constructor(
     el: Element,
     lightSheet: LightSheet,
     rowCount: number,
-    colCount: number,
+    colCount: number
   ) {
     this.tableEl = el;
     this.colCount = colCount;
     this.rowCount = rowCount;
     this.lightSheet = lightSheet;
-    this.selectedCell = "";
+    this.selectedCell = [];
 
     this.tableEl.classList.add("light_sheet_table_container");
 
@@ -76,15 +76,18 @@ export default class UI {
     colIndex: number,
     rowIndex: number,
     value: any,
-    columnKey?: string,
+    columnKey?: string
   ) {
     const cellDom = document.createElement("td");
     rowDom.appendChild(cellDom);
     cellDom.id = `${colIndex}-${rowIndex}`;
     const inputDom = document.createElement("input");
     inputDom.value = "";
+
     inputDom.style.outline = "none";
     inputDom.style.backgroundColor = "transparent";
+    inputDom.style.borderStyle = "none";
+    cellDom.style.border = "2px solid #000";
 
     cellDom.appendChild(inputDom);
 
@@ -99,45 +102,37 @@ export default class UI {
         rowDom,
         cellDom,
         colIndex,
-        rowIndex,
+        rowIndex
       );
 
     inputDom.onfocus = (e: Event) => {
-      // this.selectedCell =
-      // console.log(cellDom);
-      cellDom.style.backgroundColor = "yellow";
-      let x = cellDom.id.split("-");
+      cellDom.style.borderStyle = "solid";
+      cellDom.style.margin = "0px";
+      cellDom.style.border = "2px solid blue";
 
-      console.log(x);
-      console.log(this.lightSheet.sheet.getRowIndex(generateRowKey(x[0])));
-      // console.log(
-      //   this.lightSheet.sheet.getColumnIndex(
-      //     generateColumnKey(cellDom.id.split("-")[1])
-      //   )
-      // );
+      let columnIndex: number | undefined;
+      let rowIndex: number | undefined;
+
+      if (!this.isUUIDv4(cellDom.id)) {
+        let x = cellDom.id.split("-");
+        columnIndex = Number(x[0]);
+        rowIndex = Number(x[1]);
+      } else {
+        let columnKey = cellDom.id;
+        let rowKey = cellDom.parentElement?.id;
+
+        columnIndex = this.lightSheet.sheet.getColumnIndex(
+          generateColumnKey(columnKey!)
+        );
+        rowIndex = this.lightSheet.sheet.getRowIndex(generateRowKey(rowKey!));
+      }
+      this.selectedCell?.push(Number(columnIndex), Number(rowIndex));
     };
 
     inputDom.onblur = (e: Event) => {
-      this.selectedCell = "";
-      cellDom.style.backgroundColor = "white";
+      this.selectedCell = [];
+      cellDom.style.border = "2px solid #000";
     };
-
-    cellDom.onclick = (e: Event) => {
-      // console.log("cell clicked");
-      // console.log(cellDom.id);
-      // cellDom.style.backgroundColor = "yellow";
-      // this.lightSheet.onCellClick?.(colIndex, rowIndex);
-    };
-
-    // cellDom.onfocus = (e: Event) => {
-    //   this.selectedCell = cellDom.id;
-    //   cellDom.style.backgroundColor = "yellow";
-    // };
-
-    // cellDom.onblur = (e: Event) => {
-    //   this.selectedCell = "";
-    //   cellDom.style.backgroundColor = "white";
-    // };
   }
 
   setCellValue(value: string, rowKey: string, colKey: string) {
@@ -159,7 +154,7 @@ export default class UI {
     rowDom: Element,
     cellDom: Element,
     colIndex: number,
-    rowIndex: number,
+    rowIndex: number
   ) {
     const keyParts = cellDom.id.split("-");
 
@@ -188,5 +183,11 @@ export default class UI {
 
     //fire cell onchange event to client callback
     this.lightSheet.onCellChange?.(colIndex, rowIndex, newValue);
+  }
+
+  isUUIDv4(str: string) {
+    const uuidv4Pattern =
+      /^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
+    return uuidv4Pattern.test(str);
   }
 }
