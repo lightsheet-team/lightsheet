@@ -1,5 +1,6 @@
 # lightsheet
 
+## Developer guide
 ### How to run for developement
 
 - Install node on your computer, version 20+
@@ -13,7 +14,6 @@
 - Run `npm run build `
 - Use the content of `dist`, check the folder `pure_js_runner_sample` for an example
 
-## Developer guide
 ### Starting work on a new feature
 0. Make sure the feature has an issue. If not, create one.
 1. Go to the issue. Click "Create a branch" under "Development".
