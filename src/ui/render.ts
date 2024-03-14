@@ -60,6 +60,20 @@ export default class UI {
       );
   }
 
+  setCellValue(value: string, rowKey: string, colKey: string) {
+    const rowDom = document.getElementById(rowKey);
+    if (!rowDom) return;
+    // TODO This method is working around duplicate IDs. (issue #47)
+    // TODO Cell formula should be preserved. (Issue #49)
+    for (let i = 0; i < rowDom.children.length; i++) {
+      const cellDom = rowDom.children.item(i)!;
+      if (cellDom.id == colKey) {
+        const inputDom = cellDom.childNodes.item(0);
+        (inputDom as HTMLInputElement).value = value;
+      }
+    }
+  }
+
   onCellValueChange(
     newValue: string,
     rowDom: Element,

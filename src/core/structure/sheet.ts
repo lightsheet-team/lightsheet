@@ -1,8 +1,9 @@
 import { CellKey, ColumnKey, RowKey } from "./key/keyTypes.ts";
-import Cell from "./cell/cell.ts";
+import Cell, { CellState } from "./cell/cell.ts";
 import Column from "./group/column.ts";
 import Row from "./group/row.ts";
-import { PositionInfo } from "./sheet.types.ts";
+import { CellInfo, PositionInfo } from "./sheet.types.ts";
+import ExpressionHandler from "../evaluation/expressionHandler.ts";
 import CellStyle from "./cellStyle.ts";
 import CellGroup from "./group/cellGroup.ts";
 
@@ -17,6 +18,8 @@ export default class Sheet {
 
   default_width: number;
   default_height: number;
+
+  private expressionHandler: ExpressionHandler;
 
   constructor() {
     this.defaultStyle = new CellStyle(
@@ -37,14 +40,16 @@ export default class Sheet {
 
     this.default_width = 40;
     this.default_height = 20;
+
+    this.expressionHandler = new ExpressionHandler(this);
   }
 
-  setCellAt(colPos: number, rowPos: number, value: string): PositionInfo {
+  setCellAt(colPos: number, rowPos: number, value: string): CellInfo {
     const position = this.initializePosition(colPos, rowPos);
     return this.setCell(position.columnKey!, position.rowKey!, value);
   }
 
-  setCell(colKey: ColumnKey, rowKey: RowKey, value: string): PositionInfo {
+  setCell(colKey: ColumnKey, rowKey: RowKey, value: string): CellInfo {
     let cell = this.getCell(colKey, rowKey);
     if (!cell) {
       cell = this.createCell(colKey, rowKey, value);
@@ -59,9 +64,21 @@ export default class Sheet {
     }
 
     return {
-      rowKey: this.rows.has(rowKey) ? rowKey : undefined,
-      columnKey: this.columns.has(colKey) ? colKey : undefined,
+      value: cell ? cell.value : undefined,
+      position: {
+        rowKey: this.rows.has(rowKey) ? rowKey : undefined,
+        columnKey: this.columns.has(colKey) ? colKey : undefined,
+      },
     };
+  }
+
+  public getCellValueAt(colPos: number, rowPos: number): string | null {
+    const colKey = this.columnPositions.get(colPos);
+    const rowKey = this.rowPositions.get(rowPos);
+    if (!colKey || !rowKey) return null;
+
+    const cell = this.getCell(colKey, rowKey);
+    return cell ? cell.value : null;
   }
 
   deleteCell(colKey: ColumnKey, rowKey: RowKey): boolean {
@@ -219,7 +236,6 @@ export default class Sheet {
     const cell = new Cell();
     cell.formula = value;
     this.cell_data.set(cell.key, cell);
-    this.resolveCell(cell);
 
     col.cellIndex.set(row.key, cell.key);
     row.cellIndex.set(col.key, cell.key);
@@ -238,8 +254,18 @@ export default class Sheet {
     return this.cell_data.get(cellKey)!;
   }
 
-  private resolveCell(cell: Cell) {
-    cell.value = cell.formula; // TODO
+  private resolveCell(cell: Cell): boolean {
+    const value = this.expressionHandler.evaluate(cell.formula);
+    if (value == null) {
+      cell.state = CellState.INVALID_EXPRESSION;
+      return false;
+    }
+
+    // TODO Resolve restrictions from cell formatting here (CellState.INVALID_FORMAT).
+
+    cell.state = CellState.OK;
+    cell.value = value;
+    return cell.formula != cell.value;
   }
 
   private initializePosition(colPos: number, rowPos: number): PositionInfo {
