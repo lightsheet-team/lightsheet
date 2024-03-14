@@ -3,6 +3,8 @@ import Cell from "./cell/cell.ts";
 import Column from "./group/column.ts";
 import Row from "./group/row.ts";
 import { PositionInfo } from "./sheet.types.ts";
+import CellStyle from "./cellStyle.ts";
+import CellGroup from "./group/cellGroup.ts";
 
 export default class Sheet {
   defaultStyle: any;
@@ -17,7 +19,14 @@ export default class Sheet {
   default_height: number;
 
   constructor() {
-    this.defaultStyle = null;
+    this.defaultStyle = new CellStyle(
+      null,
+      30,
+      10,
+      [0, 0, 0],
+      [false, false, false, false],
+    ); // TODO This should be configurable.
+
     this.settings = null;
     this.cell_data = new Map<CellKey, Cell>();
     this.rows = new Map<RowKey, Row>();
@@ -55,32 +64,6 @@ export default class Sheet {
     };
   }
 
-  private createCell(colKey: ColumnKey, rowKey: RowKey, value: string): Cell {
-    const col = this.columns.get(colKey);
-    const row = this.rows.get(rowKey);
-    if (!col || !row) {
-      throw new Error(
-        `Failed to create cell at col: ${col} row: ${row}: Column or Row not found.`,
-      );
-    }
-
-    if (col.cellIndex.has(row.key)) {
-      throw new Error(
-        `Failed to create cell at col: ${col} row: ${row}: Cell already exists.`,
-      );
-    }
-
-    const cell = new Cell();
-    cell.formula = value;
-    this.cell_data.set(cell.key, cell);
-    this.resolveCell(cell);
-
-    col.cellIndex.set(row.key, cell.key);
-    row.cellIndex.set(col.key, cell.key);
-
-    return cell;
-  }
-
   deleteCell(colKey: ColumnKey, rowKey: RowKey): boolean {
     const col = this.columns.get(colKey);
     const row = this.rows.get(rowKey);
@@ -113,15 +96,88 @@ export default class Sheet {
     return true;
   }
 
-  private getCell(colKey: ColumnKey, rowKey: RowKey): Cell | null {
+  getCellStyle(colKey: ColumnKey, rowKey: RowKey): CellStyle {
     const col = this.columns.get(colKey);
     const row = this.rows.get(rowKey);
+    if (!col || !row) return this.defaultStyle;
 
-    if (!col || !row) return null;
+    const existingStyle = col.cellFormatting.get(row.key);
+    const cellStyle = new CellStyle().clone(existingStyle);
 
-    if (!col.cellIndex.has(row.key)) return null;
-    const cellKey = col.cellIndex.get(row.key)!;
-    return this.cell_data.get(cellKey)!;
+    // Apply style properties with priority: cell style > column style > row style > default style.
+    cellStyle
+      .applyStylesOf(col.defaultStyle)
+      .applyStylesOf(row.defaultStyle)
+      .applyStylesOf(this.defaultStyle);
+
+    return cellStyle;
+  }
+
+  setCellStyle(
+    colKey: ColumnKey,
+    rowKey: RowKey,
+    style: CellStyle | null,
+  ): boolean {
+    const col = this.columns.get(colKey);
+    const row = this.rows.get(rowKey);
+    if (!col || !row) return false;
+
+    if (style == null) {
+      return this.clearCellStyle(colKey, rowKey);
+    }
+    style = new CellStyle().clone(style);
+
+    col.cellFormatting.set(row.key, style);
+    row.cellFormatting.set(col.key, style);
+    return true;
+  }
+
+  setColumnStyle(colKey: ColumnKey, style: CellStyle | null): boolean {
+    const col = this.columns.get(colKey);
+    if (!col) return false;
+
+    this.setCellGroupStyle(col, style);
+    return true;
+  }
+
+  setRowStyle(rowKey: RowKey, style: CellStyle | null): boolean {
+    const row = this.rows.get(rowKey);
+    if (!row) return false;
+
+    this.setCellGroupStyle(row, style);
+    return true;
+  }
+
+  private setCellGroupStyle(
+    group: CellGroup<ColumnKey | RowKey>,
+    style: CellStyle | null,
+  ) {
+    style = style ? new CellStyle().clone(style) : null;
+    group.defaultStyle = style;
+
+    // Iterate through cells in this column and clear any styling properties set by the new style.
+    for (const [opposingKey, cellStyle] of group.cellFormatting) {
+      const shouldClear = cellStyle.clearStylingSetBy(style);
+      if (!shouldClear) continue;
+
+      // The cell's style will have no properties after applying this group's new style; clear it.
+      if (group instanceof Column) {
+        this.clearCellStyle(group.key, opposingKey as RowKey);
+        continue;
+      }
+      this.clearCellStyle(opposingKey as ColumnKey, group.key as RowKey);
+    }
+  }
+
+  private clearCellStyle(colKey: ColumnKey, rowKey: RowKey): boolean {
+    const col = this.columns.get(colKey);
+    const row = this.rows.get(rowKey);
+    if (!col || !row) return false;
+
+    col.cellFormatting.delete(row.key);
+    row.cellFormatting.delete(col.key);
+
+    return true;
   }
 
   // <Row index, <Column index, value>>
@@ -143,6 +199,43 @@ export default class Sheet {
     }
 
     return data;
+  }
+
+  private createCell(colKey: ColumnKey, rowKey: RowKey, value: string): Cell {
+    const col = this.columns.get(colKey);
+    const row = this.rows.get(rowKey);
+    if (!col || !row) {
+      throw new Error(
+        `Failed to create cell at col: ${col} row: ${row}: Column or Row not found.`,
+      );
+    }
+
+    if (col.cellIndex.has(row.key)) {
+      throw new Error(
+        `Failed to create cell at col: ${col} row: ${row}: Cell already exists.`,
+      );
+    }
+
+    const cell = new Cell();
+    cell.formula = value;
+    this.cell_data.set(cell.key, cell);
+    this.resolveCell(cell);
+
+    col.cellIndex.set(row.key, cell.key);
+    row.cellIndex.set(col.key, cell.key);
+
+    return cell;
+  }
+
+  private getCell(colKey: ColumnKey, rowKey: RowKey): Cell | null {
+    const col = this.columns.get(colKey);
+    const row = this.rows.get(rowKey);
+
+    if (!col || !row) return null;
+
+    if (!col.cellIndex.has(row.key)) return null;
+    const cellKey = col.cellIndex.get(row.key)!;
+    return this.cell_data.get(cellKey)!;
   }
 
   private resolveCell(cell: Cell) {
