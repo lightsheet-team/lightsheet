@@ -96,7 +96,7 @@ export default class Sheet {
     return true;
   }
 
-  getStyle(colKey: ColumnKey, rowKey: RowKey): CellStyle {
+  getCellStyle(colKey: ColumnKey, rowKey: RowKey): CellStyle {
     const col = this.columns.get(colKey);
     const row = this.rows.get(rowKey);
     if (!col || !row) return this.defaultStyle;
@@ -113,7 +113,7 @@ export default class Sheet {
     return cellStyle;
   }
 
-  setStyle(
+  setCellStyle(
     colKey: ColumnKey,
     rowKey: RowKey,
     style: CellStyle | null,
@@ -123,7 +123,7 @@ export default class Sheet {
     if (!col || !row) return false;
 
     if (style == null) {
-      return this.clearStyle(colKey, rowKey);
+      return this.clearCellStyle(colKey, rowKey);
     }
     style = new CellStyle().clone(style);
 
@@ -162,14 +162,14 @@ export default class Sheet {
 
       // The cell's style will have no properties after applying this group's new style; clear it.
       if (group instanceof Column) {
-        this.clearStyle(group.key, opposingKey as RowKey);
+        this.clearCellStyle(group.key, opposingKey as RowKey);
         continue;
       }
-      this.clearStyle(opposingKey as ColumnKey, group.key as RowKey);
+      this.clearCellStyle(opposingKey as ColumnKey, group.key as RowKey);
     }
   }
 
-  clearStyle(colKey: ColumnKey, rowKey: RowKey): boolean {
+  private clearCellStyle(colKey: ColumnKey, rowKey: RowKey): boolean {
     const col = this.columns.get(colKey);
     const row = this.rows.get(rowKey);
     if (!col || !row) return false;
