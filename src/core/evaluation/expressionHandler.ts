@@ -68,7 +68,7 @@ export default class ExpressionHandler {
     const rowIndex = parseInt(rowStr) - 1;
 
     const value = this.sheet.getCellValueAt(columnIndex, rowIndex);
-    if (value == null) throw new Error("Invalid cell reference: " + name)
+    if (value == null) throw new Error("Invalid cell reference: " + name);
     return value;
   }
 
