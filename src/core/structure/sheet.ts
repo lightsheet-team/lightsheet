@@ -218,7 +218,7 @@ export default class Sheet {
     return data;
   }
 
-    private createCell(colKey: ColumnKey, rowKey: RowKey, value: string): Cell {
+  private createCell(colKey: ColumnKey, rowKey: RowKey, value: string): Cell {
     const col = this.columns.get(colKey);
     const row = this.rows.get(rowKey);
     if (!col || !row) {
