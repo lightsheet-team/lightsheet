@@ -1,18 +1,78 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <h3>This file can be run directly by the browser!</h3>
     <p>after building the project</p>
     <p>openning the HTML file won't work, use live server or other server to server the content of the directory</p>
-    <div id="app"></div>
+    <div id="lightsheet"></div>
     <script type="module">
-        import app from "../dist/main.js";
-        const myApp = new app("app");
+        import Lightsheet from "../dist/main.js";
+        var data = [
+            [
+                1,
+                "",
+                "img/nophoto.jpg",
+                "Marketing",
+                "3120",
+            ],
+            [
+                2,
+                "Jorge",
+                "img/nophoto.jpg",
+                "Marketing",
+                "3120",
+            ], [
+                3,
+                "Jorge",
+                "img/nophoto.jpg",
+                "Marketing",
+                "3120",
+            ],
+        ];
+        const columns = [
+            {
+                title: 'Id',
+                type: 'autonumber',
+                name: 'id',
+                readOnly: true,
+                primaryKey: true,
+                width: '80px',
+            },
+            {
+                title: 'Name',
+                type: 'text',
+                name: 'name',
+                width: '140px',
+            },
+            {
+                title: 'Photo',
+                type: 'image',
+                name: 'img',
+                width: '80px',
+                render: 'round',
+            },
+            {
+                title: 'Department',
+                type: 'text',
+                name: 'department',
+                width: '180px',
+                source: ['Marketing', 'Accounts', 'General'],
+            },
+            {
+                title: 'Extension',
+                name: 'extension',
+                width: '120px'
+            },
+        ];
+        const myApp = new Lightsheet(document.getElementById("lightsheet"), { data, columns });
     </script>
 </head>
+
 <body>
-    
+
 </body>
+
 </html>

@@ -1,11 +1,61 @@
-import { renderHtml } from "./ui/render.ts";
-import sheet from "./core/sheet.ts";
+import UI from "./ui/render.ts";
+import { LightSheetOptions } from "./main.types.ts";
+import Sheet from "./core/structure/sheet.ts";
+import {
+  generateColumnKey,
+  generateRowKey,
+} from "./core/structure/key/keyTypes.ts";
+import { PositionInfo } from "./core/structure/sheet.types.ts";
 
-export default class main {
-  constructor(targetElementId: string) {
-    document.getElementById(targetElementId)!.innerHTML = renderHtml();
+export default class LightSheet {
+  ui: UI;
+  options: LightSheetOptions;
+  sheet: Sheet;
+  onCellChange?;
 
-    const newSheet = new sheet();
-    console.log(newSheet.test());
+  constructor(targetElement: Element, options: LightSheetOptions) {
+    this.options = options;
+    this.sheet = new Sheet();
+    this.ui = new UI(
+      targetElement,
+      this,
+      this.options.data.length,
+      this.options.data[0].length,
+    );
+    this.initializeData();
+    if (options.onCellChange) {
+      this.onCellChange = options.onCellChange;
+    }
+  }
+
+  initializeData() {
+    for (let i = 0; i < this.options.data.length; i++) {
+      const item = this.options.data[i];
+      //create new row
+      const rowDom = this.ui.addRow();
+
+      for (let j = 0; j < item.length; j++) {
+        //if data is not empty add cell to core and render ui, otherwise render only ui
+        if (item[j]) {
+          const cell = this.sheet.setCellAt(j, i, item[j]);
+          if (!rowDom.id) rowDom.id = cell.rowKey!.toString();
+          this.ui.addColumn(rowDom, j, i, item[j], cell.columnKey!.toString());
+        } else {
+          this.ui.addColumn(rowDom, j, i, "");
+        }
+      }
+    }
+  }
+
+  setCell(columnKey: string, rowKey: string, value: any): PositionInfo {
+    return this.sheet.setCell(
+      generateColumnKey(columnKey),
+      generateRowKey(rowKey),
+      value,
+    );
+  }
+
+  setCellAt(columnKey: number, rowKey: number, value: any): PositionInfo {
+    return this.sheet.setCellAt(columnKey, rowKey, value);
   }
 }
