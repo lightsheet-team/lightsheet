@@ -256,7 +256,7 @@ export default class Sheet {
 
   private resolveCell(cell: Cell): boolean {
     const value = this.expressionHandler.evaluate(cell.formula);
-    if (!value) {
+    if (value == null) {
       cell.state = CellState.INVALID_EXPRESSION;
       return false;
     }

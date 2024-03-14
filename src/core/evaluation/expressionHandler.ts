@@ -34,11 +34,15 @@ export default class ExpressionHandler {
       this.resolveSymbol(name);
   }
 
-  evaluate(expression: string): string {
+  evaluate(expression: string): string | null {
     if (!expression.startsWith("=")) return expression;
     expression = expression.substring(1);
-    const parsed = math.parse(expression);
-    return parsed.evaluate();
+    try {
+      const parsed = math.parse(expression);
+      return parsed.evaluate();
+    } catch (e) {
+      return null;
+    }
   }
 
   private resolveFunction(name: string): any {
