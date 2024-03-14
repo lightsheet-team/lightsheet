@@ -72,13 +72,13 @@ export default class Sheet {
     };
   }
 
-  public getCellValueAt(colPos: number, rowPos: number): string {
+  public getCellValueAt(colPos: number, rowPos: number): string | null {
     const colKey = this.columnPositions.get(colPos);
     const rowKey = this.rowPositions.get(rowPos);
-    if (!colKey || !rowKey) return "";
+    if (!colKey || !rowKey) return null;
 
     const cell = this.getCell(colKey, rowKey);
-    return cell ? cell.value : "";
+    return cell ? cell.value : null;
   }
 
   deleteCell(colKey: ColumnKey, rowKey: RowKey): boolean {

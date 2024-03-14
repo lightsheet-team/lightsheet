@@ -58,16 +58,18 @@ export default class ExpressionHandler {
     // Symbols should always be cell references in our case.
     // TODO only handling references within one sheet for now.
     const split = name.split(/[0-9]+/);
-    if (split.length <= 1) return "";
+    if (split.length != 2) throw new Error("Invalid symbol: " + name);
 
     // Resolve column/row indices from text-based cell reference.
     const columnStr = split[0];
-    const rowStr = name.substring(columnStr[0].length);
+    const rowStr = name.substring(columnStr.length);
     const columnIndex = ExpressionHandler.resolveColumnIndex(columnStr);
-    if (columnIndex == -1) return "";
+    if (columnIndex == -1) throw new Error("Invalid symbol: " + name);
     const rowIndex = parseInt(rowStr) - 1;
 
-    return this.sheet.getCellValueAt(columnIndex, rowIndex);
+    const value = this.sheet.getCellValueAt(columnIndex, rowIndex);
+    if (value == null) throw new Error("Invalid cell reference: " + name)
+    return value;
   }
 
   // TODO Translating between column names and indices should probably be a common function.
