@@ -12,7 +12,6 @@ export default class LightSheet {
   options: LightSheetOptions;
   sheet: Sheet;
   onCellChange?;
-  // onCellClick?;
 
   constructor(targetElement: Element, options: LightSheetOptions) {
     this.options = options;
@@ -21,7 +20,7 @@ export default class LightSheet {
       targetElement,
       this,
       this.options.data.length,
-      this.options.data[0].length,
+      this.options.data[0].length
     );
     this.initializeData();
     if (options.onCellChange) {
@@ -52,7 +51,7 @@ export default class LightSheet {
     return this.sheet.setCell(
       generateColumnKey(columnKey),
       generateRowKey(rowKey),
-      value,
+      value
     );
   }
 

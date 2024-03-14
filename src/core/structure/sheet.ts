@@ -30,12 +30,7 @@ export default class Sheet {
     this.default_height = 20;
   }
 
-  // We have the cell key, but we need to use that to find the relevant
-  // row key and column key. And then use the, to find and return
-  // the position of the cell
-
   getRowIndex(rowKey: RowKey): number | undefined {
-    console.log(this.rows.get(rowKey));
     return this.rows.get(rowKey)?.position;
   }
 
@@ -73,13 +68,13 @@ export default class Sheet {
     const row = this.rows.get(rowKey);
     if (!col || !row) {
       throw new Error(
-        `Failed to create cell at col: ${col} row: ${row}: Column or Row not found.`,
+        `Failed to create cell at col: ${col} row: ${row}: Column or Row not found.`
       );
     }
 
     if (col.cellIndex.has(row.key)) {
       throw new Error(
-        `Failed to create cell at col: ${col} row: ${row}: Cell already exists.`,
+        `Failed to create cell at col: ${col} row: ${row}: Cell already exists.`
       );
     }
 
