@@ -1,17 +1,17 @@
-import Sheet from '../../../src/core/structure/sheet';
-import Cell from '../../../src/core/structure/cell/cell.ts';
+import Sheet from "../../../src/core/structure/sheet";
+import Cell from "../../../src/core/structure/cell/cell.ts";
 
-describe('Sheet', () => {
+describe("Sheet", () => {
   let sheet: Sheet;
 
   beforeEach(() => {
     sheet = new Sheet();
   });
 
-  it('should set a cell value at a specified position', () => {
+  it("should set a cell value at a specified position", () => {
     const colPos = 1;
     const rowPos = 1;
-    const value = 'test value';
+    const value = "test value";
 
     sheet.setCellAt(colPos, rowPos, value);
 
