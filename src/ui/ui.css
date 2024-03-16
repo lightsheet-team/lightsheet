@@ -1,3 +1,10 @@
+:root {
+    --border-top: 1px solid transparent;
+    --border-left: 1px solid transparent;
+    --border-right: 1px solid #ccc;
+    --border-bottom: 1px solid #ccc;
+}
+
 .light_sheet_table_container {
     display:inline-block;
     padding-right:2px;
@@ -15,17 +22,15 @@
 
 .light_sheet_table {
     border-collapse: separate;
-    /*table-layout: fixed;*/
     white-space:  nowrap;
     empty-cells: show;
     border: 0px;
     background-color: #fff;
-    /*width: 0;*/
-    
-    border-top: 1px solid transparent;
-    border-left: 1px solid transparent;
-    border-right: 1px solid #ccc;
-    border-bottom: 1px solid #ccc;
+
+    border-top: var(--border-top);
+    border-left: var(--border-left);
+    border-right: var(--border-right);
+    border-bottom: var(--border-bottom);
 }
 
 .light_sheet_table > thead > tr > td

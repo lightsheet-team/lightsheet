@@ -32,7 +32,7 @@ export default class LightSheet {
     // Create header row and add headers
     const headerData = Array.from(
       { length: this.options.data[0].length + 1 }, // Adding 1 for the row number column
-      (_, i) => (i === 0 ? "" : String.fromCharCode(64 + i)), // A for the first column
+      (_, i) => (i === 0 ? "" : this.generateRowLabel(i)), // Generating row labels
     );
     this.ui.addHeader(headerData);
 
@@ -64,5 +64,16 @@ export default class LightSheet {
 
   setCellAt(columnKey: number, rowKey: number, value: any): PositionInfo {
     return this.sheet.setCellAt(columnKey, rowKey, value);
+  }
+
+  generateRowLabel(rowIndex: number) {
+    let label = "";
+    const alphabet = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+    while (rowIndex > 0) {
+      rowIndex--; // Adjust index to start from 0
+      label = alphabet[rowIndex % 26] + label;
+      rowIndex = Math.floor(rowIndex / 26);
+    }
+    return label || "A"; // Return "A" if index is 0
   }
 }
