@@ -11,17 +11,18 @@
     "build:watch": "tsc && vite build --watch"
   },
   "devDependencies": {
+    "@types/uuid": "^9.0.8",
     "@typescript-eslint/eslint-plugin": "^7.0.2",
     "@typescript-eslint/parser": "^7.0.2",
     "eslint": "^8.56.0",
     "eslint-config-prettier": "^9.1.0",
     "eslint-plugin-prettier": "^5.1.3",
     "prettier": "^3.2.5",
-    "@types/uuid": "^9.0.8",
     "typescript": "^5.2.2",
     "vite": "^5.1.0"
   },
   "dependencies": {
+    "mathjs": "^12.4.0",
     "uuid": "^9.0.1"
   }
 }

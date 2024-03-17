@@ -1,6 +1,7 @@
 import Formatter from "../evaluation/formatter";
+import Cloneable from "../cloneable.ts";
 
-export default class CellStyle {
+export default class CellStyle extends Cloneable<CellStyle> {
   formatter: Formatter | null;
   width?: number;
   height?: number;
@@ -9,14 +10,17 @@ export default class CellStyle {
 
   constructor(
     formatter: Formatter | null = null,
-    width: number = 30,
-    height: number = 10,
+    width?: number,
+    height?: number,
+    color?: [number, number, number],
+    borders?: [boolean, boolean, boolean, boolean],
   ) {
+    super();
     this.formatter = formatter;
     this.width = width;
     this.height = height;
-    this.color = [255, 255, 255];
-    this.borders = [false, false, false, false];
+    this.color = color;
+    this.borders = borders;
   }
 
   applyStylesOf(other: CellStyle | null): CellStyle {
@@ -24,7 +28,10 @@ export default class CellStyle {
 
     // If a style is set in other but not in this, apply it to this.
     for (const key in this) {
-      if (Object.prototype.hasOwnProperty.call(other, key)) {
+      if (
+        Object.prototype.hasOwnProperty.call(other, key) &&
+        !Reflect.get(this, key)
+      ) {
         const otherProp = Reflect.get(other, key);
         Reflect.set(this, key, otherProp);
       }
