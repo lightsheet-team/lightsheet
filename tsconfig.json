@@ -23,6 +23,8 @@
   },
   "include": [
     "src",
-    "index.js"
+    "index.js",
+    "jest.config.js",
+    "tests"
   ]
 }
