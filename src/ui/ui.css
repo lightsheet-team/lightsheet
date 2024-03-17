@@ -1,90 +1,82 @@
 :root {
-    --border-top: 1px solid transparent;
-    --border-left: 1px solid transparent;
-    --border-right: 1px solid #ccc;
-    --border-bottom: 1px solid #ccc;
+  --lightsheet-transparent: transparent;
+  --lightsheet-silver-400: #cccccc;
+  --lightsheet-gray-200: #f3f3f3;
+  --lightsheet-white: #ffffff;
 }
 
 .light_sheet_table_container {
-    display:inline-block;
-    padding-right:2px;
-    box-sizing: border-box;
-    outline: none;
+  display: inline-block;
+  padding-right: 2px;
+  box-sizing: border-box;
+  outline: none;
 }
 
 .light_sheet_table_content {
-    display:inline-block;
-    box-sizing: border-box;
-    padding-right:3px;
-    padding-bottom:3px;
-    position:relative;
+  display: inline-block;
+  box-sizing: border-box;
+  padding-right: 3px;
+  padding-bottom: 3px;
+  position: relative;
 }
 
 .light_sheet_table {
-    border-collapse: separate;
-    white-space:  nowrap;
-    empty-cells: show;
-    border: 0px;
-    background-color: #fff;
+  border-collapse: separate;
+  white-space: nowrap;
+  empty-cells: show;
+  border: 0px;
+  background-color: var(--lightsheet-white);
 
-    border-top: var(--border-top);
-    border-left: var(--border-left);
-    border-right: var(--border-right);
-    border-bottom: var(--border-bottom);
+  border-top: 1px solid var(--lightsheet-transparent);
+  border-left: 1px solid var(--lightsheet-transparent);
+  border-right: 1px solid var(--lightsheet-silver-400);
+  border-bottom: 1px solid var(--lightsheet-silver-400);
 }
 
-.light_sheet_table > thead > tr > td
-{
-    border-top: 1px solid #ccc;
-    border-left: 1px solid #ccc;
-    border-right: 1px solid transparent;
-    border-bottom: 1px solid transparent;
-    background-color: #f3f3f3;
-    padding: 2px;
-    cursor: pointer;
-    box-sizing: border-box;
-    overflow: hidden;
-    position: -webkit-sticky;
-    position: sticky;
-    top: 0;
-    z-index:2;
-    text-align:center;
+.light_sheet_table > thead > tr > td {
+  border-top: 1px solid var(--lightsheet-silver-400);
+  border-left: 1px solid var(--lightsheet-silver-400);
+  border-right: 1px solid var(--lightsheet-transparent);
+  border-bottom: 1px solid var(--lightsheet-transparent);
+
+  background-color: #f3f3f3;
+  padding: 2px;
+  cursor: pointer;
+  box-sizing: border-box;
+  overflow: hidden;
+  position: -webkit-sticky;
+  position: sticky;
+  top: 0;
+  z-index: 2;
+  text-align: center;
 }
 
-.light_sheet_table > tbody > tr > td
-{
-    border-top:1px solid #ccc;
-    border-left:1px solid #ccc;
-    border-right:1px solid transparent;
-    border-bottom:1px solid transparent;
-    padding:4px;
-    white-space: nowrap;
-    box-sizing: border-box;
-    line-height:1em;
+.light_sheet_table > tbody > tr > td {
+  border-top: 1px solid var(--lightsheet-silver-400);
+  border-left: 1px solid var(--lightsheet-silver-400);
+  border-right: 1px solid var(--lightsheet-transparent);
+  border-bottom: 1px solid var(--lightsheet-transparent);
+  padding: 4px;
+  white-space: nowrap;
+  box-sizing: border-box;
+  line-height: 1em;
 }
 
-.light_sheet_table > tbody > tr > td > input
-{
-    border:0px;
-    border-radius:0px;
-    outline:0px;
-    width:100%;
-    margin:0px;
-    padding:0px;
-    padding-right:2px;
-    background-color:transparent;
-    box-sizing: border-box;
+.light_sheet_table > tbody > tr > td > input {
+  border: 0px;
+  border-radius: 0px;
+  outline: 0px;
+  width: 100%;
+  margin: 0px;
+  padding: 0px;
+  padding-right: 2px;
+  background-color: transparent;
+  box-sizing: border-box;
 }
 
-.light_sheet_table > tbody > tr > td:first-child
-{
-    position:relative;
-    background-color:#f3f3f3;
-    text-align:center;
-    width: 50px;
+.light_sheet_table > tbody > tr > td:first-child {
+  position: relative;
+  background-color: var(--lightsheet-gray-200);
+  text-align: center;
+  width: 50px;
 }
-
-
-
-
-
