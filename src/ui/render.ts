@@ -74,14 +74,14 @@ export default class UI {
   ) {
     const cellDom = document.createElement("td");
     rowDom.appendChild(cellDom);
-    cellDom.id = `${colIndex}-${rowIndex}`;
+    cellDom.id = `${colIndex}_${rowIndex}`;
     const inputDom = document.createElement("input");
     inputDom.value = "";
 
     cellDom.appendChild(inputDom);
 
     if (value) {
-      cellDom.id = columnKey!;
+      cellDom.id = `${columnKey}_${rowDom.id}`;
       inputDom.value = value;
     }
 
@@ -95,20 +95,6 @@ export default class UI {
       );
   }
 
-  setCellValue(value: string, rowKey: string, colKey: string) {
-    const rowDom = document.getElementById(rowKey);
-    if (!rowDom) return;
-    // TODO This method is working around duplicate IDs. (issue #47)
-    // TODO Cell formula should be preserved. (Issue #49)
-    for (let i = 0; i < rowDom.children.length; i++) {
-      const cellDom = rowDom.children.item(i)!;
-      if (cellDom.id == colKey) {
-        const inputDom = cellDom.childNodes.item(0);
-        (inputDom as HTMLInputElement).value = value;
-      }
-    }
-  }
-
   onCellValueChange(
     newValue: string,
     rowDom: Element,
@@ -116,30 +102,30 @@ export default class UI {
     colIndex: number,
     rowIndex: number,
   ) {
-    const keyParts = cellDom.id.split("-");
+    const keyParts = cellDom.id.split("_");
+    if (keyParts.length != 2) return;
 
-    //if it was enpty value previously then the keyparts lenth will be 2, hence we create a cell in core and update ui with new keys
-    if (keyParts.length == 2) {
-      const cell = this.lightSheet.setCellAt(
-        parseInt(keyParts[0]),
-        parseInt(keyParts[1]),
-        newValue,
-      );
+    let cell;
+    // If the key parts are integers, we need to create a cell in core and update ui with new keys.
+    if (keyParts[0].match("^[0-9]+$")) {
+      cell = this.lightSheet.setCellAt(colIndex, rowIndex, newValue);
       // Keys will be valid as value shouldn't be empty at this point.
-      rowDom.id = cell.rowKey!.toString();
-      cellDom.id = cell.columnKey!.toString();
+      rowDom.id = cell.position.rowKey!.toString();
+      cellDom.id = `${cell.position.columnKey!.toString()}_${cell.position.rowKey!.toString()}`;
     } else {
-      const position = this.lightSheet.setCell(cellDom.id, rowDom.id, newValue);
-
+      cell = this.lightSheet.setCell(keyParts[0], keyParts[1], newValue);
       // The row may be deleted if the cell is cleared.
-      if (!position.rowKey) {
-        rowDom.id = `row-${rowIndex}`;
+      if (!cell.position.rowKey) {
+        rowDom.id = `row_${rowIndex}`;
       }
       // Empty cells should not hold a column key.
       if (newValue == "") {
-        cellDom.id = `${colIndex}-${rowIndex}`;
+        cellDom.id = `${colIndex}_${rowIndex}`;
       }
     }
+    // Set cell value to resolved value from the core.
+    // TODO Cell formula should be preserved. (Issue #49)
+    (cellDom.firstChild! as HTMLInputElement).value = cell.value!;
 
     //fire cell onchange event to client callback
     this.lightSheet.onCellChange?.(colIndex, rowIndex, newValue);
