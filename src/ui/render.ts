@@ -2,6 +2,7 @@ import LightSheet from "../main";
 
 export default class UI {
   tableEl: Element;
+  tableHeadDom: Element;
   tableBodyDom: Element;
   rowCount: number;
   colCount: number;
@@ -18,15 +19,49 @@ export default class UI {
     this.rowCount = rowCount;
     this.lightSheet = lightSheet;
 
+    this.tableEl.classList.add("light_sheet_table_container");
+
+    const lightSheetContainerDom = document.createElement("div");
+    lightSheetContainerDom.classList.add("light_sheet_table_content");
+    this.tableEl.appendChild(lightSheetContainerDom);
+
     const tableContainerDom = document.createElement("table");
-    this.tableEl.appendChild(tableContainerDom);
+    tableContainerDom.classList.add("light_sheet_table");
+    tableContainerDom.setAttribute("cellpadding", "0");
+    tableContainerDom.setAttribute("cellspacing", "0");
+    tableContainerDom.setAttribute("unselectable", "yes");
+    lightSheetContainerDom.appendChild(tableContainerDom);
+
+    //thead
+    this.tableHeadDom = document.createElement("thead");
+    tableContainerDom.appendChild(this.tableHeadDom);
+
+    //tbody
     this.tableBodyDom = document.createElement("tbody");
     tableContainerDom.appendChild(this.tableBodyDom);
   }
 
-  addRow(): Element {
+  addHeader(headerData: string[]) {
+    const headerRowDom = document.createElement("tr");
+    this.tableHeadDom.appendChild(headerRowDom);
+
+    for (let i = 0; i < headerData.length; i++) {
+      const headerCellDom = document.createElement("td");
+      headerCellDom.textContent = headerData[i];
+      headerRowDom.appendChild(headerCellDom);
+    }
+  }
+
+  addRow(rowLabelNumber: number): Element {
     const rowDom = document.createElement("tr");
     this.tableBodyDom.appendChild(rowDom);
+
+    //row number
+    const rowNumberCell = document.createElement("td");
+    rowNumberCell.innerHTML = `${rowLabelNumber + 1}`; // Row numbers start from 1
+    rowNumberCell.className = "light_sheet_table_row"; // Add class for styling
+    rowDom.appendChild(rowNumberCell); // Append the row number cell to the row
+
     return rowDom;
   }
 
@@ -58,6 +93,20 @@ export default class UI {
         colIndex,
         rowIndex,
       );
+  }
+
+  setCellValue(value: string, rowKey: string, colKey: string) {
+    const rowDom = document.getElementById(rowKey);
+    if (!rowDom) return;
+    // TODO This method is working around duplicate IDs. (issue #47)
+    // TODO Cell formula should be preserved. (Issue #49)
+    for (let i = 0; i < rowDom.children.length; i++) {
+      const cellDom = rowDom.children.item(i)!;
+      if (cellDom.id == colKey) {
+        const inputDom = cellDom.childNodes.item(0);
+        (inputDom as HTMLInputElement).value = value;
+      }
+    }
   }
 
   onCellValueChange(
