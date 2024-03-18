@@ -15,7 +15,6 @@ describe("Sheet", () => {
 
     sheet.setCellAt(colPos, rowPos, value);
 
-    //const positionInfo = sheet.setCellAt(colPos, rowPos, value);
     const iterator = sheet.cell_data.values();
     const cell = iterator.next().value;
     expect(cell).toBeInstanceOf(Cell);
