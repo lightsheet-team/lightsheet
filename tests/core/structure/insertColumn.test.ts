@@ -15,7 +15,7 @@ describe("Insert column test", () => {
 
   it("Insert column should shift the column correctly without losing any data", () => {
     console.log(sheet.exportData());
-    sheet.insertColumn(1)
+    sheet.insertColumn(1);
     console.log(sheet.exportData());
     expect(sheet.getCellValueAt(1, 1)).toBe(null);
     expect(sheet.getCellValueAt(2, 1)).toBe("1x1");
@@ -26,5 +26,4 @@ describe("Insert column test", () => {
     expect(sheet.getCellValueAt(3, 2)).toBe("2x2");
     expect(sheet.getCellValueAt(4, 2)).toBe("3x2");
   });
-
 });

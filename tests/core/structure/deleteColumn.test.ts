@@ -24,5 +24,4 @@ describe("Delete column test", () => {
     expect(sheet.getCellValueAt(2, 2)).toBe("3x2");
     expect(sheet.getCellValueAt(3, 2)).toBe(null);
   });
-
 });

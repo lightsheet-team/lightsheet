@@ -88,7 +88,8 @@ export default class Sheet {
 
     if (colKey !== undefined) {
       const col = this.columns.get(colKey);
-      if (col === undefined) throw new Error("Column not found, inconsistent state");
+      if (col === undefined)
+        throw new Error("Column not found, inconsistent state");
       col.position = to;
     }
 
@@ -97,8 +98,7 @@ export default class Sheet {
 
     if (colKey !== undefined) {
       this.columnPositions.set(to, colKey);
-    }
-    else {
+    } else {
       this.columnPositions.delete(to);
     }
 
@@ -108,7 +108,7 @@ export default class Sheet {
   insertColumn(position: number): boolean {
     const lastColumnPosition = Math.max(...this.columnPositions.keys());
     //this is a shift forward
-    this.shiftColumns(position,lastColumnPosition+1); 
+    this.shiftColumns(position, lastColumnPosition + 1);
     return true;
   }
 
@@ -119,33 +119,36 @@ export default class Sheet {
     return true;
   }
 
-  /** 
-  * Shift the columns between start and end by one position. You can control the direction and the range.
-  */
+  /**
+   * Shift the columns between start and end by one position. You can control the direction and the range.
+   */
   private shiftColumns(start: number, end: number): boolean {
     if (start === end) return false;
-    
-    if (start < end) {  // we are shifting forward
-      for (let position = end; position >= start ; position--) {
-        const previousColkey = this.columnPositions.get(position-1);
+
+    if (start < end) {
+      // we are shifting forward
+      for (let position = end; position >= start; position--) {
+        const previousColkey = this.columnPositions.get(position - 1);
         if (previousColkey === undefined) {
           this.columnPositions.delete(position);
         } else {
           const col = this.columns.get(previousColkey);
-          if (col === undefined) throw new Error("Column not found, inconsistent state");
+          if (col === undefined)
+            throw new Error("Column not found, inconsistent state");
           col.position = position;
           this.columnPositions.set(position, previousColkey);
         }
       }
-    }
-    else { // we are shifting backward
+    } else {
+      // we are shifting backward
       for (let position = end; position <= start; position++) {
-        const nextColKey = this.columnPositions.get(position+1);
+        const nextColKey = this.columnPositions.get(position + 1);
         if (nextColKey === undefined) {
           this.columnPositions.delete(position);
         } else {
           const col = this.columns.get(nextColKey);
-          if (col === undefined) throw new Error("Column not found, inconsistent state");
+          if (col === undefined)
+            throw new Error("Column not found, inconsistent state");
           col.position = position;
           this.columnPositions.set(position, nextColKey);
         }
@@ -369,6 +372,4 @@ export default class Sheet {
 
     return { rowKey: rowKey, columnKey: colKey };
   }
-
-  
 }
