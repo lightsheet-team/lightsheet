@@ -94,13 +94,13 @@ export default class Sheet {
     const row = this.rows.get(rowKey);
     if (!col || !row) {
       throw new Error(
-        `Failed to create cell at col: ${col} row: ${row}: Column or Row not found.`
+        `Failed to create cell at col: ${col} row: ${row}: Column or Row not found.`,
       );
     }
 
     if (col.cellIndex.has(row.key)) {
       throw new Error(
-        `Failed to create cell at col: ${col} row: ${row}: Cell already exists.`
+        `Failed to create cell at col: ${col} row: ${row}: Cell already exists.`,
       );
     }
 

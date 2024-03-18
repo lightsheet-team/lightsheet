@@ -17,7 +17,7 @@ export default class UI {
     el: Element,
     lightSheet: LightSheet,
     rowCount: number,
-    colCount: number
+    colCount: number,
   ) {
     this.tableEl = el;
     this.colCount = colCount;
@@ -76,7 +76,7 @@ export default class UI {
     colIndex: number,
     rowIndex: number,
     value: any,
-    columnKey?: string
+    columnKey?: string,
   ) {
     const cellDom = document.createElement("td");
     rowDom.appendChild(cellDom);
@@ -102,7 +102,7 @@ export default class UI {
         rowDom,
         cellDom,
         colIndex,
-        rowIndex
+        rowIndex,
       );
 
     inputDom.onfocus = (e: Event) => {
@@ -154,7 +154,7 @@ export default class UI {
     rowDom: Element,
     cellDom: Element,
     colIndex: number,
-    rowIndex: number
+    rowIndex: number,
   ) {
     const keyParts = cellDom.id.split("-");
 
@@ -163,7 +163,7 @@ export default class UI {
       const cell = this.lightSheet.setCellAt(
         parseInt(keyParts[0]),
         parseInt(keyParts[1]),
-        newValue
+        newValue,
       );
       // Keys will be valid as value shouldn't be empty at this point.
       rowDom.id = cell.rowKey!.toString();

@@ -20,7 +20,7 @@ export default class LightSheet {
       targetElement,
       this,
       this.options.data.length,
-      this.options.data[0].length
+      this.options.data[0].length,
     );
     this.initializeData();
     if (options.onCellChange) {
