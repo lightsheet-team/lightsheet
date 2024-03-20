@@ -57,7 +57,6 @@ export default class UI {
         toolbarItem.classList.add("material-symbols-outlined");
         toolbarItem.textContent = toolbar[i].content;
         this.lightSheetToolBarDom.appendChild(toolbarItem);
-
       } else if (toolbar[i].type == "color") {
         const toolbarItem = document.createElement("i");
         toolbarItem.classList.add("lightSheet_toolbar_item");
