@@ -39,9 +39,70 @@ const columns = [
     width: "120px",
   },
 ];
+const toolbar = [
+  {
+    type: "i",
+    content: "undo",
+  },
+  {
+    type: "i",
+    content: "redo",
+  },
+  {
+    type: "i",
+    content: "save",
+  },
+  {
+    type: "i",
+    content: "format_bold",
+    k: "font-weight",
+    v: "bold",
+  },
+  {
+    type: "i",
+    content: "format_italic",
+  },
+  {
+    type: "color",
+    content: "format_color_text",
+    k: "color",
+  },
+  {
+    type: "color",
+    content: "format_color_fill",
+    k: "background-color",
+  },
+  {
+    type: "i",
+    content: "format_underlined",
+  },
+  {
+    type: "i",
+    content: "strikethrough_s",
+  },
+  {
+    type: "i",
+    content: "border_all",
+  },
+  {
+    type: "i",
+    content: "format_align_center",
+    k: "text-align",
+    v: "center",
+  },
+  {
+    type: "i",
+    content: "vertical_align_bottom",
+  },
+  {
+    type: "i",
+    content: "format_text_wrap",
+  },
+];
 new Lightsheet(document.getElementById("lightsheet"), {
   data,
   columns,
+  toolbar,
   onCellChange: (colIndex, rowIndex, newValue) => {
     console.log(colIndex, rowIndex, newValue);
   },

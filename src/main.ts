@@ -22,12 +22,15 @@ export default class LightSheet {
       this.options.data.length,
       this.options.data[0].length,
     );
+    this.createToolBar();
     this.initializeData();
     if (options.onCellChange) {
       this.onCellChange = options.onCellChange;
     }
   }
-
+  createToolBar() {
+    this.ui.createToolBar(this.options.toolbar);
+  }
   initializeData() {
     // Create header row and add headers
     const headerData = Array.from(
