@@ -58,11 +58,6 @@ export default class UI {
         toolbarItem.textContent = toolbar[i].content;
         this.lightSheetToolBarDom.appendChild(toolbarItem);
 
-      } else if (toolbar[i].type == "select") {
-        const toolbarItem = document.createElement("select");
-        toolbarItem.classList.add("lightSheet_toolbar_item");
-        this.lightSheetToolBarDom.appendChild(toolbarItem);
-        
       } else if (toolbar[i].type == "color") {
         const toolbarItem = document.createElement("i");
         toolbarItem.classList.add("lightSheet_toolbar_item");

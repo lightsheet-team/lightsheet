@@ -54,24 +54,6 @@ const toolbar = [
   },
   {
     type: "i",
-    content: "format_align_left",
-    k: "text-align",
-    v: "left",
-  },
-  {
-    type: "i",
-    content: "format_align_center",
-    k: "text-align",
-    v: "center",
-  },
-  {
-    type: "i",
-    content: "format_align_right",
-    k: "text-align",
-    v: "right",
-  },
-  {
-    type: "i",
     content: "format_bold",
     k: "font-weight",
     v: "bold",
@@ -79,6 +61,16 @@ const toolbar = [
   {
     type: "i",
     content: "format_italic",
+  },
+  {
+    type: "color",
+    content: "format_color_text",
+    k: "color",
+  },
+  {
+    type: "color",
+    content: "format_color_fill",
+    k: "background-color",
   },
   {
     type: "i",
@@ -94,21 +86,17 @@ const toolbar = [
   },
   {
     type: "i",
+    content: "format_align_center",
+    k: "text-align",
+    v: "center",
+  },
+  {
+    type: "i",
     content: "vertical_align_bottom",
   },
   {
     type: "i",
     content: "format_text_wrap",
-  },
-  {
-    type: "color",
-    content: "format_color_text",
-    k: "color",
-  },
-  {
-    type: "color",
-    content: "format_color_fill",
-    k: "background-color",
   },
 ];
 new Lightsheet(document.getElementById("lightsheet"), {

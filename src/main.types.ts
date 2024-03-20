@@ -25,22 +25,6 @@ interface ToolbarIconItem extends ToolbarItemBase {
 
   /** The value of the style should be apply to the cell. */
   v: string;
-
-  /** Event fired when clicking on the html item referring to that item. */
-  onclick: (el: any, obj: any, iconElement: HTMLElement) => void;
-}
-
-interface ToolbarSelectItem extends ToolbarItemBase {
-  type: "select";
-
-  /** The value of the style should be apply to the cell. */
-  v: string[];
-
-  /** Select tag onchange event. */
-  onchange: (event: Event) => void;
-
-  /** Initial value of the selectbox. */
-  selectedValue: string;
 }
 
 interface ToolbarColorItem extends ToolbarItemBase {
@@ -50,7 +34,4 @@ interface ToolbarColorItem extends ToolbarItemBase {
   content: string;
 }
 
-export type ToolbarItem =
-  | ToolbarIconItem
-  | ToolbarSelectItem
-  | ToolbarColorItem;
+export type ToolbarItem = ToolbarIconItem | ToolbarColorItem;
