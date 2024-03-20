@@ -5,16 +5,16 @@ export default class Cell {
   formula: string;
   value: string;
   state: CellState;
-  referencesIn: CellKey[];
-  referencesOut: CellKey[];
+  referencesIn: Set<CellKey>;
+  referencesOut: Set<CellKey>;
 
   constructor() {
     this.key = generateCellKey();
     this.formula = "";
     this.value = "";
     this.state = CellState.OK;
-    this.referencesIn = [];
-    this.referencesOut = [];
+    this.referencesIn = new Set<CellKey>();
+    this.referencesOut = new Set<CellKey>();
   }
 }
 

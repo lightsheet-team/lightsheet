@@ -72,13 +72,19 @@ export default class Sheet {
     };
   }
 
-  public getCellValueAt(colPos: number, rowPos: number): string | null {
+  public getCellInfoAt(colPos: number, rowPos: number): CellInfo | null {
     const colKey = this.columnPositions.get(colPos);
     const rowKey = this.rowPositions.get(rowPos);
     if (!colKey || !rowKey) return null;
 
-    const cell = this.getCell(colKey, rowKey);
-    return cell ? cell.value : null;
+    const cell = this.getCell(colKey, rowKey)!;
+    return {
+      value: cell.value,
+      position: {
+        columnKey: colKey,
+        rowKey: rowKey,
+      },
+    };
   }
 
   deleteCell(colKey: ColumnKey, rowKey: RowKey): boolean {
@@ -88,6 +94,21 @@ export default class Sheet {
 
     if (!col.cellIndex.has(row.key)) return false;
     const cellKey = col.cellIndex.get(row.key)!;
+
+    // Remove references to this cell from other cells.
+    const cell = this.cell_data.get(cellKey)!;
+    cell.referencesIn.forEach((ref) => {
+      const referredCell = this.cell_data.get(ref)!;
+      referredCell.referencesOut.delete(cellKey);
+      // Since the cell is referring to a cell that's now deleted, its state will be invalid.
+      referredCell.state = CellState.INVALID_EXPRESSION;
+    });
+
+    // Remove incoming references from this cell to other cells.
+    cell.referencesOut.forEach((ref) => {
+      const referredCell = this.cell_data.get(ref)!;
+      referredCell.referencesIn.delete(cellKey);
+    });
 
     // Delete cell data and all references to it in its column and row.
     this.cell_data.delete(cellKey);
@@ -107,8 +128,6 @@ export default class Sheet {
       this.rows.delete(rowKey);
       this.rowPositions.delete(row.position);
     }
-
-    // TODO References should also be checked here.
 
     return true;
   }
@@ -255,8 +274,8 @@ export default class Sheet {
   }
 
   private resolveCell(cell: Cell): boolean {
-    const value = this.expressionHandler.evaluate(cell.formula);
-    if (value == null) {
+    const evalResult = this.expressionHandler.evaluate(cell.formula);
+    if (!evalResult) {
       cell.state = CellState.INVALID_EXPRESSION;
       return false;
     }
@@ -264,7 +283,26 @@ export default class Sheet {
     // TODO Resolve restrictions from cell formatting here (CellState.INVALID_FORMAT).
 
     cell.state = CellState.OK;
-    cell.value = value;
+    cell.value = evalResult.value;
+
+    const oldOut = new Set<CellKey>(cell.referencesOut);
+    cell.referencesOut.clear();
+    evalResult.references.forEach((ref) => {
+      const referredCell = this.getCell(ref.columnKey!, ref.rowKey!)!;
+      cell.referencesOut.add(referredCell.key);
+      referredCell.referencesIn.add(cell.key);
+    });
+
+    // Compute oldOut - newOut to get references that were removed.
+    const removedReferences = new Set<CellKey>(
+      [...oldOut].filter((x) => !cell.referencesOut.has(x)),
+    );
+    // Clean up the referencedIn set of cells that are no longer referenced by this.
+    removedReferences.forEach((ref) => {
+      const referredCell = this.cell_data.get(ref)!;
+      referredCell.referencesIn.delete(cell.key);
+    });
+
     return cell.formula != cell.value;
   }
 
