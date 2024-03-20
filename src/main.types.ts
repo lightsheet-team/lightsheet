@@ -2,6 +2,7 @@
 export type LightSheetOptions = {
   data: any[];
   columns: LightSheetColumn[];
+  style: any;
   onCellChange?: (colIndex: number, rowIndex: number, value: any) => void;
 };
 

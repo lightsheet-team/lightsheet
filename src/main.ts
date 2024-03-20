@@ -6,11 +6,13 @@ import {
   generateRowKey,
 } from "./core/structure/key/keyTypes.ts";
 import { CellInfo } from "./core/structure/sheet.types.ts";
+import { generateRowLabel, getRowColFromCellRef } from "./utlis.ts";
 
 export default class LightSheet {
   ui: UI;
   options: LightSheetOptions;
   sheet: Sheet;
+  style: any = null;
   onCellChange?;
 
   constructor(targetElement: Element, options: LightSheetOptions) {
@@ -22,17 +24,34 @@ export default class LightSheet {
       this.options.data.length,
       this.options.data[0].length,
     );
+    this.style = options.style;
     this.initializeData();
     if (options.onCellChange) {
       this.onCellChange = options.onCellChange;
     }
   }
 
+  initializeStyle() {
+    for (const [key, value] of Object.entries(this.style)) {
+      const { row, col } = getRowColFromCellRef(key)
+      if (row == null && col == null) {
+        continue;
+      } else if (row != null && col != null) {
+        // this.sheet.setCellStyle(row, col, value as string);
+      } else if (row != null) {
+
+      } else if (col != null) {
+
+      }
+    }
+
+  }
+
   initializeData() {
     // Create header row and add headers
     const headerData = Array.from(
       { length: this.options.data[0].length + 1 }, // Adding 1 for the row number column
-      (_, i) => (i === 0 ? "" : this.generateRowLabel(i)), // Generating row labels
+      (_, i) => (i === 0 ? "" : generateRowLabel(i)), // Generating row labels
     );
     this.ui.addHeader(headerData);
 
@@ -66,16 +85,5 @@ export default class LightSheet {
 
   setCellAt(columnKey: number, rowKey: number, value: any): CellInfo {
     return this.sheet.setCellAt(columnKey, rowKey, value);
-  }
-
-  generateRowLabel(rowIndex: number) {
-    let label = "";
-    const alphabet = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
-    while (rowIndex > 0) {
-      rowIndex--; // Adjust index to start from 0
-      label = alphabet[rowIndex % 26] + label;
-      rowIndex = Math.floor(rowIndex / 26);
-    }
-    return label || "A"; // Return "A" if index is 0
   }
 }

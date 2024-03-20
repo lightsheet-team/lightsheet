@@ -131,10 +131,14 @@ export default class Sheet {
   }
 
   setCellStyle(
-    colKey: ColumnKey,
-    rowKey: RowKey,
+    colPos: number,
+    rowPos: number,
     style: CellStyle | null,
   ): boolean {
+
+    const colKey = this.columnPositions.get(colPos);
+    const rowKey = this.rowPositions.get(rowPos);
+    if (!colKey || !rowKey) return false;
     const col = this.columns.get(colKey);
     const row = this.rows.get(rowKey);
     if (!col || !row) return false;
@@ -150,6 +154,7 @@ export default class Sheet {
   }
 
   setColumnStyle(colKey: ColumnKey, style: CellStyle | null): boolean {
+
     const col = this.columns.get(colKey);
     if (!col) return false;
 
