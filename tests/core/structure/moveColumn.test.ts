@@ -13,7 +13,7 @@ describe("move column test", () => {
     sheet.setCellAt(3, 2, "3x2");
   });
 
-  it("Move column should shift the column correctly without losing any data", () => {
+  it("Move column right should shift the column correctly without losing any data", () => {
     console.log(sheet.exportData());
     sheet.moveColumn(1, 3);
     console.log(sheet.exportData());
@@ -23,5 +23,17 @@ describe("move column test", () => {
     expect(sheet.getCellValueAt(1, 2)).toBe("2x2");
     expect(sheet.getCellValueAt(2, 2)).toBe("3x2");
     expect(sheet.getCellValueAt(3, 2)).toBe("1x2");
+  });
+
+  it("Move column left should shift the column correctly without losing any data", () => {
+    console.log(sheet.exportData());
+    sheet.moveColumn(3, 1);
+    console.log(sheet.exportData());
+    expect(sheet.getCellValueAt(3, 1)).toBe("2x1");
+    expect(sheet.getCellValueAt(1, 1)).toBe("3x1");
+    expect(sheet.getCellValueAt(2, 1)).toBe("1x1");
+    expect(sheet.getCellValueAt(1, 2)).toBe("3x2");
+    expect(sheet.getCellValueAt(2, 2)).toBe("1x2");
+    expect(sheet.getCellValueAt(3, 2)).toBe("2x2");
   });
 });

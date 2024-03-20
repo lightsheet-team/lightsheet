@@ -2,7 +2,7 @@ import { CellKey, ColumnKey, RowKey } from "./key/keyTypes.ts";
 import Cell, { CellState } from "./cell/cell.ts";
 import Column from "./group/column.ts";
 import Row from "./group/row.ts";
-import { CellInfo, PositionInfo } from "./sheet.types.ts";
+import { CellInfo, PositionInfo, ShiftDirection } from "./sheet.types.ts";
 import ExpressionHandler from "../evaluation/expressionHandler.ts";
 import CellStyle from "./cellStyle.ts";
 import CellGroup from "./group/cellGroup.ts";
@@ -27,7 +27,7 @@ export default class Sheet {
       30,
       10,
       [0, 0, 0],
-      [false, false, false, false],
+      [false, false, false, false]
     ); // TODO This should be configurable.
 
     this.settings = null;
@@ -94,66 +94,81 @@ export default class Sheet {
     }
 
     //we have to update all the positions to keep it consistent
-    this.shiftColumns(to, from);
-
-    if (colKey !== undefined) {
-      this.columnPositions.set(to, colKey);
+    this.columnPositions.delete(from);
+    if (to > from) {
+      this.shiftColumns(to, ShiftDirection.backward);
     } else {
+      this.shiftColumns(to, ShiftDirection.forward);
+    }
+    if (colKey === undefined) {
       this.columnPositions.delete(to);
+    } else {
+      this.columnPositions.set(to, colKey);
     }
 
     return true;
   }
 
   insertColumn(position: number): boolean {
-    const lastColumnPosition = Math.max(...this.columnPositions.keys());
-    //this is a shift forward
-    this.shiftColumns(position, lastColumnPosition + 1);
+    this.shiftColumns(position, ShiftDirection.forward);
     return true;
   }
 
   deleteColumn(position: number): boolean {
+    const colKey = this.columnPositions.get(position);
+
+    if (colKey === undefined) return false;
+
+    const col = this.columns.get(colKey);
+
+    
+    for (let [rowKey, _] of col!.cellIndex){
+      this.deleteCell(colKey, rowKey)
+    }
+
+    this.columns.delete(colKey);
+
+    this.columnPositions.delete(position);
+
     const lastColumnPosition = Math.max(...this.columnPositions.keys());
-    //this is a shift backward
-    this.shiftColumns(lastColumnPosition, position);
+    this.shiftColumns(lastColumnPosition, ShiftDirection.backward);
     return true;
   }
 
   /**
-   * Shift the columns between start and end by one position. You can control the direction and the range.
+   * Shift the column forward or backward till an empty position is found.
    */
-  private shiftColumns(start: number, end: number): boolean {
-    if (start === end) return false;
+  private shiftColumns(start: number, shiftDirection: ShiftDirection): boolean {
+    let previousValue: ColumnKey | undefined = undefined;
+    let currentPos = start;
+    while (true) {
+      let tempCurrent = this.columnPositions.get(currentPos);
 
-    if (start < end) {
-      // we are shifting forward
-      for (let position = end; position >= start; position--) {
-        const previousColkey = this.columnPositions.get(position - 1);
-        if (previousColkey === undefined) {
-          this.columnPositions.delete(position);
-        } else {
-          const col = this.columns.get(previousColkey);
-          if (col === undefined)
-            throw new Error("Column not found, inconsistent state");
-          col.position = position;
-          this.columnPositions.set(position, previousColkey);
-        }
+      if (tempCurrent === undefined && previousValue === undefined) {
+        break;
       }
-    } else {
-      // we are shifting backward
-      for (let position = end; position <= start; position++) {
-        const nextColKey = this.columnPositions.get(position + 1);
-        if (nextColKey === undefined) {
-          this.columnPositions.delete(position);
-        } else {
-          const col = this.columns.get(nextColKey);
-          if (col === undefined)
-            throw new Error("Column not found, inconsistent state");
-          col.position = position;
-          this.columnPositions.set(position, nextColKey);
+
+      if (previousValue === undefined) {
+        this.columnPositions.delete(currentPos);
+      } else {
+        this.columnPositions.set(currentPos, previousValue);
+        const col = this.columns.get(previousValue);
+        col!.position = currentPos;
+      }
+
+      previousValue = tempCurrent;
+
+      if (shiftDirection === ShiftDirection.forward) {
+        currentPos++;
+      } else {
+        // this is an issue, if there is not empty position before the current position we will delete the first column
+        if (currentPos === 1) {
+          break;
         }
+        currentPos--;
       }
     }
+
     return true;
   }
 
@@ -209,7 +224,7 @@ export default class Sheet {
   setCellStyle(
     colKey: ColumnKey,
     rowKey: RowKey,
-    style: CellStyle | null,
+    style: CellStyle | null
   ): boolean {
     const col = this.columns.get(colKey);
     const row = this.rows.get(rowKey);
@@ -243,7 +258,7 @@ export default class Sheet {
 
   private setCellGroupStyle(
     group: CellGroup<ColumnKey | RowKey>,
-    style: CellStyle | null,
+    style: CellStyle | null
   ) {
     style = style ? new CellStyle().clone(style) : null;
     group.defaultStyle = style;
@@ -299,13 +314,13 @@ export default class Sheet {
     const row = this.rows.get(rowKey);
     if (!col || !row) {
       throw new Error(
-        `Failed to create cell at col: ${col} row: ${row}: Column or Row not found.`,
+        `Failed to create cell at col: ${col} row: ${row}: Column or Row not found.`
       );
     }
 
     if (col.cellIndex.has(row.key)) {
       throw new Error(
-        `Failed to create cell at col: ${col} row: ${row}: Cell already exists.`,
+        `Failed to create cell at col: ${col} row: ${row}: Cell already exists.`
       );
     }
 
