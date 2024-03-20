@@ -55,19 +55,14 @@ export default class UI {
         const toolbarItem = document.createElement("i");
         toolbarItem.classList.add("lightSheet_toolbar_item");
         toolbarItem.classList.add("material-symbols-outlined");
-
-        // Tooltip
-        if (toolbar[i].tooltip) {
-          toolbarItem.setAttribute("title", toolbar[i].tooltip);
-        }
-
-        // Append element
         toolbarItem.textContent = toolbar[i].content;
         this.lightSheetToolBarDom.appendChild(toolbarItem);
+
       } else if (toolbar[i].type == "select") {
         const toolbarItem = document.createElement("select");
         toolbarItem.classList.add("lightSheet_toolbar_item");
         this.lightSheetToolBarDom.appendChild(toolbarItem);
+        
       } else if (toolbar[i].type == "color") {
         const toolbarItem = document.createElement("i");
         toolbarItem.classList.add("lightSheet_toolbar_item");
