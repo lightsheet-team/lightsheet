@@ -2,6 +2,7 @@ import LightSheet from "../main";
 
 export default class UI {
   tableEl: Element;
+  lightSheetToolBarDom: Element;
   tableHeadDom: Element;
   tableBodyDom: Element;
   rowCount: number;
@@ -21,6 +22,12 @@ export default class UI {
 
     this.tableEl.classList.add("light_sheet_table_container");
 
+    /*toolbar*/
+    this.lightSheetToolBarDom = document.createElement("div");
+    this.lightSheetToolBarDom.classList.add("light_sheet_table_toolbar");
+    this.tableEl.appendChild(this.lightSheetToolBarDom);
+
+    /*content*/
     const lightSheetContainerDom = document.createElement("div");
     lightSheetContainerDom.classList.add("light_sheet_table_content");
     this.tableEl.appendChild(lightSheetContainerDom);
@@ -40,6 +47,7 @@ export default class UI {
     this.tableBodyDom = document.createElement("tbody");
     tableContainerDom.appendChild(this.tableBodyDom);
   }
+
 
   addHeader(headerData: string[]) {
     const headerRowDom = document.createElement("tr");
