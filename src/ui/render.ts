@@ -48,6 +48,35 @@ export default class UI {
     tableContainerDom.appendChild(this.tableBodyDom);
   }
 
+  createToolBar(toolbar: string | any[]) {
+    for (let i = 0; i < toolbar.length; i++) {
+      //divide the tool bar icons into 3 types for later implementation
+      if (toolbar[i].type == "i") {
+        const toolbarItem = document.createElement("i");
+        toolbarItem.classList.add("lightSheet_toolbar_item");
+        toolbarItem.classList.add("material-symbols-outlined");
+
+        // Tooltip
+        if (toolbar[i].tooltip) {
+          toolbarItem.setAttribute("title", toolbar[i].tooltip);
+        }
+
+        // Append element
+        toolbarItem.textContent = toolbar[i].content;
+        this.lightSheetToolBarDom.appendChild(toolbarItem);
+      } else if (toolbar[i].type == "select") {
+        const toolbarItem = document.createElement("select");
+        toolbarItem.classList.add("lightSheet_toolbar_item");
+        this.lightSheetToolBarDom.appendChild(toolbarItem);
+      } else if (toolbar[i].type == "color") {
+        const toolbarItem = document.createElement("i");
+        toolbarItem.classList.add("lightSheet_toolbar_item");
+        toolbarItem.classList.add("material-symbols-outlined");
+        this.lightSheetToolBarDom.appendChild(toolbarItem);
+        toolbarItem.textContent = toolbar[i].content;
+      }
+    }
+  }
 
   addHeader(headerData: string[]) {
     const headerRowDom = document.createElement("tr");
