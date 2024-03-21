@@ -11,7 +11,7 @@ export default class UI {
   rowCount: number;
   colCount: number;
   lightSheet: LightSheet;
-  selectedCell: Number[] | undefined;
+  selectedCell: number[] | undefined;
 
   constructor(
     el: Element,
@@ -53,8 +53,10 @@ export default class UI {
 
     for (let i = 0; i < headerData.length; i++) {
       const headerCellDom = document.createElement("td");
-      headerCellDom.classList.add("lightsheet_table_header",
-                                  "lightsheet_table_td");
+      headerCellDom.classList.add(
+        "lightsheet_table_header",
+        "lightsheet_table_td",
+      );
       headerCellDom.textContent = headerData[i];
       headerRowDom.appendChild(headerCellDom);
     }
@@ -67,9 +69,11 @@ export default class UI {
     //row number
     const rowNumberCell = document.createElement("td");
     rowNumberCell.innerHTML = `${rowLabelNumber + 1}`; // Row numbers start from 1
-    rowNumberCell.classList.add("lightsheet_table_row_number",
-                                "lightsheet_table_row_cell",
-                                "lightsheet_table_td");
+    rowNumberCell.classList.add(
+      "lightsheet_table_row_number",
+      "lightsheet_table_row_cell",
+      "lightsheet_table_td",
+    );
     rowDom.appendChild(rowNumberCell); // Append the row number cell to the row
 
     return rowDom;
@@ -83,9 +87,11 @@ export default class UI {
     columnKey?: string,
   ) {
     const cellDom = document.createElement("td");
-    cellDom.classList.add("lightsheet_table_cell",
-                          "lightsheet_table_row_cell",
-                          "lightsheet_table_td");
+    cellDom.classList.add(
+      "lightsheet_table_cell",
+      "lightsheet_table_row_cell",
+      "lightsheet_table_td",
+    );
     rowDom.appendChild(cellDom);
     cellDom.id = `${colIndex}-${rowIndex}`;
     const inputDom = document.createElement("input");
@@ -108,29 +114,29 @@ export default class UI {
         rowIndex,
       );
 
-    inputDom.onfocus = (e: Event) => {
+    inputDom.onfocus = () => {
       cellDom.classList.add("lightsheet_table_selected_cell");
 
       let columnIndex: number | undefined;
       let rowIndex: number | undefined;
 
       if (!this.isUUIDv4(cellDom.id)) {
-        let x = cellDom.id.split("-");
+        const x = cellDom.id.split("-");
         columnIndex = Number(x[0]);
         rowIndex = Number(x[1]);
       } else {
-        let columnKey = cellDom.id;
-        let rowKey = cellDom.parentElement?.id;
+        const columnKey = cellDom.id;
+        const rowKey = cellDom.parentElement?.id;
 
         columnIndex = this.lightSheet.sheet.getColumnIndex(
-          generateColumnKey(columnKey!)
+          generateColumnKey(columnKey!),
         );
         rowIndex = this.lightSheet.sheet.getRowIndex(generateRowKey(rowKey!));
       }
       this.selectedCell?.push(Number(columnIndex), Number(rowIndex));
     };
 
-    inputDom.onblur = (e: Event) => {
+    inputDom.onblur = () => {
       this.selectedCell = [];
       cellDom.classList.remove("lightsheet_table_selected_cell");
     };
