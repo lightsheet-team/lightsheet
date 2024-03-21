@@ -2,20 +2,24 @@ import EventType from "./eventType";
 import Event from "./event";
 import EventState from "./eventState";
  
+type ListenerFunction = (payload: any) => void;
+
 export default class Events {
-    private listeners: { [key: string]: Function };
+    private listeners: { [key in EventType]?: ListenerFunction };
 
     constructor() {
         this.listeners = {};
     }
 
-    on(eventType: EventType, callback: Function): void {
+    on(eventType: EventType, callback: ListenerFunction): void {
         this.listeners[eventType] = callback;
     }
 
     emit(event: Event): void {
-        if (this.listeners[event.eventType]) {
-            this.listeners[event.eventType](event.payload);
+
+        const listener = this.listeners[event.eventType];
+        if (listener) {
+            listener(event.payload);
         }
 
         if (event.eventState == EventState.PRE_EVENT && !event.canceled) {
@@ -25,15 +29,15 @@ export default class Events {
             
     }
 
-    once(eventType: EventType, callback: Function): void {
-        const oncecallback: Function = (payload: any) => {
+    once(eventType: EventType, callback: ListenerFunction): void {
+        const oncecallback: ListenerFunction = (payload: any) => {
             this.removeEventListener(eventType);
             callback(payload);
         };
         this.on(eventType, oncecallback);
     }
 
-    addEventListener(eventType: EventType, callback: Function): void {
+    addEventListener(eventType: EventType, callback: ListenerFunction): void {
         this.on(eventType, callback);
     }
 
