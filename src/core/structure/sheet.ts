@@ -1,8 +1,8 @@
-import { CellKey, ColumnKey, RowKey } from "./key/keyTypes.ts";
-import Cell, { CellState } from "./cell/cell.ts";
+import {CellKey, ColumnKey, RowKey} from "./key/keyTypes.ts";
+import Cell, {CellState} from "./cell/cell.ts";
 import Column from "./group/column.ts";
 import Row from "./group/row.ts";
-import { CellInfo, PositionInfo } from "./sheet.types.ts";
+import {CellInfo, PositionInfo} from "./sheet.types.ts";
 import ExpressionHandler from "../evaluation/expressionHandler.ts";
 import CellStyle from "./cellStyle.ts";
 import CellGroup from "./group/cellGroup.ts";
@@ -65,6 +65,7 @@ export default class Sheet {
 
     return {
       value: cell ? cell.value : undefined,
+      state: cell ? cell.state : undefined,
       position: {
         rowKey: this.rows.has(rowKey) ? rowKey : undefined,
         columnKey: this.columns.has(colKey) ? colKey : undefined,
@@ -80,6 +81,7 @@ export default class Sheet {
     const cell = this.getCell(colKey, rowKey)!;
     return {
       value: cell.value,
+      state: cell.state,
       position: {
         columnKey: colKey,
         rowKey: rowKey,
@@ -296,6 +298,11 @@ export default class Sheet {
       referredCell.referencesIn.add(cell.key);
     });
 
+    // After outgoing references are updated, check for circular references.
+    if (evalResult.references.length && this.hasCircularReference(cell)) {
+      cell.state = CellState.CIRCULAR_REFERENCE;
+    }
+
     // Compute oldOut - newOut to get references that were removed.
     const removedReferences = new Set<CellKey>(
       [...oldOut].filter((x) => !cell.referencesOut.has(x)),
@@ -306,7 +313,8 @@ export default class Sheet {
       referredCell.referencesIn.delete(cell.key);
     });
 
-    if (!valueChanged) return false;
+    if (!valueChanged && cell.state != CellState.OK) return false;
+
     // Update cells that reference this cell. TODO This currently desyncs the UI - an event should be emitted.
     cell.referencesIn.forEach((ref) => {
       const referredCell = this.cell_data.get(ref)!;
@@ -314,6 +322,26 @@ export default class Sheet {
     });
 
     return true;
+  }
+
+  private hasCircularReference(cell: Cell): boolean {
+    const stack = [cell.key];
+    let initial = true;
+
+    // Depth-first search.
+    while (stack.length > 0) {
+      const current = stack.pop()!;
+      if (current === cell.key && !initial) return true;
+      initial = false;
+
+      const currentCell = this.cell_data.get(current)!;
+      console.log(currentCell);
+      currentCell.referencesOut.forEach((ref) => {
+        stack.push(ref);
+      });
+    }
+
+    return false;
   }
 
   private initializePosition(colPos: number, rowPos: number): PositionInfo {

@@ -12,6 +12,7 @@ import {
 import Sheet from "../structure/sheet.ts";
 import { PositionInfo } from "../structure/sheet.types.ts";
 import { EvaluationResult } from "./expressionHandler.types.ts";
+import {CellState} from "../structure/cell/cell.ts";
 const math = create({
   parseDependencies,
   addDependencies,
@@ -81,7 +82,7 @@ export default class ExpressionHandler {
     const rowIndex = parseInt(rowStr) - 1;
 
     const cellInfo = this.sheet.getCellInfoAt(columnIndex, rowIndex);
-    if (cellInfo == null) throw new Error("Invalid cell reference: " + name);
+    if (cellInfo == null || cellInfo.state != CellState.OK) throw new Error("Invalid cell reference: " + name);
 
     this.cellRefCache.push(cellInfo.position);
     return cellInfo.value!;

@@ -1,4 +1,5 @@
 import { ColumnKey, RowKey } from "./key/keyTypes.ts";
+import {CellState} from "./cell/cell.ts";
 
 export type PositionInfo = {
   columnKey?: ColumnKey;
@@ -8,4 +9,5 @@ export type PositionInfo = {
 export type CellInfo = {
   position: PositionInfo;
   value?: string;
+  state?: CellState;
 };
