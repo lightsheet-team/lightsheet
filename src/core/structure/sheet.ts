@@ -125,10 +125,6 @@ export default class Sheet {
       this.deleteCell(colKey, rowKey);
     }
 
-    this.columns.delete(colKey);
-
-    this.columnPositions.delete(position);
-
     const lastColumnPosition = Math.max(...this.columnPositions.keys());
     this.shiftColumns(lastColumnPosition, ShiftDirection.backward);
     return true;
