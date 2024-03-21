@@ -27,7 +27,7 @@ export default class Sheet {
       30,
       10,
       [0, 0, 0],
-      [false, false, false, false]
+      [false, false, false, false],
     ); // TODO This should be configurable.
 
     this.settings = null;
@@ -121,9 +121,8 @@ export default class Sheet {
 
     const col = this.columns.get(colKey);
 
-    
-    for (let [rowKey, _] of col!.cellIndex){
-      this.deleteCell(colKey, rowKey)
+    for (const [rowKey] of col!.cellIndex) {
+      this.deleteCell(colKey, rowKey);
     }
 
     this.columns.delete(colKey);
@@ -141,12 +140,9 @@ export default class Sheet {
   private shiftColumns(start: number, shiftDirection: ShiftDirection): boolean {
     let previousValue: ColumnKey | undefined = undefined;
     let currentPos = start;
-    while (true) {
-      let tempCurrent = this.columnPositions.get(currentPos);
-
-      if (tempCurrent === undefined && previousValue === undefined) {
-        break;
-      }
+    let tempCurrent;
+    do {
+      tempCurrent = this.columnPositions.get(currentPos);
 
       if (previousValue === undefined) {
         this.columnPositions.delete(currentPos);
@@ -167,7 +163,7 @@ export default class Sheet {
         }
         currentPos--;
       }
-    }
+    } while (tempCurrent !== undefined && previousValue !== undefined);
 
     return true;
   }
@@ -224,7 +220,7 @@ export default class Sheet {
   setCellStyle(
     colKey: ColumnKey,
     rowKey: RowKey,
-    style: CellStyle | null
+    style: CellStyle | null,
   ): boolean {
     const col = this.columns.get(colKey);
     const row = this.rows.get(rowKey);
@@ -258,7 +254,7 @@ export default class Sheet {
 
   private setCellGroupStyle(
     group: CellGroup<ColumnKey | RowKey>,
-    style: CellStyle | null
+    style: CellStyle | null,
   ) {
     style = style ? new CellStyle().clone(style) : null;
     group.defaultStyle = style;
@@ -314,13 +310,13 @@ export default class Sheet {
     const row = this.rows.get(rowKey);
     if (!col || !row) {
       throw new Error(
-        `Failed to create cell at col: ${col} row: ${row}: Column or Row not found.`
+        `Failed to create cell at col: ${col} row: ${row}: Column or Row not found.`,
       );
     }
 
     if (col.cellIndex.has(row.key)) {
       throw new Error(
-        `Failed to create cell at col: ${col} row: ${row}: Cell already exists.`
+        `Failed to create cell at col: ${col} row: ${row}: Cell already exists.`,
       );
     }
 
