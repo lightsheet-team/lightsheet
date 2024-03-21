@@ -313,7 +313,8 @@ export default class Sheet {
       referredCell.referencesIn.delete(cell.key);
     });
 
-    if (!valueChanged && cell.state != CellState.OK) return false;
+    // Skip resolving incoming references if value hasn't changed and state is OK.
+    if (!valueChanged && cell.state == CellState.OK) return false;
 
     // Update cells that reference this cell. TODO This currently desyncs the UI - an event should be emitted.
     cell.referencesIn.forEach((ref) => {
