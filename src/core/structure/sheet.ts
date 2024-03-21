@@ -335,7 +335,6 @@ export default class Sheet {
       initial = false;
 
       const currentCell = this.cell_data.get(current)!;
-      console.log(currentCell);
       currentCell.referencesOut.forEach((ref) => {
         stack.push(ref);
       });
