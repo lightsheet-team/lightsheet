@@ -22,5 +22,6 @@ export default class Cell {
 export enum CellState {
   OK,
   INVALID_EXPRESSION,
+  INVALID_REFERENCE,
   INVALID_FORMAT,
 }

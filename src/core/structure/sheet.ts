@@ -100,8 +100,8 @@ export default class Sheet {
     cell.referencesIn.forEach((ref) => {
       const referredCell = this.cell_data.get(ref)!;
       referredCell.referencesOut.delete(cellKey);
-      // Since the cell is referring to a cell that's now deleted, its state will be invalid.
-      referredCell.state = CellState.INVALID_EXPRESSION;
+      // Invalidate cells that reference this cell.
+      referredCell.state = CellState.INVALID_REFERENCE;
     });
 
     // Remove incoming references from this cell to other cells.
@@ -283,8 +283,11 @@ export default class Sheet {
     // TODO Resolve restrictions from cell formatting here (CellState.INVALID_FORMAT).
 
     cell.state = CellState.OK;
+
+    const valueChanged = cell.value != evalResult.value;
     cell.value = evalResult.value;
 
+    // Update cell references.
     const oldOut = new Set<CellKey>(cell.referencesOut);
     cell.referencesOut.clear();
     evalResult.references.forEach((ref) => {
@@ -297,13 +300,20 @@ export default class Sheet {
     const removedReferences = new Set<CellKey>(
       [...oldOut].filter((x) => !cell.referencesOut.has(x)),
     );
-    // Clean up the referencedIn set of cells that are no longer referenced by this.
+    // Clean up the referencesIn sets of cells that are no longer referenced by this.
     removedReferences.forEach((ref) => {
       const referredCell = this.cell_data.get(ref)!;
       referredCell.referencesIn.delete(cell.key);
     });
 
-    return cell.formula != cell.value;
+    if (!valueChanged) return false;
+    // Update cells that reference this cell. TODO This currently desyncs the UI - an event should be emitted.
+    cell.referencesIn.forEach((ref) => {
+      const referredCell = this.cell_data.get(ref)!;
+      this.resolveCell(referredCell);
+    });
+
+    return true;
   }
 
   private initializePosition(colPos: number, rowPos: number): PositionInfo {
