@@ -5,17 +5,14 @@ export default class UI {
   tableHeadDom: Element;
   tableBodyDom: Element;
   rowCount: number;
-  colCount: number;
   lightSheet: LightSheet;
 
   constructor(
     el: Element,
     lightSheet: LightSheet,
     rowCount: number,
-    colCount: number,
   ) {
     this.tableEl = el;
-    this.colCount = colCount;
     this.rowCount = rowCount;
     this.lightSheet = lightSheet;
 
