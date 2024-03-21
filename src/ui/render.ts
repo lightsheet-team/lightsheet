@@ -3,6 +3,7 @@ import {
   generateColumnKey,
   generateRowKey,
 } from "../core/structure/key/keyTypes";
+import { CellIdInfo } from "./render.types.ts";
 
 export default class UI {
   tableEl: Element;
@@ -120,10 +121,13 @@ export default class UI {
       let columnIndex: number | undefined;
       let rowIndex: number | undefined;
 
-      if (!this.isUUIDv4(cellDom.id)) {
-        const cellIndices = cellDom.id.split("-");
-        columnIndex = Number(cellIndices[0]);
-        rowIndex = Number(cellIndices[1]);
+      const cellIdInfo = this.checkCellId(cellDom);
+      if (!cellIdInfo) return;
+      const { keyParts, isIndex } = cellIdInfo;
+
+      if (isIndex) {
+        columnIndex = Number(keyParts[0]);
+        rowIndex = Number(keyParts[1]);
       } else {
         const columnKey = cellDom.id;
         const rowKey = cellDom.parentElement?.id;
@@ -149,12 +153,14 @@ export default class UI {
     colIndex: number,
     rowIndex: number,
   ) {
-    const keyParts = cellDom.id.split("_");
+    const cellIdInfo = this.checkCellId(cellDom);
+    if (!cellIdInfo) return;
+    const { keyParts, isIndex } = cellIdInfo;
     if (keyParts.length != 2) return;
 
     let cell;
     // If the key parts are integers, we need to create a cell in core and update ui with new keys.
-    if (keyParts[0].match("^[0-9]+$")) {
+    if (isIndex) {
       cell = this.lightSheet.setCellAt(colIndex, rowIndex, newValue);
       // Keys will be valid as value shouldn't be empty at this point.
       rowDom.id = cell.position.rowKey!.toString();
@@ -178,9 +184,12 @@ export default class UI {
     this.lightSheet.onCellChange?.(colIndex, rowIndex, newValue);
   }
 
-  isUUIDv4(str: string) {
-    const uuidv4Pattern =
-      /^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
-    return uuidv4Pattern.test(str);
+  checkCellId(cellDom: Element): CellIdInfo | undefined {
+    const keyParts = cellDom.id.split("_");
+    if (keyParts.length != 2) return;
+
+    const isIndex = keyParts[0].match("^[0-9]+$") !== null;
+
+    return { keyParts: keyParts, isIndex: isIndex };
   }
 }
