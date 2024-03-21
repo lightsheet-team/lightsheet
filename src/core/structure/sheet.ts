@@ -44,6 +44,14 @@ export default class Sheet {
     this.expressionHandler = new ExpressionHandler(this);
   }
 
+  getRowIndex(rowKey: RowKey): number | undefined {
+    return this.rows.get(rowKey)?.position;
+  }
+
+  getColumnIndex(colKey: ColumnKey): number | undefined {
+    return this.columns.get(colKey)?.position;
+  }
+
   setCellAt(colPos: number, rowPos: number, value: string): CellInfo {
     const position = this.initializePosition(colPos, rowPos);
     return this.setCell(position.columnKey!, position.rowKey!, value);
@@ -236,6 +244,7 @@ export default class Sheet {
     const cell = new Cell();
     cell.formula = value;
     this.cell_data.set(cell.key, cell);
+    this.resolveCell(cell);
 
     col.cellIndex.set(row.key, cell.key);
     row.cellIndex.set(col.key, cell.key);
