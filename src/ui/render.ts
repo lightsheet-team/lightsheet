@@ -84,11 +84,6 @@ export default class UI {
     const inputDom = document.createElement("input");
     inputDom.value = "";
 
-    inputDom.style.outline = "none";
-    inputDom.style.backgroundColor = "transparent";
-    inputDom.style.borderStyle = "none";
-    cellDom.style.border = "2px solid #000";
-
     cellDom.appendChild(inputDom);
 
     if (value) {
@@ -106,9 +101,7 @@ export default class UI {
       );
 
     inputDom.onfocus = (e: Event) => {
-      cellDom.style.borderStyle = "solid";
-      cellDom.style.margin = "0px";
-      cellDom.style.border = "2px solid blue";
+      cellDom.classList.add("light_sheet_table_selected_cell");
 
       let columnIndex: number | undefined;
       let rowIndex: number | undefined;
@@ -131,7 +124,7 @@ export default class UI {
 
     inputDom.onblur = (e: Event) => {
       this.selectedCell = [];
-      cellDom.style.border = "2px solid #000";
+      cellDom.classList.remove("light_sheet_table_selected_cell");
     };
   }
 
