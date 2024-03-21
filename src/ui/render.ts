@@ -121,9 +121,9 @@ export default class UI {
       let rowIndex: number | undefined;
 
       if (!this.isUUIDv4(cellDom.id)) {
-        const x = cellDom.id.split("-");
-        columnIndex = Number(x[0]);
-        rowIndex = Number(x[1]);
+        const cellIndices = cellDom.id.split("-");
+        columnIndex = Number(cellIndices[0]);
+        rowIndex = Number(cellIndices[1]);
       } else {
         const columnKey = cellDom.id;
         const rowKey = cellDom.parentElement?.id;
