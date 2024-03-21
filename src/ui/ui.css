@@ -80,6 +80,5 @@
 }
 
 .lightsheet_table_selected_cell {
-  background-color: green;
   border: 1px solid blue;
 }
