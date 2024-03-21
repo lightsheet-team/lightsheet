@@ -103,7 +103,7 @@ export default class Sheet {
       const referredCell = this.cell_data.get(ref)!;
       referredCell.referencesOut.delete(cellKey);
       // Invalidate cells that reference this cell.
-      referredCell.state = CellState.INVALID_REFERENCE;
+      referredCell.setState(CellState.INVALID_REFERENCE);
     });
 
     // Remove incoming references from this cell to other cells.
@@ -278,13 +278,13 @@ export default class Sheet {
   private resolveCell(cell: Cell): boolean {
     const evalResult = this.expressionHandler.evaluate(cell.formula);
     if (!evalResult) {
-      cell.state = CellState.INVALID_EXPRESSION;
+      cell.setState(CellState.INVALID_EXPRESSION);
       return false;
     }
 
     // TODO Resolve restrictions from cell formatting here (CellState.INVALID_FORMAT).
 
-    cell.state = CellState.OK;
+    cell.setState(CellState.OK);
 
     const valueChanged = cell.value != evalResult.value;
     cell.value = evalResult.value;
@@ -300,7 +300,7 @@ export default class Sheet {
 
     // After outgoing references are updated, check for circular references.
     if (evalResult.references.length && this.hasCircularReference(cell)) {
-      cell.state = CellState.CIRCULAR_REFERENCE;
+      cell.setState(CellState.CIRCULAR_REFERENCE);
     }
 
     // Compute oldOut - newOut to get references that were removed.
