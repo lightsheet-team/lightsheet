@@ -89,32 +89,6 @@ export default class Sheet {
     return cell ? cell.value : null;
   }
 
-  private createCell(colKey: ColumnKey, rowKey: RowKey, value: string): Cell {
-    const col = this.columns.get(colKey);
-    const row = this.rows.get(rowKey);
-    if (!col || !row) {
-      throw new Error(
-        `Failed to create cell at col: ${col} row: ${row}: Column or Row not found.`,
-      );
-    }
-
-    if (col.cellIndex.has(row.key)) {
-      throw new Error(
-        `Failed to create cell at col: ${col} row: ${row}: Cell already exists.`,
-      );
-    }
-
-    const cell = new Cell();
-    cell.formula = value;
-    this.cell_data.set(cell.key, cell);
-    this.resolveCell(cell);
-
-    col.cellIndex.set(row.key, cell.key);
-    row.cellIndex.set(col.key, cell.key);
-
-    return cell;
-  }
-
   deleteCell(colKey: ColumnKey, rowKey: RowKey): boolean {
     const col = this.columns.get(colKey);
     const row = this.rows.get(rowKey);
@@ -250,6 +224,32 @@ export default class Sheet {
     }
 
     return data;
+  }
+
+  private createCell(colKey: ColumnKey, rowKey: RowKey, value: string): Cell {
+    const col = this.columns.get(colKey);
+    const row = this.rows.get(rowKey);
+    if (!col || !row) {
+      throw new Error(
+        `Failed to create cell at col: ${col} row: ${row}: Column or Row not found.`,
+      );
+    }
+
+    if (col.cellIndex.has(row.key)) {
+      throw new Error(
+        `Failed to create cell at col: ${col} row: ${row}: Cell already exists.`,
+      );
+    }
+
+    const cell = new Cell();
+    cell.formula = value;
+    this.cell_data.set(cell.key, cell);
+    this.resolveCell(cell);
+
+    col.cellIndex.set(row.key, cell.key);
+    row.cellIndex.set(col.key, cell.key);
+
+    return cell;
   }
 
   private getCell(colKey: ColumnKey, rowKey: RowKey): Cell | null {
