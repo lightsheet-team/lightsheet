@@ -5,14 +5,14 @@
   --lightsheet-white: #ffffff;
 }
 
-.light_sheet_table_container {
+.lightsheet_table_container {
   display: inline-block;
   padding-right: 2px;
   box-sizing: border-box;
   outline: none;
 }
 
-.light_sheet_table_content {
+.lightsheet_table_content {
   display: inline-block;
   box-sizing: border-box;
   padding-right: 3px;
@@ -20,7 +20,7 @@
   position: relative;
 }
 
-.light_sheet_table {
+.lightsheet_table {
   border-collapse: separate;
   white-space: nowrap;
   empty-cells: show;
@@ -33,7 +33,7 @@
   border-bottom: 1px solid var(--lightsheet-silver-400);
 }
 
-.light_sheet_table_td {
+.lightsheet_table_td {
   border-top: 1px solid var(--lightsheet-silver-400);
   border-left: 1px solid var(--lightsheet-silver-400);
   border-right: 1px solid var(--lightsheet-transparent);
@@ -41,7 +41,7 @@
   box-sizing: border-box;
 }
 
-.light_sheet_table_header {
+.lightsheet_table_header {
   background-color: #f3f3f3;
   padding: 2px;
   cursor: pointer;
@@ -54,13 +54,13 @@
 }
 
 /* All td's in the table below the header row */
-.light_sheet_table_row_td {
+.lightsheet_table_row_td {
   padding: 4px;
   white-space: nowrap;
   line-height: 1em;
 }
 
-.light_sheet_table_cell_input {
+.lightsheet_table_cell_input {
   border: 0px;
   border-radius: 0px;
   outline: 0px;
@@ -72,14 +72,14 @@
   box-sizing: border-box;
 }
 
-.light_sheet_table_row_number {
+.lightsheet_table_row_number {
   position: relative;
   background-color: var(--lightsheet-gray-200);
   text-align: center;
   width: 50px;
 }
 
-.light_sheet_table_selected_cell {
+.lightsheet_table_selected_cell {
   background-color: green;
   border: 1px solid blue;
 }

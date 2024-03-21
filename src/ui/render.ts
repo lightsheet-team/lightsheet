@@ -25,14 +25,14 @@ export default class UI {
     this.lightSheet = lightSheet;
     this.selectedCell = [];
 
-    this.tableEl.classList.add("light_sheet_table_container");
+    this.tableEl.classList.add("lightsheet_table_container");
 
     const lightSheetContainerDom = document.createElement("div");
-    lightSheetContainerDom.classList.add("light_sheet_table_content");
+    lightSheetContainerDom.classList.add("lightsheet_table_content");
     this.tableEl.appendChild(lightSheetContainerDom);
 
     const tableContainerDom = document.createElement("table");
-    tableContainerDom.classList.add("light_sheet_table");
+    tableContainerDom.classList.add("lightsheet_table");
     tableContainerDom.setAttribute("cellpadding", "0");
     tableContainerDom.setAttribute("cellspacing", "0");
     tableContainerDom.setAttribute("unselectable", "yes");
@@ -53,8 +53,8 @@ export default class UI {
 
     for (let i = 0; i < headerData.length; i++) {
       const headerCellDom = document.createElement("td");
-      headerCellDom.classList.add("light_sheet_table_header",
-                                  "light_sheet_table_td");
+      headerCellDom.classList.add("lightsheet_table_header",
+                                  "lightsheet_table_td");
       headerCellDom.textContent = headerData[i];
       headerRowDom.appendChild(headerCellDom);
     }
@@ -67,9 +67,9 @@ export default class UI {
     //row number
     const rowNumberCell = document.createElement("td");
     rowNumberCell.innerHTML = `${rowLabelNumber + 1}`; // Row numbers start from 1
-    rowNumberCell.classList.add("light_sheet_table_row_number",
-                                "light_sheet_table_row_cell",
-                                "light_sheet_table_td");
+    rowNumberCell.classList.add("lightsheet_table_row_number",
+                                "lightsheet_table_row_cell",
+                                "lightsheet_table_td");
     rowDom.appendChild(rowNumberCell); // Append the row number cell to the row
 
     return rowDom;
@@ -83,13 +83,13 @@ export default class UI {
     columnKey?: string,
   ) {
     const cellDom = document.createElement("td");
-    cellDom.classList.add("light_sheet_table_cell",
-                          "light_sheet_table_row_cell",
-                          "light_sheet_table_td");
+    cellDom.classList.add("lightsheet_table_cell",
+                          "lightsheet_table_row_cell",
+                          "lightsheet_table_td");
     rowDom.appendChild(cellDom);
     cellDom.id = `${colIndex}-${rowIndex}`;
     const inputDom = document.createElement("input");
-    inputDom.classList.add("light_sheet_table_cell_input");
+    inputDom.classList.add("lightsheet_table_cell_input");
     inputDom.value = "";
 
     cellDom.appendChild(inputDom);
@@ -109,7 +109,7 @@ export default class UI {
       );
 
     inputDom.onfocus = (e: Event) => {
-      cellDom.classList.add("light_sheet_table_selected_cell");
+      cellDom.classList.add("lightsheet_table_selected_cell");
 
       let columnIndex: number | undefined;
       let rowIndex: number | undefined;
@@ -132,7 +132,7 @@ export default class UI {
 
     inputDom.onblur = (e: Event) => {
       this.selectedCell = [];
-      cellDom.classList.remove("light_sheet_table_selected_cell");
+      cellDom.classList.remove("lightsheet_table_selected_cell");
     };
   }
 
