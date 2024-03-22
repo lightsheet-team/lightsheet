@@ -100,16 +100,17 @@ export default class Sheet {
     if (!col.cellIndex.has(row.key)) return false;
     const cellKey = col.cellIndex.get(row.key)!;
 
-    // Remove references to this cell from other cells.
+    // Remove references to this cell from other cells' referencesOut.
     const cell = this.cell_data.get(cellKey)!;
     cell.referencesIn.forEach((ref) => {
       const referredCell = this.cell_data.get(ref)!;
       referredCell.referencesOut.delete(cellKey);
+
       // Invalidate cells that reference this cell.
       referredCell.setState(CellState.INVALID_REFERENCE);
     });
 
-    // Remove incoming references from this cell to other cells.
+    // Remove this cell from other cells' referencesIn.
     cell.referencesOut.forEach((ref) => {
       const referredCell = this.cell_data.get(ref)!;
       referredCell.referencesIn.delete(cellKey);
@@ -292,7 +293,7 @@ export default class Sheet {
     const valueChanged = cell.value != evalResult.value;
     cell.value = evalResult.value;
 
-    // Update cell references.
+    // Update referencesOut of this cell and referencesIn of newly referenced cells.
     const oldOut = new Set<CellKey>(cell.referencesOut);
     cell.referencesOut.clear();
     evalResult.references.forEach((ref) => {
@@ -301,22 +302,23 @@ export default class Sheet {
       referredCell.referencesIn.add(cell.key);
     });
 
-    // After outgoing references are updated, check for circular references.
-    if (evalResult.references.length && this.hasCircularReference(cell)) {
-      cell.setState(CellState.CIRCULAR_REFERENCE);
-    }
-
-    // Compute oldOut - newOut to get references that were removed.
+    // Resolve (oldOut - newOut) to get references that were removed from the formula.
     const removedReferences = new Set<CellKey>(
       [...oldOut].filter((x) => !cell.referencesOut.has(x)),
     );
-    // Clean up the referencesIn sets of cells that are no longer referenced by this.
+
+    // Clean up the referencesIn sets of cells that are no longer referenced by the formula.
     removedReferences.forEach((ref) => {
       const referredCell = this.cell_data.get(ref)!;
       referredCell.referencesIn.delete(cell.key);
     });
 
-    // Skip resolving incoming references if value hasn't changed and state is OK.
+    // After references are updated, check for circular references.
+    if (evalResult.references.length && this.hasCircularReference(cell)) {
+      cell.setState(CellState.CIRCULAR_REFERENCE);
+    }
+
+    // If the value of the cell hasn't changed, there's no need to update cells that reference this cell.
     if (!valueChanged && cell.state == CellState.OK) return false;
 
     // Update cells that reference this cell. TODO This currently desyncs the UI - an event should be emitted.
