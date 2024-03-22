@@ -68,18 +68,22 @@ describe("Sheet", () => {
   });
 
   it("should create and detect a circular reference", () => {
+    sheet.setCellAt(1, 0, "0"); // B1
+    sheet.setCellAt(1, 1, "0"); // B2
+    sheet.setCellAt(0, 1, "0"); // A2
+
     // A1 -> B1 -> B2 -> A2 -> A1
     sheet.setCellAt(0, 0, "=B1 + 100"); // A1
     sheet.setCellAt(1, 0, "=B2 * 2"); // B1
     sheet.setCellAt(1, 1, "=A2 - 200"); // B2
 
-    const final = sheet.setCellAt(0, 1, "=A1 - 200"); // A2
+    let final = sheet.setCellAt(0, 1, "=A1 - 200"); // A2 -> A1
     expect(final.state).toBe(CellState.CIRCULAR_REFERENCE);
 
     // Check simple case of A1 -> B1 -> A1.
-    sheet.setCellAt(0, 1, "100");
+    final = sheet.setCellAt(1, 0, "100");
     expect(final.state).toBe(CellState.OK);
-    sheet.setCellAt(1, 1, "=A1 - 200");
+    final = sheet.setCellAt(1, 0, "=A1 - 200");
     expect(final.state).toBe(CellState.CIRCULAR_REFERENCE);
   });
 
