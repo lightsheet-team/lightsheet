@@ -14,16 +14,29 @@ describe("Events", () => {
     const mockCallback = jest.fn();
     events.on(EventType.UI_SET_CELL, mockCallback);
 
-    const event = new Event(
-      EventType.UI_SET_CELL,
-      "test payload",
-      false,
-      EventState.PRE_EVENT,
-    );
+    const event = new Event(EventType.UI_SET_CELL, "test payload", false);
     events.emit(event);
 
     expect(mockCallback).toHaveBeenCalledWith("test payload");
     expect(event.eventState).toBe(EventState.POST_EVENT);
+  });
+
+  test("should transition from PRE_EVENT to POST_EVENT state", () => {
+    const preEventCallback = jest.fn();
+    const postEventCallback = jest.fn();
+    const event = new Event(
+      EventType.CORE_SET_CELL,
+      null,
+      false,
+      EventState.PRE_EVENT,
+    );
+
+    events.on(EventType.CORE_SET_CELL, preEventCallback);
+    events.on(EventType.CORE_SET_CELL, postEventCallback);
+    events.emit(event);
+
+    expect(preEventCallback).toHaveBeenCalled();
+    expect(postEventCallback).toHaveBeenCalled();
   });
 
   test("should register a one-time event and trigger it just once", () => {
@@ -45,11 +58,94 @@ describe("Events", () => {
   test("should remove an event listener", () => {
     const mockCallback = jest.fn();
     events.on(EventType.UI_SET_CELL, mockCallback);
-    events.removeEventListener(EventType.UI_SET_CELL);
+    events.removeEventListener(EventType.UI_SET_CELL, mockCallback);
 
     const event = new Event(EventType.UI_SET_CELL, "test payload");
     events.emit(event);
 
     expect(mockCallback).not.toHaveBeenCalled();
+  });
+
+  test("should handle multiple listeners for the same event", () => {
+    const firstCallback = jest.fn();
+    const secondCallback = jest.fn();
+    events.on(EventType.UI_SET_CELL, firstCallback);
+    events.on(EventType.UI_SET_CELL, secondCallback);
+
+    const event = new Event(EventType.UI_SET_CELL, "test payload");
+    events.emit(event);
+
+    expect(firstCallback).toHaveBeenCalledWith("test payload");
+    expect(secondCallback).toHaveBeenCalledWith("test payload");
+  });
+
+  test("should not trigger listeners of a different event type", () => {
+    const mockCallback = jest.fn();
+    events.on(EventType.UI_SET_CELL, mockCallback);
+
+    const event = new Event(EventType.CORE_SET_CELL, "test payload");
+    events.emit(event);
+
+    expect(mockCallback).not.toHaveBeenCalled();
+  });
+
+  test("should not trigger listeners after they are removed", () => {
+    const mockCallback = jest.fn();
+    events.on(EventType.UI_SET_CELL, mockCallback);
+    events.removeEventListener(EventType.UI_SET_CELL, mockCallback);
+
+    const event = new Event(EventType.UI_SET_CELL, "test payload");
+    events.emit(event);
+
+    expect(mockCallback).not.toHaveBeenCalled();
+  });
+
+  test("should handle the cancellation of an event", () => {
+    const mockCallback = jest.fn(() => {
+      event.canceled = true;
+    });
+    const anotherCallback = jest.fn();
+
+    events.on(EventType.UI_SET_CELL, mockCallback, EventState.PRE_EVENT);
+    events.on(EventType.UI_SET_CELL, anotherCallback);
+
+    const event = new Event(
+      EventType.UI_SET_CELL,
+      "test payload",
+      false,
+      EventState.PRE_EVENT,
+    );
+    events.emit(event);
+
+    expect(mockCallback).toHaveBeenCalled();
+    expect(anotherCallback).not.toHaveBeenCalled();
+    expect(event.canceled).toBe(true);
+  });
+
+  test("should distinguish between different event states", () => {
+    const preEventCallback = jest.fn();
+    const postEventCallback = jest.fn();
+
+    events.on(EventType.UI_SET_CELL, preEventCallback, EventState.PRE_EVENT);
+    events.on(EventType.UI_SET_CELL, postEventCallback, EventState.POST_EVENT);
+
+    const preEvent = new Event(
+      EventType.UI_SET_CELL,
+      "pre payload",
+      false,
+      EventState.PRE_EVENT,
+    );
+    const postEvent = new Event(
+      EventType.UI_SET_CELL,
+      "post payload",
+      false,
+      EventState.POST_EVENT,
+    );
+
+    events.emit(preEvent);
+    events.emit(postEvent);
+
+    expect(preEventCallback).toHaveBeenCalledWith("pre payload");
+    expect(postEventCallback).toHaveBeenCalledWith("post payload");
   });
 });
