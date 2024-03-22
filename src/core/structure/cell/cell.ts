@@ -1,4 +1,5 @@
 import { CellKey, generateCellKey } from "../key/keyTypes";
+import { CellState } from "./cellState.ts";
 
 export default class Cell {
   key: CellKey;
@@ -27,13 +28,4 @@ export default class Cell {
       this.value = "";
     }
   }
-}
-
-// Initial structure, move to separate file
-export enum CellState {
-  OK,
-  INVALID_EXPRESSION,
-  INVALID_REFERENCE,
-  CIRCULAR_REFERENCE,
-  INVALID_FORMAT,
 }

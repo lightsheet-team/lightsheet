@@ -12,7 +12,8 @@ import {
 import Sheet from "../structure/sheet.ts";
 import { PositionInfo } from "../structure/sheet.types.ts";
 import { EvaluationResult } from "./expressionHandler.types.ts";
-import { CellState } from "../structure/cell/cell.ts";
+
+import { CellState } from "../structure/cell/cellState.ts";
 const math = create({
   parseDependencies,
   addDependencies,
