@@ -31,7 +31,7 @@ describe("Events", () => {
       EventState.PRE_EVENT,
     );
 
-    events.on(EventType.CORE_SET_CELL, preEventCallback);
+    events.on(EventType.CORE_SET_CELL, preEventCallback, EventState.PRE_EVENT);
     events.on(EventType.CORE_SET_CELL, postEventCallback);
     events.emit(event);
 
@@ -39,9 +39,26 @@ describe("Events", () => {
     expect(postEventCallback).toHaveBeenCalled();
   });
 
-  test("should register a one-time event and trigger it just once", () => {
+  test("should register a one-time post-event callback and trigger it just once", () => {
     const mockCallback = jest.fn();
     events.once(EventType.CORE_SET_CELL, mockCallback);
+
+    const event = new Event(
+      EventType.CORE_SET_CELL,
+      "test payload",
+      false,
+    );
+    events.emit(event);
+    expect(mockCallback).toHaveBeenCalledTimes(1);
+    events.emit(event); 
+    expect(mockCallback).toHaveBeenCalledTimes(1);
+  });
+
+  test("should register a one-time post-event callback and trigger it just once with transition from pre-event to post-event", () => {
+    const preMockCallback = jest.fn();
+    const postMockCallback = jest.fn();
+    events.once(EventType.CORE_SET_CELL, postMockCallback);
+    events.on(EventType.CORE_SET_CELL, preMockCallback)
 
     const event = new Event(
       EventType.CORE_SET_CELL,
@@ -50,9 +67,30 @@ describe("Events", () => {
       EventState.PRE_EVENT,
     );
     events.emit(event);
+    events.emit(event); 
     events.emit(event);
 
-    expect(mockCallback).toHaveBeenCalledTimes(1);
+    expect(preMockCallback).toHaveBeenCalledTimes(3);
+    expect(postMockCallback).toHaveBeenCalledTimes(1);
+  });
+
+  test("should register a one-time pre-event callback and trigger it just once", () => {
+    const preMockCallback = jest.fn();
+    const postMockCallback = jest.fn();
+    events.once(EventType.CORE_SET_CELL, preMockCallback, EventState.PRE_EVENT);
+    events.on(EventType.CORE_SET_CELL, postMockCallback, EventState.POST_EVENT);
+
+    const event = new Event(
+      EventType.CORE_SET_CELL,
+      "test payload",
+      false,
+      EventState.PRE_EVENT
+    );
+    events.emit(event);
+    expect(preMockCallback).toHaveBeenCalledTimes(1);
+    events.emit(event); 
+    expect(preMockCallback).toHaveBeenCalledTimes(1);
+    expect(postMockCallback).toHaveBeenCalledTimes(2);
   });
 
   test("should remove an event listener", () => {
@@ -64,6 +102,19 @@ describe("Events", () => {
     events.emit(event);
 
     expect(mockCallback).not.toHaveBeenCalled();
+  });
+
+  test("should remove an event listener only with correct state", () => {
+    const mockCallback = jest.fn();
+    events.on(EventType.UI_SET_CELL, mockCallback);
+    events.on(EventType.UI_SET_CELL, mockCallback, EventState.PRE_EVENT);
+
+    events.removeEventListener(EventType.UI_SET_CELL, mockCallback, EventState.PRE_EVENT);
+
+    const event = new Event(EventType.UI_SET_CELL, "test payload", false, EventState.PRE_EVENT);
+    events.emit(event);
+
+    expect(mockCallback).toHaveBeenCalledTimes(1);
   });
 
   test("should handle multiple listeners for the same event", () => {
