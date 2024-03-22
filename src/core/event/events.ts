@@ -55,8 +55,17 @@ export default class Events {
     this.on(eventType, oncecallback, eventState);
   }
 
-  addEventListener(eventType: EventType, callback: ListenerFunction): void {
-    this.on(eventType, callback);
+  addEventListener(
+    eventType: EventType,
+    callback: ListenerFunction,
+    eventState: EventState = EventState.POST_EVENT,
+    once: boolean = false,
+  ): void {
+    if (!once) {
+      this.on(eventType, callback, eventState);
+    } else {
+      this.once(eventType, callback, eventState);
+    }
   }
 
   removeEventListener(
