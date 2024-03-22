@@ -79,14 +79,16 @@ export default class Sheet {
     if (!colKey || !rowKey) return null;
 
     const cell = this.getCell(colKey, rowKey)!;
-    return {
-      value: cell.value,
-      state: cell.state,
-      position: {
-        columnKey: colKey,
-        rowKey: rowKey,
-      },
-    };
+    return cell
+      ? {
+          value: cell.value,
+          state: cell.state,
+          position: {
+            columnKey: colKey,
+            rowKey: rowKey,
+          },
+        }
+      : null;
   }
 
   deleteCell(colKey: ColumnKey, rowKey: RowKey): boolean {
