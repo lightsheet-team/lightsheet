@@ -4,21 +4,37 @@ import EventState from "./eventState";
 
 type ListenerFunction = (payload: any) => void;
 
+type EventListener = {
+  callback: ListenerFunction;
+  eventState: EventState;
+};
+
 export default class Events {
-  private listeners: { [key in EventType]?: ListenerFunction };
+  private listeners: { [key in EventType]?: EventListener[] };
 
   constructor() {
     this.listeners = {};
   }
 
-  on(eventType: EventType, callback: ListenerFunction): void {
-    this.listeners[eventType] = callback;
+  on(
+    eventType: EventType,
+    callback: ListenerFunction,
+    eventState: EventState = EventState.POST_EVENT,
+  ): void {
+    if (!this.listeners[eventType]) {
+      this.listeners[eventType] = [];
+    }
+    this.listeners[eventType]!.push({ callback, eventState });
   }
 
   emit(event: Event): void {
-    const listener = this.listeners[event.eventType];
-    if (listener) {
-      listener(event.payload);
+    const listeners = this.listeners[event.eventType];
+    if (listeners) {
+      listeners.slice().forEach((listener) => {
+        if (listener.eventState === event.eventState) {
+          listener.callback(event.payload);
+        }
+      });
     }
 
     if (event.eventState == EventState.PRE_EVENT && !event.canceled) {
@@ -27,19 +43,35 @@ export default class Events {
     }
   }
 
-  once(eventType: EventType, callback: ListenerFunction): void {
+  once(
+    eventType: EventType,
+    callback: ListenerFunction,
+    eventState: EventState = EventState.POST_EVENT,
+  ): void {
     const oncecallback: ListenerFunction = (payload: any) => {
-      this.removeEventListener(eventType);
+      this.removeEventListener(eventType, oncecallback, eventState);
       callback(payload);
     };
-    this.on(eventType, oncecallback);
+    this.on(eventType, oncecallback, eventState);
   }
 
   addEventListener(eventType: EventType, callback: ListenerFunction): void {
     this.on(eventType, callback);
   }
 
-  removeEventListener(eventType: EventType): void {
-    delete this.listeners[eventType];
+  removeEventListener(
+    eventType: EventType,
+    callback: ListenerFunction,
+    eventState: EventState = EventState.POST_EVENT,
+  ): void {
+    const listeners = this.listeners[eventType];
+    if (listeners) {
+      this.listeners[eventType] = listeners.filter(
+        (listener) =>
+          !(
+            listener.callback === callback && listener.eventState === eventState
+          ),
+      );
+    }
   }
 }
