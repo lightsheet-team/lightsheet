@@ -2,7 +2,11 @@
 export type LightSheetOptions = {
   data: any[];
   columns: LightSheetColumn[];
-  toolbar: ToolbarItem[];
+  toolbarOptions?: {
+    showToolbar: boolean;
+    items: ToolbarItem[];
+    element?: HTMLElement;
+  };
   onCellChange?: (colIndex: number, rowIndex: number, value: any) => void;
 };
 

@@ -22,15 +22,32 @@ export default class LightSheet {
       this.options.data.length,
       this.options.data[0].length,
     );
-    this.createToolBar();
+    if (options.toolbarOptions) {
+      //create toolbar
+      this.createToolBar();
+      //show toolbar
+      if (options.toolbarOptions.showToolbar) {
+        this.showToolBar();
+      }
+    }
     this.initializeData();
     if (options.onCellChange) {
       this.onCellChange = options.onCellChange;
     }
   }
+
   createToolBar() {
-    this.ui.createToolBar(this.options.toolbar);
+    if (this.options.toolbarOptions) {
+      this.ui.createToolBar(this.options.toolbarOptions);
+    }
   }
+
+  showToolBar() {
+    if (this.options.toolbarOptions) {
+      this.ui.showToolBar(this.options.toolbarOptions?.showToolbar);
+    }
+  }
+
   initializeData() {
     // Create header row and add headers
     const headerData = Array.from(

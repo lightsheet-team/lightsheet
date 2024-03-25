@@ -1,8 +1,9 @@
 import LightSheet from "../main";
+import { ToolbarItem } from "../main.types";
 
 export default class UI {
   tableEl: Element;
-  lightSheetToolBarDom: Element;
+  lightSheetToolBarDom: HTMLElement;
   tableHeadDom: Element;
   tableBodyDom: Element;
   rowCount: number;
@@ -25,7 +26,7 @@ export default class UI {
     /*toolbar*/
     this.lightSheetToolBarDom = document.createElement("div");
     this.lightSheetToolBarDom.classList.add("light_sheet_table_toolbar");
-    this.tableEl.appendChild(this.lightSheetToolBarDom);
+    this.lightSheetToolBarDom.style.display = "none";
 
     /*content*/
     const lightSheetContainerDom = document.createElement("div");
@@ -48,22 +49,46 @@ export default class UI {
     tableContainerDom.appendChild(this.tableBodyDom);
   }
 
-  createToolBar(toolbar: string | any[]) {
-    for (let i = 0; i < toolbar.length; i++) {
+  createToolBar(toolbarOptions: {
+    showToolbar: boolean;
+    items: ToolbarItem[];
+    element?: HTMLElement | undefined;
+  }) {
+    if (toolbarOptions.element != null) {
+      toolbarOptions.element.appendChild(this.lightSheetToolBarDom);
+    } else {
+      //insert the tool bar as first child
+      this.tableEl.insertBefore(
+        this.lightSheetToolBarDom,
+        this.tableEl.firstChild,
+      );
+    }
+
+    const toolbarContent = toolbarOptions.items;
+
+    for (let i = 0; i < toolbarContent.length; i++) {
       //divide the tool bar icons into 3 types for later implementation
-      if (toolbar[i].type == "i") {
+      if (toolbarContent[i].type == "i") {
         const toolbarItem = document.createElement("i");
         toolbarItem.classList.add("lightSheet_toolbar_item");
         toolbarItem.classList.add("material-symbols-outlined");
-        toolbarItem.textContent = toolbar[i].content;
+        toolbarItem.textContent = toolbarContent[i].content;
         this.lightSheetToolBarDom.appendChild(toolbarItem);
-      } else if (toolbar[i].type == "color") {
+      } else if (toolbarContent[i].type == "color") {
         const toolbarItem = document.createElement("i");
         toolbarItem.classList.add("lightSheet_toolbar_item");
         toolbarItem.classList.add("material-symbols-outlined");
         this.lightSheetToolBarDom.appendChild(toolbarItem);
-        toolbarItem.textContent = toolbar[i].content;
+        toolbarItem.textContent = toolbarContent[i].content;
       }
+    }
+  }
+
+  showToolBar(isShown: boolean) {
+    if (isShown) {
+      this.lightSheetToolBarDom.style.display = "flex";
+    } else {
+      this.lightSheetToolBarDom.style.display = "none";
     }
   }
 

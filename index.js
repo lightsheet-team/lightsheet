@@ -102,7 +102,11 @@ const toolbar = [
 new Lightsheet(document.getElementById("lightsheet"), {
   data,
   columns,
-  toolbar,
+  toolbarOptions: {
+    showToolbar: true,
+    items: toolbar,
+    element: document.getElementById("toolbar-dom-id"),
+  },
   onCellChange: (colIndex, rowIndex, newValue) => {
     console.log(colIndex, rowIndex, newValue);
   },
