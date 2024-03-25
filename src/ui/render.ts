@@ -67,20 +67,11 @@ export default class UI {
     const toolbarContent = toolbarOptions.items;
 
     for (let i = 0; i < toolbarContent.length; i++) {
-      //divide the tool bar icons into 3 types for later implementation
-      if (toolbarContent[i].type == "i") {
-        const toolbarItem = document.createElement("i");
-        toolbarItem.classList.add("lightSheet_toolbar_item");
-        toolbarItem.classList.add("material-symbols-outlined");
-        toolbarItem.textContent = toolbarContent[i].content;
-        this.lightSheetToolBarDom.appendChild(toolbarItem);
-      } else if (toolbarContent[i].type == "color") {
-        const toolbarItem = document.createElement("i");
-        toolbarItem.classList.add("lightSheet_toolbar_item");
-        toolbarItem.classList.add("material-symbols-outlined");
-        this.lightSheetToolBarDom.appendChild(toolbarItem);
-        toolbarItem.textContent = toolbarContent[i].content;
-      }
+      const toolbarItem = document.createElement("i");
+      toolbarItem.classList.add("lightSheet_toolbar_item");
+      toolbarItem.classList.add("material-symbols-outlined");
+      toolbarItem.textContent = toolbarContent[i];
+      this.lightSheetToolBarDom.appendChild(toolbarItem);
     }
   }
 
