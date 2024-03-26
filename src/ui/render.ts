@@ -1,5 +1,6 @@
+import { ToolbarItems } from "../../utils/constants";
 import LightSheet from "../main";
-import { ToolbarItem } from "../main.types";
+import { ToolbarOptions } from "../main.types";
 
 export default class UI {
   tableEl: Element;
@@ -9,17 +10,25 @@ export default class UI {
   rowCount: number;
   colCount: number;
   lightSheet: LightSheet;
+  toolbarOptions?: ToolbarOptions;
 
   constructor(
     el: Element,
     lightSheet: LightSheet,
     rowCount: number,
     colCount: number,
+    toolbarOptions?: ToolbarOptions,
   ) {
     this.tableEl = el;
     this.colCount = colCount;
     this.rowCount = rowCount;
     this.lightSheet = lightSheet;
+    this.toolbarOptions = {
+      showToolbar: true,
+      element: undefined,
+      items: ToolbarItems,
+      ...toolbarOptions,
+    };
 
     this.tableEl.classList.add("light_sheet_table_container");
 
@@ -27,6 +36,13 @@ export default class UI {
     this.lightSheetToolBarDom = document.createElement("div");
     this.lightSheetToolBarDom.classList.add("light_sheet_table_toolbar");
     this.lightSheetToolBarDom.style.display = "none";
+
+    if (this.toolbarOptions) {
+      this.createToolBar();
+      if (this.toolbarOptions.showToolbar) {
+        this.showToolBar(this.toolbarOptions.showToolbar);
+      }
+    }
 
     /*content*/
     const lightSheetContainerDom = document.createElement("div");
@@ -49,29 +65,27 @@ export default class UI {
     tableContainerDom.appendChild(this.tableBodyDom);
   }
 
-  createToolBar(toolbarOptions: {
-    showToolbar: boolean;
-    items: ToolbarItem[];
-    element?: HTMLElement | undefined;
-  }) {
-    if (toolbarOptions.element != null) {
-      toolbarOptions.element.appendChild(this.lightSheetToolBarDom);
-    } else {
-      //insert the tool bar as first child
-      this.tableEl.insertBefore(
-        this.lightSheetToolBarDom,
-        this.tableEl.firstChild,
-      );
-    }
+  createToolBar() {
+    if (this.toolbarOptions) {
+      if (this.toolbarOptions.element != null) {
+        this.toolbarOptions.element.appendChild(this.lightSheetToolBarDom);
+      } else {
+        //insert the tool bar as first child
+        this.tableEl.insertBefore(
+          this.lightSheetToolBarDom,
+          this.tableEl.firstChild,
+        );
+      }
 
-    const toolbarContent = toolbarOptions.items;
+      const toolbarContent = this.toolbarOptions.items;
 
-    for (let i = 0; i < toolbarContent.length; i++) {
-      const toolbarItem = document.createElement("i");
-      toolbarItem.classList.add("lightSheet_toolbar_item");
-      toolbarItem.classList.add("material-symbols-outlined");
-      toolbarItem.textContent = toolbarContent[i];
-      this.lightSheetToolBarDom.appendChild(toolbarItem);
+      for (let i = 0; i < toolbarContent.length; i++) {
+        const toolbarItem = document.createElement("i");
+        toolbarItem.classList.add("lightSheet_toolbar_item");
+        toolbarItem.classList.add("material-symbols-outlined");
+        toolbarItem.textContent = toolbarContent[i];
+        this.lightSheetToolBarDom.appendChild(toolbarItem);
+      }
     }
   }
 

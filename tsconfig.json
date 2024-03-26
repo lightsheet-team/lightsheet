@@ -26,6 +26,7 @@
     "src",
     "index.js",
     "jest.config.js",
-    "tests"
+    "tests",
+    "utils",
   ]
 }
