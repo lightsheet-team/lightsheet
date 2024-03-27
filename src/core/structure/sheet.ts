@@ -121,18 +121,18 @@ export default class Sheet {
     return true;
   }
 
-  getCellStyle(colKey: ColumnKey, rowKey: RowKey): CellStyle {
-    const col = this.columns.get(colKey);
-    const row = this.rows.get(rowKey);
-    if (!col || !row) return this.defaultStyle;
+  getCellStyle(colKey?: ColumnKey, rowKey?: RowKey): CellStyle {
+    const col = colKey ? this.columns.get(colKey) : null;
+    const row = rowKey ? this.rows.get(rowKey) : null;
+    if (!col && !row) return this.defaultStyle;
 
-    const existingStyle = col.cellFormatting.get(row.key);
+    const existingStyle = col && row ? col.cellFormatting.get(row.key) : null;
     const cellStyle = new CellStyle().clone(existingStyle);
 
     // Apply style properties with priority: cell style > column style > row style > default style.
     cellStyle
-      .applyStylesOf(col.defaultStyle)
-      .applyStylesOf(row.defaultStyle)
+      .applyStylesOf(col ? col.defaultStyle : null)
+      .applyStylesOf(row ? row.defaultStyle : null)
       .applyStylesOf(this.defaultStyle);
 
     return cellStyle;
