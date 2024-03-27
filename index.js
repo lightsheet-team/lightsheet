@@ -42,6 +42,10 @@ const columns = [
 new Lightsheet(document.getElementById("lightsheet"), {
   data,
   columns,
+  formulaBarOptions: {
+    showToolbar: true,
+    element: document.getElementById("toolbar-dom-id"),
+  },
   onCellChange: (colIndex, rowIndex, newValue) => {
     console.log(colIndex, rowIndex, newValue);
   },

@@ -1,25 +1,39 @@
 import LightSheet from "../main";
+import { FormulaBarOptions } from "../main.types";
 
 export default class UI {
   tableEl: Element;
+  lightSheetFormulaBarDom: HTMLElement;
   tableHeadDom: Element;
   tableBodyDom: Element;
   rowCount: number;
   colCount: number;
   lightSheet: LightSheet;
+  formulaBarOptions?: FormulaBarOptions;
 
   constructor(
     el: Element,
     lightSheet: LightSheet,
     rowCount: number,
     colCount: number,
+    formulaBarOptions?: FormulaBarOptions,
   ) {
     this.tableEl = el;
     this.colCount = colCount;
     this.rowCount = rowCount;
     this.lightSheet = lightSheet;
+    this.formulaBarOptions = formulaBarOptions;
 
     this.tableEl.classList.add("light_sheet_table_container");
+
+    /*formula bar*/
+    this.lightSheetFormulaBarDom = document.createElement("div");
+    this.lightSheetFormulaBarDom.classList.add("light_sheet_table_formula_bar");
+    this.lightSheetFormulaBarDom.style.display = "none";
+
+    if (this.formulaBarOptions) {
+      this.createFormulaBar();
+    }
 
     const lightSheetContainerDom = document.createElement("div");
     lightSheetContainerDom.classList.add("light_sheet_table_content");
@@ -39,6 +53,22 @@ export default class UI {
     //tbody
     this.tableBodyDom = document.createElement("tbody");
     tableContainerDom.appendChild(this.tableBodyDom);
+  }
+
+  createFormulaBar() {
+    if (this.formulaBarOptions) {
+      if (this.formulaBarOptions.element != null) {
+        this.formulaBarOptions.element.appendChild(
+          this.lightSheetFormulaBarDom,
+        );
+      } else {
+        //insert the tool bar as first child
+        this.tableEl.insertBefore(
+          this.lightSheetFormulaBarDom,
+          this.tableEl.firstChild,
+        );
+      }
+    }
   }
 
   addHeader(headerData: string[]) {
