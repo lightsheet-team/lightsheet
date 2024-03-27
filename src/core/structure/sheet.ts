@@ -6,6 +6,12 @@ import { CellInfo, PositionInfo } from "./sheet.types.ts";
 import ExpressionHandler from "../evaluation/expressionHandler.ts";
 import CellStyle from "./cellStyle.ts";
 import CellGroup from "./group/cellGroup.ts";
+import Events from "../event/events.ts";
+import LightsheetEvent from "../event/event.ts";
+import EventType, {
+  CoreSetCellPayload,
+  UISetCellPayload,
+} from "../event/eventType.ts";
 
 export default class Sheet {
   defaultStyle: any;
@@ -20,8 +26,9 @@ export default class Sheet {
   default_height: number;
 
   private expressionHandler: ExpressionHandler;
+  private events: Events;
 
-  constructor() {
+  constructor(events: Events | null = null) {
     this.defaultStyle = new CellStyle(
       null,
       30,
@@ -42,6 +49,9 @@ export default class Sheet {
     this.default_height = 20;
 
     this.expressionHandler = new ExpressionHandler(this);
+
+    this.events = events ?? new Events();
+    this.registerEvents();
   }
 
   getRowIndex(rowKey: RowKey): number | undefined {
@@ -70,6 +80,8 @@ export default class Sheet {
       cell.formula = value;
       this.resolveCell(cell);
     }
+
+    this.emitSetCellEvent(colKey, rowKey, cell);
 
     return {
       value: cell ? cell.value : undefined,
@@ -304,5 +316,50 @@ export default class Sheet {
     }
 
     return { rowKey: rowKey, columnKey: colKey };
+  }
+
+  private emitSetCellEvent(colKey: ColumnKey, rowKey: RowKey, cell: Cell) {
+    const payload: CoreSetCellPayload = {
+      position: {
+        rowKey: rowKey,
+        columnKey: colKey,
+      },
+      indexPosition: {
+        columnIndex: this.getColumnIndex(colKey)!,
+        rowIndex: this.getRowIndex(rowKey)!,
+      },
+      formula: cell ? cell.formula : "",
+      value: cell ? cell.value : "",
+      clearCell: this.cell_data.get(cell.key) == null,
+      clearRow: this.rows.get(rowKey) == null,
+    };
+
+    this.events.emit(new LightsheetEvent(EventType.CORE_SET_CELL, payload));
+  }
+
+  private registerEvents() {
+    this.events.on(EventType.UI_SET_CELL, (event) => {
+      const payload = event.payload as UISetCellPayload;
+      // Use either setCellAt or setCell depending on what information is provided.
+      if (payload.keyPosition) {
+        this.setCell(
+          payload.keyPosition.columnKey!,
+          payload.keyPosition.rowKey!,
+          payload.formula,
+        );
+      } else if (payload.indexPosition) {
+        this.setCellAt(
+          payload.indexPosition.columnIndex,
+          payload.indexPosition.rowIndex,
+          payload.formula,
+        );
+      } else {
+        throw new Error(
+          "Invalid event payload for UI_SET_CELL: no position info provided.",
+        );
+      }
+
+      console.log(this.exportData());
+    });
   }
 }
