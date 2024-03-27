@@ -358,8 +358,6 @@ export default class Sheet {
           "Invalid event payload for UI_SET_CELL: no position info provided.",
         );
       }
-
-      console.log(this.exportData());
     });
   }
 }
