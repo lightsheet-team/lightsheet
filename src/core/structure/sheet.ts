@@ -8,10 +8,8 @@ import CellStyle from "./cellStyle.ts";
 import CellGroup from "./group/cellGroup.ts";
 import Events from "../event/events.ts";
 import LightsheetEvent from "../event/event.ts";
-import EventType, {
-  CoreSetCellPayload,
-  UISetCellPayload,
-} from "../event/eventType.ts";
+import { CoreSetCellPayload, UISetCellPayload } from "../event/events.types.ts";
+import EventType from "../event/eventType.ts";
 
 export default class Sheet {
   defaultStyle: any;

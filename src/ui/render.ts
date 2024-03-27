@@ -5,7 +5,8 @@ import {
 } from "../core/structure/key/keyTypes";
 import { CellIdInfo } from "./render.types.ts";
 import LightsheetEvent from "../core/event/event.ts";
-import EventType, { CoreSetCellPayload } from "../core/event/eventType.ts";
+import { CoreSetCellPayload } from "../core/event/events.types.ts";
+import EventType from "../core/event/eventType.ts";
 
 export default class UI {
   tableEl: Element;
