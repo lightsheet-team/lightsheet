@@ -67,6 +67,9 @@ export default class Sheet {
 
   setCell(colKey: ColumnKey, rowKey: RowKey, value: string): CellInfo {
     let cell = this.getCell(colKey, rowKey);
+    const colIndex = this.getColumnIndex(colKey)!;
+    const rowIndex = this.getRowIndex(rowKey)!;
+
     if (!cell) {
       cell = this.createCell(colKey, rowKey, value);
     } else if (value == "") {
@@ -79,7 +82,7 @@ export default class Sheet {
       this.resolveCell(cell);
     }
 
-    this.emitSetCellEvent(colKey, rowKey, cell);
+    this.emitSetCellEvent(colKey, rowKey, colIndex, rowIndex, cell);
 
     return {
       value: cell ? cell.value : undefined,
@@ -316,15 +319,21 @@ export default class Sheet {
     return { rowKey: rowKey, columnKey: colKey };
   }
 
-  private emitSetCellEvent(colKey: ColumnKey, rowKey: RowKey, cell: Cell) {
+  private emitSetCellEvent(
+    colKey: ColumnKey,
+    rowKey: RowKey,
+    colPos: number,
+    rowPos: number,
+    cell: Cell,
+  ) {
     const payload: CoreSetCellPayload = {
       position: {
         rowKey: rowKey,
         columnKey: colKey,
       },
       indexPosition: {
-        columnIndex: this.getColumnIndex(colKey)!,
-        rowIndex: this.getRowIndex(rowKey)!,
+        columnIndex: colPos,
+        rowIndex: rowPos,
       },
       formula: cell ? cell.formula : "",
       value: cell ? cell.value : "",
