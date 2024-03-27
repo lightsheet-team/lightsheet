@@ -336,26 +336,30 @@ export default class Sheet {
   }
 
   private registerEvents() {
-    this.events.on(EventType.UI_SET_CELL, (event) => {
-      const payload = event.payload as UISetCellPayload;
-      // Use either setCellAt or setCell depending on what information is provided.
-      if (payload.keyPosition) {
-        this.setCell(
-          payload.keyPosition.columnKey!,
-          payload.keyPosition.rowKey!,
-          payload.formula,
-        );
-      } else if (payload.indexPosition) {
-        this.setCellAt(
-          payload.indexPosition.columnIndex,
-          payload.indexPosition.rowIndex,
-          payload.formula,
-        );
-      } else {
-        throw new Error(
-          "Invalid event payload for UI_SET_CELL: no position info provided.",
-        );
-      }
-    });
+    this.events.on(EventType.UI_SET_CELL, (event) =>
+      this.handleUISetCell(event),
+    );
+  }
+
+  private handleUISetCell(event: LightsheetEvent) {
+    const payload = event.payload as UISetCellPayload;
+    // Use either setCellAt or setCell depending on what information is provided.
+    if (payload.keyPosition) {
+      this.setCell(
+        payload.keyPosition.columnKey!,
+        payload.keyPosition.rowKey!,
+        payload.formula,
+      );
+    } else if (payload.indexPosition) {
+      this.setCellAt(
+        payload.indexPosition.columnIndex,
+        payload.indexPosition.rowIndex,
+        payload.formula,
+      );
+    } else {
+      throw new Error(
+        "Invalid event payload for UI_SET_CELL: no position info provided.",
+      );
+    }
   }
 }
