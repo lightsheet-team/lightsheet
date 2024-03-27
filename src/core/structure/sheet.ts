@@ -117,6 +117,7 @@ export default class Sheet {
   deleteColumn(position: number): boolean {
     const colKey = this.columnPositions.get(position);
 
+    const lastColumnPosition = Math.max(...this.columnPositions.keys());
     if (colKey !== undefined) {
       const col = this.columns.get(colKey);
       for (const [rowKey] of col!.cellIndex) {
@@ -124,8 +125,9 @@ export default class Sheet {
       }
     }
 
-    const lastColumnPosition = Math.max(...this.columnPositions.keys());
-    this.shiftColumns(lastColumnPosition, ShiftDirection.backward);
+    if (position !== lastColumnPosition) {
+      this.shiftColumns(lastColumnPosition, ShiftDirection.backward);
+    }
     return true;
   }
 
