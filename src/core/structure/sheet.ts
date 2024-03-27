@@ -117,12 +117,11 @@ export default class Sheet {
   deleteColumn(position: number): boolean {
     const colKey = this.columnPositions.get(position);
 
-    if (colKey === undefined) return false;
-
-    const col = this.columns.get(colKey);
-
-    for (const [rowKey] of col!.cellIndex) {
-      this.deleteCell(colKey, rowKey);
+    if (colKey !== undefined) {
+      const col = this.columns.get(colKey);
+      for (const [rowKey] of col!.cellIndex) {
+        this.deleteCell(colKey, rowKey);
+      }
     }
 
     const lastColumnPosition = Math.max(...this.columnPositions.keys());
@@ -153,8 +152,7 @@ export default class Sheet {
       if (shiftDirection === ShiftDirection.forward) {
         currentPos++;
       } else {
-        // this is an issue, if there is not empty position before the current position we will delete the first column
-        if (currentPos === 1) {
+        if (currentPos === 0) {
           break;
         }
         currentPos--;
