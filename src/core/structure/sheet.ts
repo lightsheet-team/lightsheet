@@ -22,13 +22,7 @@ export default class Sheet {
   private expressionHandler: ExpressionHandler;
 
   constructor() {
-    this.defaultStyle = new CellStyle(
-      null,
-      30,
-      10,
-      [0, 0, 0],
-      [false, false, false, false],
-    ); // TODO This should be configurable.
+    this.defaultStyle = new CellStyle(); // TODO This should be configurable.
 
     this.settings = null;
     this.cell_data = new Map<CellKey, Cell>();
