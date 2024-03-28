@@ -1,5 +1,6 @@
 import Sheet from "../../../src/core/structure/sheet";
 import { CellState } from "../../../src/core/structure/cell/cellState.ts";
+import { CellInfo } from "../../../src/core/structure/sheet.types.ts";
 
 describe("Cell references", () => {
   let sheet: Sheet;
@@ -15,8 +16,7 @@ describe("Cell references", () => {
   });
 
   it("should create cells with references which are reflected by cell.referencesIn and cell.referencesOut", () => {
-    const setCell = function (col: number, row: number, value: string) {
-      const cInfo = sheet.setCellAt(col, row, value);
+    const getCellReference = (cInfo: CellInfo) => {
       const cKey = sheet.columns
         .get(cInfo.position.columnKey!)!
         .cellIndex.get(cInfo.position.rowKey!)!;
@@ -24,10 +24,10 @@ describe("Cell references", () => {
     };
 
     const cells = [
-      setCell(0, 0, "100"), // A1
-      setCell(1, 0, "=A1"), // B1
-      setCell(2, 2, "1"), // C3
-      setCell(2, 0, "=A1 + B1 + C3"), // C1
+      getCellReference(sheet.setCellAt(0, 0, "100")), // A1
+      getCellReference(sheet.setCellAt(1, 0, "=A1")), // B1
+      getCellReference(sheet.setCellAt(2, 2, "1")), // C3
+      getCellReference(sheet.setCellAt(2, 0, "=A1 + B1 + C3")), // C1
     ];
 
     expect(cells[0]!.referencesIn).toEqual(
