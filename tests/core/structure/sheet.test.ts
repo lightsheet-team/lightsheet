@@ -97,12 +97,9 @@ describe("Sheet", () => {
       [0, 2, "0"], // A3
       [1, 2, "10"], // B3
     ];
-    const cells = [];
     // Initialize the cells first to generate cell keys.
     for (const c of cellInfo) {
-      cells.push(
-        sheet.setCellAt(c[0] as number, c[1] as number, c[2] as string),
-      );
+      sheet.setCellAt(c[0] as number, c[1] as number, c[2] as string);
     }
 
     sheet.setCellAt(0, 0, "=B1");
