@@ -28,7 +28,7 @@ describe("Sheet", () => {
       const cKey = sheet.columns
         .get(cInfo.position.columnKey!)!
         .cellIndex.get(cInfo.position.rowKey!)!;
-      return sheet.cell_data.get(cKey)!;
+      return sheet.cellData.get(cKey)!;
     };
 
     const cells = [

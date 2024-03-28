@@ -186,9 +186,9 @@ export default class Sheet {
     const cellKey = col.cellIndex.get(row.key)!;
 
     // Remove references to this cell from other cells' referencesOut.
-    const cell = this.cell_data.get(cellKey)!;
+    const cell = this.cellData.get(cellKey)!;
     cell.referencesIn.forEach((ref) => {
-      const referredCell = this.cell_data.get(ref)!;
+      const referredCell = this.cellData.get(ref)!;
       referredCell.referencesOut.delete(cellKey);
 
       // Invalidate cells that reference this cell.
@@ -197,7 +197,7 @@ export default class Sheet {
 
     // Remove this cell from other cells' referencesIn.
     cell.referencesOut.forEach((ref) => {
-      const referredCell = this.cell_data.get(ref)!;
+      const referredCell = this.cellData.get(ref)!;
       referredCell.referencesIn.delete(cellKey);
     });
 
@@ -395,7 +395,7 @@ export default class Sheet {
 
     // Clean up the referencesIn sets of cells that are no longer referenced by the formula.
     removedReferences.forEach((ref) => {
-      const referredCell = this.cell_data.get(ref)!;
+      const referredCell = this.cellData.get(ref)!;
       referredCell.referencesIn.delete(cell.key);
     });
 
@@ -409,7 +409,7 @@ export default class Sheet {
 
     // Update cells that reference this cell. TODO This currently desyncs the UI - an event should be emitted.
     cell.referencesIn.forEach((ref) => {
-      const referredCell = this.cell_data.get(ref)!;
+      const referredCell = this.cellData.get(ref)!;
       this.resolveCell(referredCell);
     });
 
@@ -426,7 +426,7 @@ export default class Sheet {
       if (current === cell.key && !initial) return true;
       initial = false;
 
-      const currentCell = this.cell_data.get(current)!;
+      const currentCell = this.cellData.get(current)!;
       currentCell.referencesOut.forEach((ref) => {
         stack.push(ref);
       });
