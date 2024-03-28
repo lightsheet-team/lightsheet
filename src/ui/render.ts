@@ -3,7 +3,7 @@ import {
   generateColumnKey,
   generateRowKey,
 } from "../core/structure/key/keyTypes";
-import { CellIdInfo } from "./render.types.ts";
+import { CellIdInfo, SelectionContainer } from "./render.types.ts";
 
 export default class UI {
   tableEl: Element;
@@ -12,7 +12,8 @@ export default class UI {
   rowCount: number;
   colCount: number;
   lightSheet: LightSheet;
-  selectedCell: number[] | undefined;
+  selectedCell: number[];
+  selectedCellsContainer: SelectionContainer;
 
   constructor(
     el: Element,
@@ -25,6 +26,10 @@ export default class UI {
     this.rowCount = rowCount;
     this.lightSheet = lightSheet;
     this.selectedCell = [];
+    this.selectedCellsContainer = {
+      selectionStart: null,
+      selectionEnd: null,
+    };
 
     this.tableEl.classList.add("lightsheet_table_container");
 
