@@ -84,71 +84,127 @@ export default class Sheet {
   }
 
   moveColumn(from: number, to: number): boolean {
-    if (from === to) return false;
+    return this.moveCellGroup(from, to, this.columns, this.columnPositions);
+  }
 
-    const colKey = this.columnPositions.get(from);
-
-    if (colKey !== undefined) {
-      const col = this.columns.get(colKey);
-      if (col === undefined)
-        throw new Error("Column not found, inconsistent state");
-      col.position = to;
-    }
-
-    //we have to update all the positions to keep it consistent
-    this.columnPositions.delete(from);
-    if (to > from) {
-      this.shiftColumns(to, ShiftDirection.backward);
-    } else {
-      this.shiftColumns(to, ShiftDirection.forward);
-    }
-    if (colKey === undefined) {
-      this.columnPositions.delete(to);
-    } else {
-      this.columnPositions.set(to, colKey);
-    }
-
-    return true;
+  moveRow(from: number, to: number): boolean {
+    return this.moveCellGroup(from, to, this.rows, this.rowPositions);
   }
 
   insertColumn(position: number): boolean {
-    this.shiftColumns(position, ShiftDirection.forward);
+    this.shiftCellGroups(
+      position,
+      ShiftDirection.forward,
+      this.columns,
+      this.columnPositions,
+    );
+    return true;
+  }
+
+  insertRow(position: number): boolean {
+    this.shiftCellGroups(
+      position,
+      ShiftDirection.forward,
+      this.rows,
+      this.rowPositions,
+    );
     return true;
   }
 
   deleteColumn(position: number): boolean {
-    const colKey = this.columnPositions.get(position);
+    return this.deleteCellGroup(position, this.columns, this.columnPositions);
+  }
 
-    const lastColumnPosition = Math.max(...this.columnPositions.keys());
-    if (colKey !== undefined) {
-      const col = this.columns.get(colKey);
-      for (const [rowKey] of col!.cellIndex) {
-        this.deleteCell(colKey, rowKey);
+  deleteRow(position: number): boolean {
+    return this.deleteCellGroup(position, this.rows, this.rowPositions);
+  }
+
+  private deleteCellGroup(
+    position: number,
+    target: Map<ColumnKey | RowKey, CellGroup<ColumnKey | RowKey>>,
+    targetPositions: Map<number, ColumnKey | RowKey>,
+  ): boolean {
+    const groupKey = targetPositions.get(position);
+    const lastPosition = Math.max(...targetPositions.keys());
+
+    if (groupKey !== undefined) {
+      const group = target.get(groupKey);
+      // Delete all cells in this group.
+      for (const [oppositeKey] of group!.cellIndex) {
+        group instanceof Column
+          ? this.deleteCell(groupKey as ColumnKey, oppositeKey as RowKey)
+          : this.deleteCell(oppositeKey as ColumnKey, groupKey as RowKey);
       }
     }
 
-    if (position !== lastColumnPosition) {
-      this.shiftColumns(lastColumnPosition, ShiftDirection.backward);
+    if (position !== lastPosition) {
+      this.shiftCellGroups(
+        lastPosition,
+        ShiftDirection.backward,
+        target,
+        targetPositions,
+      );
     }
     return true;
   }
 
+  private moveCellGroup(
+    from: number,
+    to: number,
+    target: Map<ColumnKey | RowKey, CellGroup<ColumnKey | RowKey>>,
+    targetPositions: Map<number, ColumnKey | RowKey>,
+  ): boolean {
+    if (from === to) return false;
+
+    const groupKey = targetPositions.get(from);
+
+    if (groupKey !== undefined) {
+      const group = target.get(groupKey);
+      if (group === undefined) {
+        throw new Error(
+          `CellGroup not found for key ${groupKey}, inconsistent state`,
+        );
+      }
+      group.position = to;
+    }
+
+    // We have to update all the positions to keep it consistent.
+    targetPositions.delete(from);
+    const direction =
+      to > from ? ShiftDirection.backward : ShiftDirection.forward;
+    this.shiftCellGroups(to, direction, target, targetPositions);
+
+    if (groupKey === undefined) {
+      targetPositions.delete(to);
+    } else {
+      targetPositions.set(to, groupKey);
+    }
+
+    return true;
+  }
+
   /**
-   * Shift the column forward or backward till an empty position is found.
+   * Shift a CellGroup (column or row) forward or backward till an empty position is found.
    */
-  private shiftColumns(start: number, shiftDirection: ShiftDirection): boolean {
-    let previousValue: ColumnKey | undefined = undefined;
+  private shiftCellGroups(
+    start: number,
+    shiftDirection: ShiftDirection,
+    target: Map<ColumnKey | RowKey, CellGroup<ColumnKey | RowKey>>,
+    targetPositions: Map<number, ColumnKey | RowKey>,
+  ): boolean {
+    let previousValue: ColumnKey | RowKey | undefined = undefined;
     let currentPos = start;
     let tempCurrent;
     do {
-      tempCurrent = this.columnPositions.get(currentPos);
+      tempCurrent = targetPositions.get(currentPos);
 
       if (previousValue === undefined) {
-        this.columnPositions.delete(currentPos);
+        // First iteration; just clear the position we're shifting from.
+        targetPositions.delete(currentPos);
       } else {
-        this.columnPositions.set(currentPos, previousValue);
-        const col = this.columns.get(previousValue);
-        col!.position = currentPos;
+        targetPositions.set(currentPos, previousValue);
+        const group = target.get(previousValue);
+        group!.position = currentPos;
       }
 
       previousValue = tempCurrent;
