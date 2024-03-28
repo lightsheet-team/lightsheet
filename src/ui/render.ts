@@ -149,7 +149,7 @@ export default class UI {
     };
   }
 
-  changeReadOnly(readonly: boolean) {
+  setReadOnly(readonly: boolean) {
     const inputElements = this.tableBodyDom.querySelectorAll("input");
     inputElements.forEach((input) => {
       (input as HTMLInputElement).readOnly = readonly;

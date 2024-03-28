@@ -24,14 +24,14 @@ export default class LightSheet {
       this.options.isReadOnly,
     );
     this.initializeData();
-    this.changeReadOnly(this.options.isReadOnly);
+    this.setReadOnly(this.options.isReadOnly);
     if (options.onCellChange) {
       this.onCellChange = options.onCellChange;
     }
   }
 
-  changeReadOnly(isReadOnly: boolean) {
-    this.ui.changeReadOnly(isReadOnly);
+  setReadOnly(isReadOnly: boolean) {
+    this.ui.setReadOnly(isReadOnly);
   }
 
   initializeData() {
