@@ -9,12 +9,17 @@ export default abstract class Cloneable<T extends object> {
         continue;
       }
 
-      const property = Reflect.get(other, key);
+      let property: any = Reflect.get(other, key);
+
+      // Method of cloning depends on the type of the property.
       if (property instanceof Cloneable) {
-        const propObj = Object.create(property);
-        Reflect.set(this, key, propObj.clone(property));
-        continue;
+        property = Object.create(property).clone(property);
+      } else if (property instanceof Map) {
+        property = new Map(property);
+      } else if (property instanceof Array) {
+        property = [...property];
       }
+
       Reflect.set(this, key, property);
     }
 
