@@ -12,7 +12,7 @@ export default class UI {
   rowCount: number;
   colCount: number;
   lightSheet: LightSheet;
-  selectedCell: number[] | undefined;
+  selectedCell: number[];
   selectedCellsContainer: SelectionContainer;
 
   constructor(
