@@ -2,7 +2,7 @@ import { CellKey, ColumnKey, RowKey } from "./key/keyTypes.ts";
 import Cell, { CellState } from "./cell/cell.ts";
 import Column from "./group/column.ts";
 import Row from "./group/row.ts";
-import { CellInfo, PositionInfo } from "./sheet.types.ts";
+import { CellInfo, PositionInfo, ShiftDirection } from "./sheet.types.ts";
 import ExpressionHandler from "../evaluation/expressionHandler.ts";
 import CellStyle from "./cellStyle.ts";
 import CellGroup from "./group/cellGroup.ts";
@@ -10,38 +10,40 @@ import CellGroup from "./group/cellGroup.ts";
 export default class Sheet {
   defaultStyle: any;
   settings: any;
-  cell_data: Map<CellKey, Cell>;
+  cellData: Map<CellKey, Cell>;
   rows: Map<RowKey, Row>;
   columns: Map<ColumnKey, Column>;
   rowPositions: Map<number, RowKey>;
   columnPositions: Map<number, ColumnKey>;
 
-  default_width: number;
-  default_height: number;
+  defaultWidth: number;
+  defaultHeight: number;
 
   private expressionHandler: ExpressionHandler;
 
   constructor() {
-    this.defaultStyle = new CellStyle(
-      null,
-      30,
-      10,
-      [0, 0, 0],
-      [false, false, false, false],
-    ); // TODO This should be configurable.
+    this.defaultStyle = new CellStyle(); // TODO This should be configurable.
 
     this.settings = null;
-    this.cell_data = new Map<CellKey, Cell>();
+    this.cellData = new Map<CellKey, Cell>();
     this.rows = new Map<RowKey, Row>();
     this.columns = new Map<ColumnKey, Column>();
 
     this.rowPositions = new Map<number, RowKey>();
     this.columnPositions = new Map<number, ColumnKey>();
 
-    this.default_width = 40;
-    this.default_height = 20;
+    this.defaultWidth = 40;
+    this.defaultHeight = 20;
 
     this.expressionHandler = new ExpressionHandler(this);
+  }
+
+  getRowIndex(rowKey: RowKey): number | undefined {
+    return this.rows.get(rowKey)?.position;
+  }
+
+  getColumnIndex(colKey: ColumnKey): number | undefined {
+    return this.columns.get(colKey)?.position;
   }
 
   setCellAt(colPos: number, rowPos: number, value: string): CellInfo {
@@ -81,6 +83,145 @@ export default class Sheet {
     return cell ? cell.value : null;
   }
 
+  moveColumn(from: number, to: number): boolean {
+    return this.moveCellGroup(from, to, this.columns, this.columnPositions);
+  }
+
+  moveRow(from: number, to: number): boolean {
+    return this.moveCellGroup(from, to, this.rows, this.rowPositions);
+  }
+
+  insertColumn(position: number): boolean {
+    this.shiftCellGroups(
+      position,
+      ShiftDirection.forward,
+      this.columns,
+      this.columnPositions,
+    );
+    return true;
+  }
+
+  insertRow(position: number): boolean {
+    this.shiftCellGroups(
+      position,
+      ShiftDirection.forward,
+      this.rows,
+      this.rowPositions,
+    );
+    return true;
+  }
+
+  deleteColumn(position: number): boolean {
+    return this.deleteCellGroup(position, this.columns, this.columnPositions);
+  }
+
+  deleteRow(position: number): boolean {
+    return this.deleteCellGroup(position, this.rows, this.rowPositions);
+  }
+
+  private deleteCellGroup(
+    position: number,
+    target: Map<ColumnKey | RowKey, CellGroup<ColumnKey | RowKey>>,
+    targetPositions: Map<number, ColumnKey | RowKey>,
+  ): boolean {
+    const groupKey = targetPositions.get(position);
+    const lastPosition = Math.max(...targetPositions.keys());
+
+    if (groupKey !== undefined) {
+      const group = target.get(groupKey);
+      // Delete all cells in this group.
+      for (const [oppositeKey] of group!.cellIndex) {
+        group instanceof Column
+          ? this.deleteCell(groupKey as ColumnKey, oppositeKey as RowKey)
+          : this.deleteCell(oppositeKey as ColumnKey, groupKey as RowKey);
+      }
+    }
+
+    if (position !== lastPosition) {
+      this.shiftCellGroups(
+        lastPosition,
+        ShiftDirection.backward,
+        target,
+        targetPositions,
+      );
+    }
+    return true;
+  }
+
+  private moveCellGroup(
+    from: number,
+    to: number,
+    target: Map<ColumnKey | RowKey, CellGroup<ColumnKey | RowKey>>,
+    targetPositions: Map<number, ColumnKey | RowKey>,
+  ): boolean {
+    if (from === to) return false;
+
+    const groupKey = targetPositions.get(from);
+
+    if (groupKey !== undefined) {
+      const group = target.get(groupKey);
+      if (group === undefined) {
+        throw new Error(
+          `CellGroup not found for key ${groupKey}, inconsistent state`,
+        );
+      }
+      group.position = to;
+    }
+
+    // We have to update all the positions to keep it consistent.
+    targetPositions.delete(from);
+    const direction =
+      to > from ? ShiftDirection.backward : ShiftDirection.forward;
+    this.shiftCellGroups(to, direction, target, targetPositions);
+
+    if (groupKey === undefined) {
+      targetPositions.delete(to);
+    } else {
+      targetPositions.set(to, groupKey);
+    }
+
+    return true;
+  }
+
+  /**
+   * Shift a CellGroup (column or row) forward or backward till an empty position is found.
+   */
+  private shiftCellGroups(
+    start: number,
+    shiftDirection: ShiftDirection,
+    target: Map<ColumnKey | RowKey, CellGroup<ColumnKey | RowKey>>,
+    targetPositions: Map<number, ColumnKey | RowKey>,
+  ): boolean {
+    let previousValue: ColumnKey | RowKey | undefined = undefined;
+    let currentPos = start;
+    let tempCurrent;
+    do {
+      tempCurrent = targetPositions.get(currentPos);
+
+      if (previousValue === undefined) {
+        // First iteration; just clear the position we're shifting from.
+        targetPositions.delete(currentPos);
+      } else {
+        targetPositions.set(currentPos, previousValue);
+        const group = target.get(previousValue);
+        group!.position = currentPos;
+      }
+
+      previousValue = tempCurrent;
+
+      if (shiftDirection === ShiftDirection.forward) {
+        currentPos++;
+      } else {
+        if (currentPos === 0) {
+          break;
+        }
+        currentPos--;
+      }
+    } while (tempCurrent !== undefined && previousValue !== undefined);
+
+    return true;
+  }
+
   deleteCell(colKey: ColumnKey, rowKey: RowKey): boolean {
     const col = this.columns.get(colKey);
     const row = this.rows.get(rowKey);
@@ -90,7 +231,7 @@ export default class Sheet {
     const cellKey = col.cellIndex.get(row.key)!;
 
     // Delete cell data and all references to it in its column and row.
-    this.cell_data.delete(cellKey);
+    this.cellData.delete(cellKey);
 
     col.cellIndex.delete(row.key);
     col.cellFormatting.delete(row.key);
@@ -113,18 +254,18 @@ export default class Sheet {
     return true;
   }
 
-  getCellStyle(colKey: ColumnKey, rowKey: RowKey): CellStyle {
-    const col = this.columns.get(colKey);
-    const row = this.rows.get(rowKey);
-    if (!col || !row) return this.defaultStyle;
+  getCellStyle(colKey?: ColumnKey, rowKey?: RowKey): CellStyle {
+    const col = colKey ? this.columns.get(colKey) : null;
+    const row = rowKey ? this.rows.get(rowKey) : null;
+    if (!col && !row) return this.defaultStyle;
 
-    const existingStyle = col.cellFormatting.get(row.key);
+    const existingStyle = col && row ? col.cellFormatting.get(row.key) : null;
     const cellStyle = new CellStyle().clone(existingStyle);
 
     // Apply style properties with priority: cell style > column style > row style > default style.
     cellStyle
-      .applyStylesOf(col.defaultStyle)
-      .applyStylesOf(row.defaultStyle)
+      .applyStylesOf(col ? col.defaultStyle : null)
+      .applyStylesOf(row ? row.defaultStyle : null)
       .applyStylesOf(this.defaultStyle);
 
     return cellStyle;
@@ -212,7 +353,7 @@ export default class Sheet {
 
       // Use row's cell index to get keys for each cell and their corresponding columns.
       for (const [colKey, cellKey] of row.cellIndex) {
-        const cell = this.cell_data.get(cellKey)!;
+        const cell = this.cellData.get(cellKey)!;
         const column = this.columns.get(colKey)!;
         rowData.set(column.position, cell.value);
       }
@@ -240,7 +381,8 @@ export default class Sheet {
 
     const cell = new Cell();
     cell.formula = value;
-    this.cell_data.set(cell.key, cell);
+    this.cellData.set(cell.key, cell);
+    this.resolveCell(cell);
 
     col.cellIndex.set(row.key, cell.key);
     row.cellIndex.set(col.key, cell.key);
@@ -256,7 +398,7 @@ export default class Sheet {
 
     if (!col.cellIndex.has(row.key)) return null;
     const cellKey = col.cellIndex.get(row.key)!;
-    return this.cell_data.get(cellKey)!;
+    return this.cellData.get(cellKey)!;
   }
 
   private resolveCell(cell: Cell): boolean {
@@ -279,7 +421,7 @@ export default class Sheet {
 
     // Create row and column if they don't exist yet.
     if (!this.rowPositions.has(rowPos)) {
-      const row = new Row(this.default_height, rowPos);
+      const row = new Row(this.defaultHeight, rowPos);
       this.rows.set(row.key, row);
       this.rowPositions.set(rowPos, row.key);
 
@@ -290,7 +432,7 @@ export default class Sheet {
 
     if (!this.columnPositions.has(colPos)) {
       // Create a new column
-      const col = new Column(this.default_width, colPos);
+      const col = new Column(this.defaultWidth, colPos);
       this.columns.set(col.key, col);
       this.columnPositions.set(colPos, col.key);
 

@@ -9,3 +9,8 @@ export type CellInfo = {
   position: PositionInfo;
   value?: string;
 };
+
+export enum ShiftDirection {
+  forward = "forward",
+  backward = "backward",
+}
