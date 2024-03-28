@@ -1,5 +1,3 @@
-// jest.mock('lightsheet');
-
 import LightSheet from "../../src/main";
 
 describe('LightSheet', () => {
@@ -7,6 +5,7 @@ describe('LightSheet', () => {
   let targetElementMock;
   const defaultRowCount = 4
   const defaultColCount = 5
+
   beforeEach(() => {
     // Mocking UI and target element
     targetElementMock = document.createElement('div');
