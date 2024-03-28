@@ -12,3 +12,8 @@ export type CellInfo = {
   value?: string;
   state?: CellState;
 };
+
+export enum ShiftDirection {
+  forward = "forward",
+  backward = "backward",
+}
