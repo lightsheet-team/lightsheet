@@ -85,7 +85,7 @@ export default class UI {
       if (this.selectedRowNumberCell) {
         this.removeRowSelection();
       }
-      selectedRow.classList.add("lightsheet_table_selected_row_number_cell");
+      selectedRow.classList.add("lightsheet_table_selected_row_number_header_cell");
       this.selectedRowNumberCell = selectedRow;
       
       const parentElement = selectedRow.parentElement;
@@ -220,7 +220,7 @@ export default class UI {
   }
 
   removeRowSelection() {
-    this.selectedRowNumberCell?.classList.remove("lightsheet_table_selected_row_number_cell");
+    this.selectedRowNumberCell?.classList.remove("lightsheet_table_selected_row_number_header_cell");
         const parentElement = this.selectedRowNumberCell?.parentElement;
         if (parentElement) {
             for (let i = 1; i < parentElement.children.length; i++) {

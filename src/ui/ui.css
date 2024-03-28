@@ -83,7 +83,7 @@
   border: 1px solid blue;
 }
 
-.lightsheet_table_selected_row_number_cell {
+.lightsheet_table_selected_row_number_header_cell {
   background-color: darkblue;
   color: white;
 }
