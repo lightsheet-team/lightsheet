@@ -28,7 +28,7 @@ export default class UI {
     this.selectedCell = [];
     this.selectedCellsContainer = {
       selectionStart: null,
-      selectionEnd: null
+      selectionEnd: null,
     };
 
     this.tableEl.classList.add("lightsheet_table_container");

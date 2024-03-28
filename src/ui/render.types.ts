@@ -6,9 +6,9 @@ export type CellIdInfo = {
 export type SelectionContainer = {
   selectionStart: Coordinate | null;
   selectionEnd: Coordinate | null;
-}
+};
 
 export type Coordinate = {
   rowPosition: number;
   columnPosition: number;
-}
+};
