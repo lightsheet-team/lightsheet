@@ -11,36 +11,30 @@ import { CellState } from "./cell/cellState.ts";
 export default class Sheet {
   defaultStyle: any;
   settings: any;
-  cell_data: Map<CellKey, Cell>;
+  cellData: Map<CellKey, Cell>;
   rows: Map<RowKey, Row>;
   columns: Map<ColumnKey, Column>;
   rowPositions: Map<number, RowKey>;
   columnPositions: Map<number, ColumnKey>;
 
-  default_width: number;
-  default_height: number;
+  defaultWidth: number;
+  defaultHeight: number;
 
   private expressionHandler: ExpressionHandler;
 
   constructor() {
-    this.defaultStyle = new CellStyle(
-      null,
-      30,
-      10,
-      [0, 0, 0],
-      [false, false, false, false],
-    ); // TODO This should be configurable.
+    this.defaultStyle = new CellStyle(); // TODO This should be configurable.
 
     this.settings = null;
-    this.cell_data = new Map<CellKey, Cell>();
+    this.cellData = new Map<CellKey, Cell>();
     this.rows = new Map<RowKey, Row>();
     this.columns = new Map<ColumnKey, Column>();
 
     this.rowPositions = new Map<number, RowKey>();
     this.columnPositions = new Map<number, ColumnKey>();
 
-    this.default_width = 40;
-    this.default_height = 20;
+    this.defaultWidth = 40;
+    this.defaultHeight = 20;
 
     this.expressionHandler = new ExpressionHandler(this);
   }
@@ -208,7 +202,7 @@ export default class Sheet {
     });
 
     // Delete cell data and all references to it in its column and row.
-    this.cell_data.delete(cellKey);
+    this.cellData.delete(cellKey);
 
     col.cellIndex.delete(row.key);
     col.cellFormatting.delete(row.key);
@@ -229,18 +223,18 @@ export default class Sheet {
     return true;
   }
 
-  getCellStyle(colKey: ColumnKey, rowKey: RowKey): CellStyle {
-    const col = this.columns.get(colKey);
-    const row = this.rows.get(rowKey);
-    if (!col || !row) return this.defaultStyle;
+  getCellStyle(colKey?: ColumnKey, rowKey?: RowKey): CellStyle {
+    const col = colKey ? this.columns.get(colKey) : null;
+    const row = rowKey ? this.rows.get(rowKey) : null;
+    if (!col && !row) return this.defaultStyle;
 
-    const existingStyle = col.cellFormatting.get(row.key);
+    const existingStyle = col && row ? col.cellFormatting.get(row.key) : null;
     const cellStyle = new CellStyle().clone(existingStyle);
 
     // Apply style properties with priority: cell style > column style > row style > default style.
     cellStyle
-      .applyStylesOf(col.defaultStyle)
-      .applyStylesOf(row.defaultStyle)
+      .applyStylesOf(col ? col.defaultStyle : null)
+      .applyStylesOf(row ? row.defaultStyle : null)
       .applyStylesOf(this.defaultStyle);
 
     return cellStyle;
@@ -323,7 +317,7 @@ export default class Sheet {
 
       // Use row's cell index to get keys for each cell and their corresponding columns.
       for (const [colKey, cellKey] of row.cellIndex) {
-        const cell = this.cell_data.get(cellKey)!;
+        const cell = this.cellData.get(cellKey)!;
         const column = this.columns.get(colKey)!;
         rowData.set(column.position, cell.value);
       }
@@ -351,7 +345,7 @@ export default class Sheet {
 
     const cell = new Cell();
     cell.formula = value;
-    this.cell_data.set(cell.key, cell);
+    this.cellData.set(cell.key, cell);
     this.resolveCell(cell);
 
     col.cellIndex.set(row.key, cell.key);
@@ -368,7 +362,7 @@ export default class Sheet {
 
     if (!col.cellIndex.has(row.key)) return null;
     const cellKey = col.cellIndex.get(row.key)!;
-    return this.cell_data.get(cellKey)!;
+    return this.cellData.get(cellKey)!;
   }
 
   private resolveCell(cell: Cell): boolean {
@@ -447,7 +441,7 @@ export default class Sheet {
 
     // Create row and column if they don't exist yet.
     if (!this.rowPositions.has(rowPos)) {
-      const row = new Row(this.default_height, rowPos);
+      const row = new Row(this.defaultHeight, rowPos);
       this.rows.set(row.key, row);
       this.rowPositions.set(rowPos, row.key);
 
@@ -458,7 +452,7 @@ export default class Sheet {
 
     if (!this.columnPositions.has(colPos)) {
       // Create a new column
-      const col = new Column(this.default_width, colPos);
+      const col = new Column(this.defaultWidth, colPos);
       this.columns.set(col.key, col);
       this.columnPositions.set(colPos, col.key);
 
