@@ -93,7 +93,7 @@ export default class UI {
           for (let i = 1; i < parentElement.children.length; i++) {
               const childElement = parentElement.children[i];
               if (childElement !== selectedRow) {
-                  childElement.classList.add("lightsheet_table_selected_row");
+                  childElement.classList.add("lightsheet_table_selected_row_column");
               }
           }
       }
@@ -226,7 +226,7 @@ export default class UI {
             for (let i = 1; i < parentElement.children.length; i++) {
                 const childElement = parentElement.children[i];
                 if (childElement !== this.selectedRowNumberCell) {
-                    childElement.classList.remove("lightsheet_table_selected_row");
+                    childElement.classList.remove("lightsheet_table_selected_row_column");
                 }
             }
         }
