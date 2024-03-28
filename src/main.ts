@@ -6,7 +6,7 @@ import {
   generateRowKey,
 } from "./core/structure/key/keyTypes.ts";
 import { CellInfo } from "./core/structure/sheet.types.ts";
-
+import { GenerateRowLabel } from '../utils/helpers.ts'
 export default class LightSheet {
   ui: UI;
   options: LightSheetOptions;
@@ -24,13 +24,13 @@ export default class LightSheet {
       this,
       this.options.data?.length ?? this.#defaultRowCount,
     );
-    this.initializeData();
+    this.#initializeData();
     if (options.onCellChange) {
       this.onCellChange = options.onCellChange;
     }
   }
 
-  initializeData() {
+  #initializeData() {
     // Create header row and add headers
     const rowLength = this.options.data?.length ? this.options.data?.length : this.#defaultRowCount
     let colLength = this.options.data?.reduce(((total, item) => total > item.length ? total : item.length), 0);
@@ -38,7 +38,7 @@ export default class LightSheet {
 
     const headerData = Array.from(
       { length: colLength + 1 }, // Adding 1 for the row number column
-      (_, i) => (i === 0 ? "" : this.generateRowLabel(i)), // Generating row labels
+      (_, i) => (i === 0 ? "" : GenerateRowLabel(i)), // Generating row labels
     );
 
     this.ui.addHeader(headerData);
@@ -72,16 +72,5 @@ export default class LightSheet {
 
   setCellAt(columnKey: number, rowKey: number, value: any): CellInfo {
     return this.sheet.setCellAt(columnKey, rowKey, value);
-  }
-
-  generateRowLabel(rowIndex: number) {
-    let label = "";
-    const alphabet = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
-    while (rowIndex > 0) {
-      rowIndex--; // Adjust index to start from 0
-      label = alphabet[rowIndex % 26] + label;
-      rowIndex = Math.floor(rowIndex / 26);
-    }
-    return label || "A"; // Return "A" if index is 0
   }
 }
