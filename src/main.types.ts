@@ -3,7 +3,7 @@ export type LightSheetOptions = {
   data: any[];
   columns: LightSheetColumn[];
   onCellChange?: (colIndex: number, rowIndex: number, value: any) => void;
-  editable: boolean;
+  isReadOnly: boolean;
 };
 
 type LightSheetColumn = { type: string; title: string; name: string };

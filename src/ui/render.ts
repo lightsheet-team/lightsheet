@@ -7,20 +7,20 @@ export default class UI {
   rowCount: number;
   colCount: number;
   lightSheet: LightSheet;
-  editable: boolean;
+  isReadOnly: boolean;
 
   constructor(
     el: Element,
     lightSheet: LightSheet,
     rowCount: number,
     colCount: number,
-    editable: boolean,
+    isReadOnly: boolean,
   ) {
     this.tableEl = el;
     this.colCount = colCount;
     this.rowCount = rowCount;
     this.lightSheet = lightSheet;
-    this.editable = editable;
+    this.isReadOnly = isReadOnly;
 
     this.tableEl.classList.add("light_sheet_table_container");
 
@@ -112,11 +112,12 @@ export default class UI {
     }
   }
 
-  isReadOnly(readonly: boolean) {
+  changeReadOnly(readonly: boolean) {
     const inputElements = this.tableBodyDom.querySelectorAll("input");
     inputElements.forEach((input) => {
       (input as HTMLInputElement).readOnly = readonly;
     });
+    this.isReadOnly = !readonly;
   }
 
   onCellValueChange(

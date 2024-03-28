@@ -42,7 +42,7 @@ const columns = [
 new Lightsheet(document.getElementById("lightsheet"), {
   data,
   columns,
-  editable: true,
+  isReadOnly: true,
   onCellChange: (colIndex, rowIndex, newValue) => {
     console.log(colIndex, rowIndex, newValue);
   },

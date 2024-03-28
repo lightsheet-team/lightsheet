@@ -21,17 +21,17 @@ export default class LightSheet {
       this,
       this.options.data.length,
       this.options.data[0].length,
-      this.options.editable,
+      this.options.isReadOnly,
     );
     this.initializeData();
-    this.isReadOnly(this.options.editable);
+    this.changeReadOnly(this.options.isReadOnly);
     if (options.onCellChange) {
       this.onCellChange = options.onCellChange;
     }
   }
 
-  isReadOnly(isEditable: boolean) {
-    this.ui.isReadOnly(isEditable);
+  changeReadOnly(isReadOnly: boolean) {
+    this.ui.changeReadOnly(isReadOnly);
   }
 
   initializeData() {
