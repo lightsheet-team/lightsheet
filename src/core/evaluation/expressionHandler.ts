@@ -10,6 +10,10 @@ import {
 } from "mathjs/number";
 
 import Sheet from "../structure/sheet.ts";
+import { PositionInfo } from "../structure/sheet.types.ts";
+import { EvaluationResult } from "./expressionHandler.types.ts";
+
+import { CellState } from "../structure/cell/cellState.ts";
 const math = create({
   parseDependencies,
   addDependencies,
@@ -23,8 +27,14 @@ const math = create({
 export default class ExpressionHandler {
   sheet: Sheet;
 
+  private cellRefCache: Array<PositionInfo>;
+
   constructor(sheet: Sheet) {
     this.sheet = sheet; // TODO The scope of this class should be all sheets, not just one.
+
+    // When resolving a formula, this array is populated with a single cell's outgoing reference positions and cleared after.
+    // This allows ExpressionHandler::resolveSymbol to essentially pass values to ExpressionHandler::evaluate.
+    this.cellRefCache = [];
 
     // Add our symbol resolving methods to mathjs.
     math.FunctionNode.onUndefinedFunction = (name: string) =>
@@ -34,12 +44,17 @@ export default class ExpressionHandler {
       this.resolveSymbol(name);
   }
 
-  evaluate(expression: string): string | null {
-    if (!expression.startsWith("=")) return expression;
+  evaluate(expression: string): EvaluationResult | null {
+    if (!expression.startsWith("="))
+      return { value: expression, references: [] };
+
     expression = expression.substring(1);
     try {
       const parsed = math.parse(expression);
-      return parsed.evaluate();
+      const value = parsed.evaluate();
+      const references = this.cellRefCache.slice();
+      this.cellRefCache = [];
+      return { value: value, references: references };
     } catch (e) {
       return null;
     }
@@ -67,9 +82,12 @@ export default class ExpressionHandler {
     if (columnIndex == -1) throw new Error("Invalid symbol: " + name);
     const rowIndex = parseInt(rowStr) - 1;
 
-    const value = this.sheet.getCellValueAt(columnIndex, rowIndex);
-    if (value == null) throw new Error("Invalid cell reference: " + name);
-    return value;
+    const cellInfo = this.sheet.getCellInfoAt(columnIndex, rowIndex);
+    if (cellInfo == null || cellInfo.state != CellState.OK)
+      throw new Error("Invalid cell reference: " + name);
+
+    this.cellRefCache.push(cellInfo.position);
+    return cellInfo.value!;
   }
 
   // TODO Translating between column names and indices should probably be a common function.

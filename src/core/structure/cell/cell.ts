@@ -1,26 +1,31 @@
 import { CellKey, generateCellKey } from "../key/keyTypes";
+import { CellState } from "./cellState.ts";
 
 export default class Cell {
   key: CellKey;
   formula: string;
   value: string;
-  state: CellState;
-  referencesIn: CellKey[];
-  referencesOut: CellKey[];
+  private cellState: CellState;
+  referencesIn: Set<CellKey>;
+  referencesOut: Set<CellKey>;
 
   constructor() {
     this.key = generateCellKey();
     this.formula = "";
     this.value = "";
-    this.state = CellState.OK;
-    this.referencesIn = [];
-    this.referencesOut = [];
+    this.cellState = CellState.OK;
+    this.referencesIn = new Set<CellKey>();
+    this.referencesOut = new Set<CellKey>();
   }
-}
 
-// Initial structure, move to separate file
-export enum CellState {
-  OK,
-  INVALID_EXPRESSION,
-  INVALID_FORMAT,
+  get state() {
+    return this.cellState;
+  }
+
+  setState(state: CellState) {
+    this.cellState = state;
+    if (state != CellState.OK) {
+      this.value = "";
+    }
+  }
 }
