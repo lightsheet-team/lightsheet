@@ -5,7 +5,7 @@ import {
   generateColumnKey,
   generateRowKey,
 } from "./core/structure/key/keyTypes.ts";
-import { PositionInfo } from "./core/structure/sheet.types.ts";
+import { CellInfo } from "./core/structure/sheet.types.ts";
 
 export default class LightSheet {
   ui: UI;
@@ -63,27 +63,15 @@ export default class LightSheet {
     }
   }
 
-  setCell(columnKeyStr: string, rowKeyStr: string, value: any): PositionInfo {
+  setCell(columnKeyStr: string, rowKeyStr: string, value: any): CellInfo {
     const colKey = generateColumnKey(columnKeyStr);
     const rowKey = generateRowKey(rowKeyStr);
 
-    const cell = this.sheet.setCell(colKey, rowKey, value);
-    if (
-      !cell.value ||
-      !cell.position.rowKey ||
-      !cell.position.columnKey ||
-      cell.value == value
-    ) {
-      return cell.position; // Cell value doesn't have a formula or was cleared.
-    }
-
-    // Resolved cell value != input value -> value is a formula and should be updated in the UI.
-    this.ui.setCellValue(cell.value, rowKeyStr, columnKeyStr);
-    return cell.position;
+    return this.sheet.setCell(colKey, rowKey, value);
   }
 
-  setCellAt(columnKey: number, rowKey: number, value: any): PositionInfo {
-    return this.sheet.setCellAt(columnKey, rowKey, value).position;
+  setCellAt(columnKey: number, rowKey: number, value: any): CellInfo {
+    return this.sheet.setCellAt(columnKey, rowKey, value);
   }
 
   generateRowLabel(rowIndex: number) {

@@ -1,4 +1,9 @@
 import LightSheet from "../main";
+import {
+  generateColumnKey,
+  generateRowKey,
+} from "../core/structure/key/keyTypes";
+import { CellIdInfo } from "./render.types.ts";
 
 export default class UI {
   tableEl: Element;
@@ -7,6 +12,7 @@ export default class UI {
   rowCount: number;
   colCount: number;
   lightSheet: LightSheet;
+  selectedCell: number[] | undefined;
   isReadOnly: boolean;
 
   constructor(
@@ -20,16 +26,17 @@ export default class UI {
     this.colCount = colCount;
     this.rowCount = rowCount;
     this.lightSheet = lightSheet;
+    this.selectedCell = [];
     this.isReadOnly = isReadOnly;
 
-    this.tableEl.classList.add("light_sheet_table_container");
+    this.tableEl.classList.add("lightsheet_table_container");
 
     const lightSheetContainerDom = document.createElement("div");
-    lightSheetContainerDom.classList.add("light_sheet_table_content");
+    lightSheetContainerDom.classList.add("lightsheet_table_content");
     this.tableEl.appendChild(lightSheetContainerDom);
 
     const tableContainerDom = document.createElement("table");
-    tableContainerDom.classList.add("light_sheet_table");
+    tableContainerDom.classList.add("lightsheet_table");
     tableContainerDom.setAttribute("cellpadding", "0");
     tableContainerDom.setAttribute("cellspacing", "0");
     tableContainerDom.setAttribute("unselectable", "yes");
@@ -50,6 +57,10 @@ export default class UI {
 
     for (let i = 0; i < headerData.length; i++) {
       const headerCellDom = document.createElement("td");
+      headerCellDom.classList.add(
+        "lightsheet_table_header",
+        "lightsheet_table_td",
+      );
       headerCellDom.textContent = headerData[i];
       headerRowDom.appendChild(headerCellDom);
     }
@@ -62,7 +73,11 @@ export default class UI {
     //row number
     const rowNumberCell = document.createElement("td");
     rowNumberCell.innerHTML = `${rowLabelNumber + 1}`; // Row numbers start from 1
-    rowNumberCell.className = "light_sheet_table_row"; // Add class for styling
+    rowNumberCell.classList.add(
+      "lightsheet_table_row_number",
+      "lightsheet_table_row_cell",
+      "lightsheet_table_td",
+    );
     rowDom.appendChild(rowNumberCell); // Append the row number cell to the row
 
     return rowDom;
@@ -76,15 +91,21 @@ export default class UI {
     columnKey?: string,
   ) {
     const cellDom = document.createElement("td");
+    cellDom.classList.add(
+      "lightsheet_table_cell",
+      "lightsheet_table_row_cell",
+      "lightsheet_table_td",
+    );
     rowDom.appendChild(cellDom);
-    cellDom.id = `${colIndex}-${rowIndex}`;
+    cellDom.id = `${colIndex}_${rowIndex}`;
     const inputDom = document.createElement("input");
+    inputDom.classList.add("lightsheet_table_cell_input");
     inputDom.value = "";
 
     cellDom.appendChild(inputDom);
 
     if (value) {
-      cellDom.id = columnKey!;
+      cellDom.id = `${columnKey}_${rowDom.id}`;
       inputDom.value = value;
     }
 
@@ -96,20 +117,36 @@ export default class UI {
         colIndex,
         rowIndex,
       );
-  }
 
-  setCellValue(value: string, rowKey: string, colKey: string) {
-    const rowDom = document.getElementById(rowKey);
-    if (!rowDom) return;
-    // TODO This method is working around duplicate IDs. (issue #47)
-    // TODO Cell formula should be preserved. (Issue #49)
-    for (let i = 0; i < rowDom.children.length; i++) {
-      const cellDom = rowDom.children.item(i)!;
-      if (cellDom.id == colKey) {
-        const inputDom = cellDom.childNodes.item(0);
-        (inputDom as HTMLInputElement).value = value;
+    inputDom.onfocus = () => {
+      cellDom.classList.add("lightsheet_table_selected_cell");
+
+      let columnIndex: number | undefined;
+      let rowIndex: number | undefined;
+
+      const cellIdInfo = this.checkCellId(cellDom);
+      if (!cellIdInfo) return;
+      const { keyParts, isIndex } = cellIdInfo;
+
+      if (isIndex) {
+        columnIndex = Number(keyParts[0]);
+        rowIndex = Number(keyParts[1]);
+      } else {
+        const columnKey = cellDom.id;
+        const rowKey = cellDom.parentElement?.id;
+
+        columnIndex = this.lightSheet.sheet.getColumnIndex(
+          generateColumnKey(columnKey!),
+        );
+        rowIndex = this.lightSheet.sheet.getRowIndex(generateRowKey(rowKey!));
       }
-    }
+      this.selectedCell?.push(Number(columnIndex), Number(rowIndex));
+    };
+
+    inputDom.onblur = () => {
+      this.selectedCell = [];
+      cellDom.classList.remove("lightsheet_table_selected_cell");
+    };
   }
 
   changeReadOnly(readonly: boolean) {
@@ -127,32 +164,43 @@ export default class UI {
     colIndex: number,
     rowIndex: number,
   ) {
-    const keyParts = cellDom.id.split("-");
+    const cellIdInfo = this.checkCellId(cellDom);
+    if (!cellIdInfo) return;
+    const { keyParts, isIndex } = cellIdInfo;
+    if (keyParts.length != 2) return;
 
-    //if it was enpty value previously then the keyparts lenth will be 2, hence we create a cell in core and update ui with new keys
-    if (keyParts.length == 2) {
-      const cell = this.lightSheet.setCellAt(
-        parseInt(keyParts[0]),
-        parseInt(keyParts[1]),
-        newValue,
-      );
+    let cell;
+    // If the key parts are integers, we need to create a cell in core and update ui with new keys.
+    if (isIndex) {
+      cell = this.lightSheet.setCellAt(colIndex, rowIndex, newValue);
       // Keys will be valid as value shouldn't be empty at this point.
-      rowDom.id = cell.rowKey!.toString();
-      cellDom.id = cell.columnKey!.toString();
+      rowDom.id = cell.position.rowKey!.toString();
+      cellDom.id = `${cell.position.columnKey!.toString()}_${cell.position.rowKey!.toString()}`;
     } else {
-      const position = this.lightSheet.setCell(cellDom.id, rowDom.id, newValue);
-
+      cell = this.lightSheet.setCell(keyParts[0], keyParts[1], newValue);
       // The row may be deleted if the cell is cleared.
-      if (!position.rowKey) {
-        rowDom.id = `row-${rowIndex}`;
+      if (!cell.position.rowKey) {
+        rowDom.id = `row_${rowIndex}`;
       }
       // Empty cells should not hold a column key.
       if (newValue == "") {
-        cellDom.id = `${colIndex}-${rowIndex}`;
+        cellDom.id = `${colIndex}_${rowIndex}`;
       }
     }
+    // Set cell value to resolved value from the core.
+    // TODO Cell formula should be preserved. (Issue #49)
+    (cellDom.firstChild! as HTMLInputElement).value = cell.value!;
 
     //fire cell onchange event to client callback
     this.lightSheet.onCellChange?.(colIndex, rowIndex, newValue);
+  }
+
+  checkCellId(cellDom: Element): CellIdInfo | undefined {
+    const keyParts = cellDom.id.split("_");
+    if (keyParts.length != 2) return;
+
+    const isIndex = keyParts[0].match("^[0-9]+$") !== null;
+
+    return { keyParts: keyParts, isIndex: isIndex };
   }
 }

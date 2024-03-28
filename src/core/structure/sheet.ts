@@ -2,7 +2,7 @@ import { CellKey, ColumnKey, RowKey } from "./key/keyTypes.ts";
 import Cell, { CellState } from "./cell/cell.ts";
 import Column from "./group/column.ts";
 import Row from "./group/row.ts";
-import { CellInfo, PositionInfo } from "./sheet.types.ts";
+import { CellInfo, PositionInfo, ShiftDirection } from "./sheet.types.ts";
 import ExpressionHandler from "../evaluation/expressionHandler.ts";
 import CellStyle from "./cellStyle.ts";
 import CellGroup from "./group/cellGroup.ts";
@@ -44,6 +44,14 @@ export default class Sheet {
     this.expressionHandler = new ExpressionHandler(this);
   }
 
+  getRowIndex(rowKey: RowKey): number | undefined {
+    return this.rows.get(rowKey)?.position;
+  }
+
+  getColumnIndex(colKey: ColumnKey): number | undefined {
+    return this.columns.get(colKey)?.position;
+  }
+
   setCellAt(colPos: number, rowPos: number, value: string): CellInfo {
     const position = this.initializePosition(colPos, rowPos);
     return this.setCell(position.columnKey!, position.rowKey!, value);
@@ -79,6 +87,89 @@ export default class Sheet {
 
     const cell = this.getCell(colKey, rowKey);
     return cell ? cell.value : null;
+  }
+
+  moveColumn(from: number, to: number): boolean {
+    if (from === to) return false;
+
+    const colKey = this.columnPositions.get(from);
+
+    if (colKey !== undefined) {
+      const col = this.columns.get(colKey);
+      if (col === undefined)
+        throw new Error("Column not found, inconsistent state");
+      col.position = to;
+    }
+
+    //we have to update all the positions to keep it consistent
+    this.columnPositions.delete(from);
+    if (to > from) {
+      this.shiftColumns(to, ShiftDirection.backward);
+    } else {
+      this.shiftColumns(to, ShiftDirection.forward);
+    }
+    if (colKey === undefined) {
+      this.columnPositions.delete(to);
+    } else {
+      this.columnPositions.set(to, colKey);
+    }
+
+    return true;
+  }
+
+  insertColumn(position: number): boolean {
+    this.shiftColumns(position, ShiftDirection.forward);
+    return true;
+  }
+
+  deleteColumn(position: number): boolean {
+    const colKey = this.columnPositions.get(position);
+
+    const lastColumnPosition = Math.max(...this.columnPositions.keys());
+    if (colKey !== undefined) {
+      const col = this.columns.get(colKey);
+      for (const [rowKey] of col!.cellIndex) {
+        this.deleteCell(colKey, rowKey);
+      }
+    }
+
+    if (position !== lastColumnPosition) {
+      this.shiftColumns(lastColumnPosition, ShiftDirection.backward);
+    }
+    return true;
+  }
+
+  /**
+   * Shift the column forward or backward till an empty position is found.
+   */
+  private shiftColumns(start: number, shiftDirection: ShiftDirection): boolean {
+    let previousValue: ColumnKey | undefined = undefined;
+    let currentPos = start;
+    let tempCurrent;
+    do {
+      tempCurrent = this.columnPositions.get(currentPos);
+
+      if (previousValue === undefined) {
+        this.columnPositions.delete(currentPos);
+      } else {
+        this.columnPositions.set(currentPos, previousValue);
+        const col = this.columns.get(previousValue);
+        col!.position = currentPos;
+      }
+
+      previousValue = tempCurrent;
+
+      if (shiftDirection === ShiftDirection.forward) {
+        currentPos++;
+      } else {
+        if (currentPos === 0) {
+          break;
+        }
+        currentPos--;
+      }
+    } while (tempCurrent !== undefined && previousValue !== undefined);
+
+    return true;
   }
 
   deleteCell(colKey: ColumnKey, rowKey: RowKey): boolean {
@@ -236,6 +327,7 @@ export default class Sheet {
     const cell = new Cell();
     cell.formula = value;
     this.cell_data.set(cell.key, cell);
+    this.resolveCell(cell);
 
     col.cellIndex.set(row.key, cell.key);
     row.cellIndex.set(col.key, cell.key);
