@@ -131,10 +131,11 @@ export default class Sheet {
     targetPositions: Map<number, ColumnKey | RowKey>,
   ): boolean {
     const groupKey = targetPositions.get(position);
-
     const lastPosition = Math.max(...targetPositions.keys());
+
     if (groupKey !== undefined) {
       const group = target.get(groupKey);
+      // Delete all cells in this group.
       for (const [oppositeKey] of group!.cellIndex) {
         group instanceof Column
           ? this.deleteCell(groupKey as ColumnKey, oppositeKey as RowKey)
@@ -204,6 +205,7 @@ export default class Sheet {
       tempCurrent = targetPositions.get(currentPos);
 
       if (previousValue === undefined) {
+        // First iteration; just clear the position we're shifting from.
         targetPositions.delete(currentPos);
       } else {
         targetPositions.set(currentPos, previousValue);
