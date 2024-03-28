@@ -13,6 +13,7 @@ export default class UI {
   colCount: number;
   lightSheet: LightSheet;
   selectedCell: number[] | undefined;
+  selectedRowNumberCell: HTMLElement | null = null;
 
   constructor(
     el: Element,
@@ -77,6 +78,27 @@ export default class UI {
     );
     rowDom.appendChild(rowNumberCell); // Append the row number cell to the row
 
+    rowNumberCell.onclick = (e: MouseEvent) => {
+      const selectedRow = e.target as HTMLElement; 
+      if (!selectedRow) return;
+      
+      if (this.selectedRowNumberCell) {
+        this.removeRowSelection();
+      }
+      selectedRow.classList.add("lightsheet_table_selected_row_number_cell");
+      this.selectedRowNumberCell = selectedRow;
+      
+      const parentElement = selectedRow.parentElement;
+      if (parentElement) {
+          for (let i = 1; i < parentElement.children.length; i++) {
+              const childElement = parentElement.children[i];
+              if (childElement !== selectedRow) {
+                  childElement.classList.add("lightsheet_table_selected_row");
+              }
+          }
+      }
+    };
+
     return rowDom;
   }
 
@@ -116,6 +138,10 @@ export default class UI {
       );
 
     inputDom.onfocus = () => {
+      if(this.selectedRowNumberCell) {
+        this.removeRowSelection();
+      }
+
       cellDom.classList.add("lightsheet_table_selected_cell");
 
       let columnIndex: number | undefined;
@@ -191,5 +217,18 @@ export default class UI {
     const isIndex = keyParts[0].match("^[0-9]+$") !== null;
 
     return { keyParts: keyParts, isIndex: isIndex };
+  }
+
+  removeRowSelection() {
+    this.selectedRowNumberCell?.classList.remove("lightsheet_table_selected_row_number_cell");
+        const parentElement = this.selectedRowNumberCell?.parentElement;
+        if (parentElement) {
+            for (let i = 1; i < parentElement.children.length; i++) {
+                const childElement = parentElement.children[i];
+                if (childElement !== this.selectedRowNumberCell) {
+                    childElement.classList.remove("lightsheet_table_selected_row");
+                }
+            }
+        }
   }
 }
