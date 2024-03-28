@@ -93,6 +93,10 @@ export default class Sheet {
     return this.moveCellGroup(from, to, this.columns, this.columnPositions);
   }
 
+  moveRow(from: number, to: number): boolean {
+    return this.moveCellGroup(from, to, this.rows, this.rowPositions);
+  }
+
   insertColumn(position: number): boolean {
     this.shiftCellGroups(
       position,
@@ -103,8 +107,22 @@ export default class Sheet {
     return true;
   }
 
+  insertRow(position: number): boolean {
+    this.shiftCellGroups(
+      position,
+      ShiftDirection.forward,
+      this.rows,
+      this.rowPositions,
+    );
+    return true;
+  }
+
   deleteColumn(position: number): boolean {
     return this.deleteCellGroup(position, this.columns, this.columnPositions);
+  }
+
+  deleteRow(position: number): boolean {
+    return this.deleteCellGroup(position, this.rows, this.rowPositions);
   }
 
   private deleteCellGroup(
