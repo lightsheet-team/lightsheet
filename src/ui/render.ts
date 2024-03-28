@@ -13,18 +13,21 @@ export default class UI {
   colCount: number;
   lightSheet: LightSheet;
   selectedCell: number[] | undefined;
+  isReadOnly: boolean;
 
   constructor(
     el: Element,
     lightSheet: LightSheet,
     rowCount: number,
     colCount: number,
+    isReadOnly: boolean,
   ) {
     this.tableEl = el;
     this.colCount = colCount;
     this.rowCount = rowCount;
     this.lightSheet = lightSheet;
     this.selectedCell = [];
+    this.isReadOnly = isReadOnly;
 
     this.tableEl.classList.add("lightsheet_table_container");
 
@@ -144,6 +147,14 @@ export default class UI {
       this.selectedCell = [];
       cellDom.classList.remove("lightsheet_table_selected_cell");
     };
+  }
+
+  setReadOnly(readonly: boolean) {
+    const inputElements = this.tableBodyDom.querySelectorAll("input");
+    inputElements.forEach((input) => {
+      (input as HTMLInputElement).readOnly = readonly;
+    });
+    this.isReadOnly = !readonly;
   }
 
   onCellValueChange(
