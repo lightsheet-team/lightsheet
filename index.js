@@ -42,7 +42,4 @@ const columns = [
 new Lightsheet(document.getElementById("lightsheet"), {
   data,
   columns,
-  onCellChange: (colIndex, rowIndex, newValue) => {
-    console.log(colIndex, rowIndex, newValue);
-  },
 });

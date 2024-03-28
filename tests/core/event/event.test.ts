@@ -17,7 +17,7 @@ describe("Events", () => {
     const event = new Event(EventType.UI_SET_CELL, "test payload", false);
     events.emit(event);
 
-    expect(mockCallback).toHaveBeenCalledWith("test payload");
+    expect(mockCallback).toHaveBeenCalledWith(event);
     expect(event.eventState).toBe(EventState.POST_EVENT);
   });
 
@@ -136,8 +136,8 @@ describe("Events", () => {
     const event = new Event(EventType.UI_SET_CELL, "test payload");
     events.emit(event);
 
-    expect(firstCallback).toHaveBeenCalledWith("test payload");
-    expect(secondCallback).toHaveBeenCalledWith("test payload");
+    expect(firstCallback).toHaveBeenCalledWith(event);
+    expect(secondCallback).toHaveBeenCalledWith(event);
   });
 
   test("should not trigger listeners of a different event type", () => {
@@ -210,7 +210,7 @@ describe("Events", () => {
     events.emit(preEvent);
     events.emit(postEvent);
 
-    expect(preEventCallback).toHaveBeenCalledWith("pre payload");
-    expect(postEventCallback).toHaveBeenCalledWith("post payload");
+    expect(preEventCallback).toHaveBeenCalledWith(preEvent);
+    expect(postEventCallback).toHaveBeenCalledWith(postEvent);
   });
 });

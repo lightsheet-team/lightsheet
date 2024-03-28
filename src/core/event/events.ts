@@ -2,7 +2,7 @@ import EventType from "./eventType";
 import Event from "./event";
 import EventState from "./eventState";
 
-type ListenerFunction = (payload: any) => void;
+type ListenerFunction = (event: Event) => void;
 
 type EventListener = {
   callback: ListenerFunction;
@@ -32,7 +32,7 @@ export default class Events {
     if (listeners) {
       listeners.slice().forEach((listener) => {
         if (listener.eventState === event.eventState) {
-          listener.callback(event.payload);
+          listener.callback(event);
         }
       });
     }
@@ -48,9 +48,9 @@ export default class Events {
     callback: ListenerFunction,
     eventState: EventState = EventState.POST_EVENT,
   ): void {
-    const oncecallback: ListenerFunction = (payload: any) => {
+    const oncecallback: ListenerFunction = (event: Event) => {
       this.removeEventListener(eventType, oncecallback, eventState);
-      callback(payload);
+      callback(event);
     };
     this.on(eventType, oncecallback, eventState);
   }

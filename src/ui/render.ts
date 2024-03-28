@@ -4,6 +4,9 @@ import {
   generateRowKey,
 } from "../core/structure/key/keyTypes";
 import { CellIdInfo } from "./render.types.ts";
+import LightsheetEvent from "../core/event/event.ts";
+import { CoreSetCellPayload } from "../core/event/events.types.ts";
+import EventType from "../core/event/eventType.ts";
 
 export default class UI {
   tableEl: Element;
@@ -25,6 +28,7 @@ export default class UI {
     this.rowCount = rowCount;
     this.lightSheet = lightSheet;
     this.selectedCell = [];
+    this.registerEvents();
 
     this.tableEl.classList.add("lightsheet_table_container");
 
@@ -63,7 +67,7 @@ export default class UI {
     }
   }
 
-  addRow(rowLabelNumber: number): Element {
+  addRow(rowLabelNumber: number): HTMLElement {
     const rowDom = document.createElement("tr");
     this.tableBodyDom.appendChild(rowDom);
 
@@ -80,13 +84,17 @@ export default class UI {
     return rowDom;
   }
 
+  getRow(rowKey: string): HTMLElement | null {
+    return document.getElementById(rowKey);
+  }
+
   addColumn(
     rowDom: Element,
     colIndex: number,
     rowIndex: number,
     value: any,
     columnKey?: string,
-  ) {
+  ): HTMLElement {
     const cellDom = document.createElement("td");
     cellDom.classList.add(
       "lightsheet_table_cell",
@@ -107,10 +115,8 @@ export default class UI {
     }
 
     inputDom.onchange = (e: Event) =>
-      this.onCellValueChange(
+      this.onUICellValueChange(
         (e.target as HTMLInputElement).value,
-        rowDom,
-        cellDom,
         colIndex,
         rowIndex,
       );
@@ -144,47 +150,90 @@ export default class UI {
       this.selectedCell = [];
       cellDom.classList.remove("lightsheet_table_selected_cell");
     };
+
+    return cellDom;
   }
 
-  onCellValueChange(
-    newValue: string,
-    rowDom: Element,
-    cellDom: Element,
-    colIndex: number,
-    rowIndex: number,
-  ) {
-    const cellIdInfo = this.checkCellId(cellDom);
-    if (!cellIdInfo) return;
-    const { keyParts, isIndex } = cellIdInfo;
-    if (keyParts.length != 2) return;
+  onUICellValueChange(newValue: string, colIndex: number, rowIndex: number) {
+    const payload = {
+      indexPosition: { columnIndex: colIndex, rowIndex: rowIndex },
+      formula: newValue,
+    };
 
-    let cell;
-    // If the key parts are integers, we need to create a cell in core and update ui with new keys.
-    if (isIndex) {
-      cell = this.lightSheet.setCellAt(colIndex, rowIndex, newValue);
-      // Keys will be valid as value shouldn't be empty at this point.
-      rowDom.id = cell.position.rowKey!.toString();
-      cellDom.id = `${cell.position.columnKey!.toString()}_${cell.position.rowKey!.toString()}`;
-    } else {
-      cell = this.lightSheet.setCell(keyParts[0], keyParts[1], newValue);
-      // The row may be deleted if the cell is cleared.
-      if (!cell.position.rowKey) {
-        rowDom.id = `row_${rowIndex}`;
-      }
-      // Empty cells should not hold a column key.
-      if (newValue == "") {
-        cellDom.id = `${colIndex}_${rowIndex}`;
-      }
+    this.lightSheet.events.emit(
+      new LightsheetEvent(EventType.UI_SET_CELL, payload),
+    );
+  }
+
+  private registerEvents() {
+    this.lightSheet.events.on(EventType.CORE_SET_CELL, (event) =>
+      this.onCoreSetCell(event),
+    );
+  }
+
+  private onCoreSetCell(event: LightsheetEvent) {
+    const payload = event.payload as CoreSetCellPayload;
+    // Get HTML elements and (new) IDs for the payload's cell and row.
+    const elInfo = UI.getElementInfoForSetCell(payload);
+
+    if (!elInfo.rowDom) {
+      const row = this.addRow(payload.indexPosition.rowIndex);
+      elInfo.rowDom = row;
+      row.id = elInfo.rowDomId;
     }
+    if (!elInfo.cellDom) {
+      elInfo.cellDom = this.addColumn(
+        elInfo.rowDom!,
+        payload.indexPosition.columnIndex,
+        payload.indexPosition.rowIndex,
+        payload.value,
+        payload.position.columnKey?.toString(),
+      );
+    }
+
+    elInfo.cellDom.id = elInfo.cellDomId;
+    elInfo.rowDom.id = elInfo.rowDomId;
+
     // Set cell value to resolved value from the core.
     // TODO Cell formula should be preserved. (Issue #49)
-    (cellDom.firstChild! as HTMLInputElement).value = cell.value!;
-
-    //fire cell onchange event to client callback
-    this.lightSheet.onCellChange?.(colIndex, rowIndex, newValue);
+    (elInfo.cellDom.firstChild! as HTMLInputElement).value = payload.value;
   }
 
-  checkCellId(cellDom: Element): CellIdInfo | undefined {
+  private static getElementInfoForSetCell(payload: CoreSetCellPayload) {
+    const colKey = payload.position.columnKey?.toString();
+    const rowKey = payload.position.rowKey?.toString();
+
+    const columnIndex = payload.indexPosition.columnIndex;
+    const rowIndex = payload.indexPosition.rowIndex;
+
+    const cellDomKey =
+      colKey && rowKey ? `${colKey!.toString()}_${rowKey!.toString()}` : null;
+
+    // Get the cell by either column and row key or position.
+    // TODO Index-based ID may not be unique if there are multiple sheets.
+    const cellDom =
+      (cellDomKey && document.getElementById(cellDomKey)) ||
+      document.getElementById(`${columnIndex}_${rowIndex}`);
+
+    const newCellDomId = payload.clearCell
+      ? `${columnIndex}_${rowIndex}`
+      : `${colKey}_${rowKey}`;
+
+    const newRowDomId = payload.clearRow ? `row_${rowIndex}` : rowKey!;
+
+    const rowDom =
+      (rowKey && document.getElementById(rowKey)) ||
+      document.getElementById(`row_${rowIndex}`);
+
+    return {
+      cellDom: cellDom,
+      cellDomId: newCellDomId,
+      rowDom: rowDom,
+      rowDomId: newRowDomId,
+    };
+  }
+
+  private checkCellId(cellDom: Element): CellIdInfo | undefined {
     const keyParts = cellDom.id.split("_");
     if (keyParts.length != 2) return;
 
