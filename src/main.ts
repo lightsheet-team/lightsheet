@@ -6,7 +6,7 @@ import {
   generateRowKey,
 } from "./core/structure/key/keyTypes.ts";
 import { CellInfo } from "./core/structure/sheet.types.ts";
-import { GenerateRowLabel } from '../utils/helpers.ts'
+import { GenerateRowLabel } from "../utils/helpers.ts";
 export default class LightSheet {
   ui: UI;
   options: LightSheetOptions;
@@ -32,9 +32,14 @@ export default class LightSheet {
 
   #initializeData() {
     // Create header row and add headers
-    const rowLength = this.options.data?.length ? this.options.data?.length : this.#defaultRowCount
-    let colLength = this.options.data?.reduce(((total, item) => total > item.length ? total : item.length), 0);
-    if (!colLength) colLength = this.#defaultColCount
+    const rowLength = this.options.data?.length
+      ? this.options.data?.length
+      : this.#defaultRowCount;
+    let colLength = this.options.data?.reduce(
+      (total, item) => (total > item.length ? total : item.length),
+      0,
+    );
+    if (!colLength) colLength = this.#defaultColCount;
 
     const headerData = Array.from(
       { length: colLength + 1 }, // Adding 1 for the row number column
@@ -47,7 +52,10 @@ export default class LightSheet {
       //create new row
       const rowDom = this.ui.addRow(i);
       for (let j = 0; j < colLength; j++) {
-        const data = (this.options.data[i] && this.options.data[i].length - 1 >= j) ? this.options.data[i][j] : null
+        const data =
+          this.options.data[i] && this.options.data[i].length - 1 >= j
+            ? this.options.data[i][j]
+            : null;
         //if data is not empty add cell to core and render ui, otherwise render only ui
         if (data) {
           const cell = this.sheet.setCellAt(j, i, data);

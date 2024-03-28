@@ -13,11 +13,7 @@ export default class UI {
   lightSheet: LightSheet;
   selectedCell: number[] | undefined;
 
-  constructor(
-    el: Element,
-    lightSheet: LightSheet,
-    rowCount: number,
-  ) {
+  constructor(el: Element, lightSheet: LightSheet, rowCount: number) {
     this.tableEl = el;
     this.rowCount = rowCount;
     this.lightSheet = lightSheet;
