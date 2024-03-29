@@ -1,10 +1,6 @@
 import UI from "./ui/render.ts";
 import { LightSheetOptions } from "./main.types.ts";
 import Sheet from "./core/structure/sheet.ts";
-import {
-  generateColumnKey,
-  generateRowKey,
-} from "./core/structure/key/keyTypes.ts";
 import { CellInfo } from "./core/structure/sheet.types.ts";
 import Events from "./core/event/events.ts";
 
@@ -54,13 +50,6 @@ export default class LightSheet {
         }
       }
     }
-  }
-
-  setCell(columnKeyStr: string, rowKeyStr: string, value: any): CellInfo {
-    const colKey = generateColumnKey(columnKeyStr);
-    const rowKey = generateRowKey(rowKeyStr);
-
-    return this.sheet.setCell(colKey, rowKey, value);
   }
 
   setCellAt(columnKey: number, rowKey: number, value: any): CellInfo {
