@@ -1,21 +1,19 @@
 import UI from "./ui/render.ts";
 import { LightSheetOptions } from "./main.types.ts";
 import Sheet from "./core/structure/sheet.ts";
-import {
-  generateColumnKey,
-  generateRowKey,
-} from "./core/structure/key/keyTypes.ts";
 import { CellInfo } from "./core/structure/sheet.types.ts";
+import Events from "./core/event/events.ts";
 
 export default class LightSheet {
   ui: UI;
   options: LightSheetOptions;
   sheet: Sheet;
-  onCellChange?;
+  events: Events;
 
   constructor(targetElement: Element, options: LightSheetOptions) {
     this.options = options;
-    this.sheet = new Sheet();
+    this.events = new Events();
+    this.sheet = new Sheet(this.events);
     this.ui = new UI(
       targetElement,
       this,
@@ -23,9 +21,6 @@ export default class LightSheet {
       this.options.data[0].length,
     );
     this.initializeData();
-    if (options.onCellChange) {
-      this.onCellChange = options.onCellChange;
-    }
   }
 
   initializeData() {
@@ -39,29 +34,22 @@ export default class LightSheet {
     for (let i = 0; i < this.options.data.length; i++) {
       const item = this.options.data[i];
       //create new row
-      const rowDom = this.ui.addRow(i);
+      let rowDom = null;
 
       for (let j = 0; j < item.length; j++) {
         //if data is not empty add cell to core and render ui, otherwise render only ui
         if (item[j]) {
-          const cell = this.sheet.setCellAt(j, i, item[j]);
-          const rowKeyStr = cell.position.rowKey!.toString();
-          const columnKeyStr = cell.position.columnKey!.toString();
-
-          if (!rowDom.id) rowDom.id = rowKeyStr;
-          this.ui.addColumn(rowDom, j, i, cell.value, columnKeyStr);
+          const cellInfo = this.sheet.setCellAt(j, i, item[j]);
+          if (!rowDom) {
+            // Get the row element if it didn't exist before setting the cell.
+            rowDom = this.ui.getRow(cellInfo.position.rowKey!);
+          }
         } else {
+          if (!rowDom) rowDom = this.ui.addRow(i);
           this.ui.addColumn(rowDom, j, i, "");
         }
       }
     }
-  }
-
-  setCell(columnKeyStr: string, rowKeyStr: string, value: any): CellInfo {
-    const colKey = generateColumnKey(columnKeyStr);
-    const rowKey = generateRowKey(rowKeyStr);
-
-    return this.sheet.setCell(colKey, rowKey, value);
   }
 
   setCellAt(columnKey: number, rowKey: number, value: any): CellInfo {
