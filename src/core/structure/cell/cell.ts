@@ -1,21 +1,24 @@
 import { CellKey, generateCellKey } from "../key/keyTypes";
 import { CellState } from "./cellState.ts";
+import { PositionInfo } from "../sheet.types.ts";
 
 export default class Cell {
   key: CellKey;
   formula: string;
   value: string;
   private cellState: CellState;
-  referencesIn: Set<CellKey>;
-  referencesOut: Set<CellKey>;
+
+  // References in this cell's formula.
+  referencesIn: Map<CellKey, PositionInfo>;
+  referencesOut: Map<CellKey, PositionInfo>;
 
   constructor() {
     this.key = generateCellKey();
     this.formula = "";
     this.value = "";
     this.cellState = CellState.OK;
-    this.referencesIn = new Set<CellKey>();
-    this.referencesOut = new Set<CellKey>();
+    this.referencesIn = new Map<CellKey, PositionInfo>();
+    this.referencesOut = new Map<CellKey, PositionInfo>();
   }
 
   get state() {

@@ -2,7 +2,12 @@ import { CellKey, ColumnKey, RowKey } from "./key/keyTypes.ts";
 import Cell from "./cell/cell.ts";
 import Column from "./group/column.ts";
 import Row from "./group/row.ts";
-import { CellInfo, PositionInfo, ShiftDirection } from "./sheet.types.ts";
+import {
+  CellInfo,
+  ResolveCellResult,
+  PositionInfo,
+  ShiftDirection,
+} from "./sheet.types.ts";
 import ExpressionHandler from "../evaluation/expressionHandler.ts";
 import CellStyle from "./cellStyle.ts";
 import CellGroup from "./group/cellGroup.ts";
@@ -74,7 +79,7 @@ export default class Sheet {
 
     if (cell) {
       cell.formula = value;
-      this.resolveCell(cell);
+      this.resolveCell(cell, colKey, rowKey);
     }
 
     this.emitSetCellEvent(colKey, rowKey, colIndex, rowIndex, cell);
@@ -256,8 +261,8 @@ export default class Sheet {
 
     // Remove references to this cell from other cells' referencesOut.
     const cell = this.cellData.get(cellKey)!;
-    cell.referencesIn.forEach((ref) => {
-      const referredCell = this.cellData.get(ref)!;
+    cell.referencesIn.forEach((_, refCell) => {
+      const referredCell = this.cellData.get(refCell)!;
       referredCell.referencesOut.delete(cellKey);
 
       // Invalidate cells that reference this cell.
@@ -265,8 +270,8 @@ export default class Sheet {
     });
 
     // Remove this cell from other cells' referencesIn.
-    cell.referencesOut.forEach((ref) => {
-      const referredCell = this.cellData.get(ref)!;
+    cell.referencesOut.forEach((_, refCell) => {
+      const referredCell = this.cellData.get(refCell)!;
       referredCell.referencesIn.delete(cellKey);
     });
 
@@ -415,7 +420,7 @@ export default class Sheet {
     const cell = new Cell();
     cell.formula = value;
     this.cellData.set(cell.key, cell);
-    this.resolveCell(cell);
+    this.resolveCell(cell, colKey, rowKey);
 
     col.cellIndex.set(row.key, cell.key);
     row.cellIndex.set(col.key, cell.key);
@@ -434,11 +439,16 @@ export default class Sheet {
     return this.cellData.get(cellKey)!;
   }
 
-  private resolveCell(cell: Cell): boolean {
+  private resolveCell(
+    cell: Cell,
+    colKey: ColumnKey,
+    rowKey: RowKey,
+  ): ResolveCellResult {
     const evalResult = this.expressionHandler.evaluate(cell.formula);
     if (!evalResult) {
+      const prevState = cell.state;
       cell.setState(CellState.INVALID_EXPRESSION);
-      return false;
+      return { valueChanged: prevState == CellState.OK }; // The cell's value has changed if the state changed from OK to invalid.
     }
 
     // TODO Resolve restrictions from cell formatting here (CellState.INVALID_FORMAT).
@@ -449,22 +459,31 @@ export default class Sheet {
     cell.value = evalResult.value;
 
     // Update referencesOut of this cell and referencesIn of newly referenced cells.
-    const oldOut = new Set<CellKey>(cell.referencesOut);
+    const oldOut = new Map<CellKey, PositionInfo>(cell.referencesOut);
     cell.referencesOut.clear();
     evalResult.references.forEach((ref) => {
+      // Add referred cells to this cell's referencesOut.
       const referredCell = this.getCell(ref.columnKey!, ref.rowKey!)!;
-      cell.referencesOut.add(referredCell.key);
-      referredCell.referencesIn.add(cell.key);
+      cell.referencesOut.set(referredCell.key, {
+        columnKey: ref.columnKey!,
+        rowKey: ref.rowKey!,
+      });
+
+      // Add this cell to the referred cell's referencesIn.
+      referredCell.referencesIn.set(cell.key, {
+        columnKey: colKey,
+        rowKey: rowKey,
+      });
     });
 
     // Resolve (oldOut - newOut) to get references that were removed from the formula.
-    const removedReferences = new Set<CellKey>(
-      [...oldOut].filter((x) => !cell.referencesOut.has(x)),
+    const removedReferences = new Map<CellKey, PositionInfo>(
+      [...oldOut].filter(([cellKey]) => !cell.referencesOut.has(cellKey)),
     );
 
     // Clean up the referencesIn sets of cells that are no longer referenced by the formula.
-    removedReferences.forEach((ref) => {
-      const referredCell = this.cellData.get(ref)!;
+    removedReferences.forEach((_, cellKey) => {
+      const referredCell = this.cellData.get(cellKey)!;
       referredCell.referencesIn.delete(cell.key);
     });
 
@@ -474,15 +493,34 @@ export default class Sheet {
     }
 
     // If the value of the cell hasn't changed, there's no need to update cells that reference this cell.
-    if (!valueChanged && cell.state == CellState.OK) return false;
+    if (!valueChanged && cell.state == CellState.OK)
+      return { valueChanged: false };
 
-    // Update cells that reference this cell. TODO This currently desyncs the UI - an event should be emitted.
-    cell.referencesIn.forEach((ref) => {
+    // Return the set of cells whose values has changed as a result of updating this cell.
+    const dirtyCells = new Map<CellKey, PositionInfo>();
+
+    // Update cells that reference this cell.
+    cell.referencesIn.forEach((pos, ref) => {
       const referredCell = this.cellData.get(ref)!;
-      this.resolveCell(referredCell);
+      const refUpdated = this.resolveCell(
+        referredCell,
+        pos.columnKey!,
+        pos.rowKey!,
+      );
+
+      // Emit event if the referred cell's value has changed.
+      if (refUpdated) {
+        this.emitSetCellEvent(
+          pos.columnKey!,
+          pos.rowKey!,
+          this.getColumnIndex(pos.columnKey!)!,
+          this.getRowIndex(pos.rowKey!)!,
+          referredCell,
+        );
+      }
     });
 
-    return true;
+    return { valueChanged: true, dirtyCells: dirtyCells };
   }
 
   private hasCircularReference(cell: Cell): boolean {
@@ -496,7 +534,7 @@ export default class Sheet {
       initial = false;
 
       const currentCell = this.cellData.get(current)!;
-      currentCell.referencesOut.forEach((ref) => {
+      currentCell.referencesOut.forEach((_, ref) => {
         stack.push(ref);
       });
     }

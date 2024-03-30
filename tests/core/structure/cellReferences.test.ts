@@ -30,19 +30,25 @@ describe("Cell references", () => {
       getCellReference(sheet.setCellAt(2, 0, "=A1 + B1 + C3")), // C1
     ];
 
-    expect(cells[0]!.referencesIn).toEqual(
+    expect(new Set(cells[0]!.referencesIn.keys())).toEqual(
       new Set([cells[1].key, cells[3].key]),
     );
 
     expect(cells[0]!.referencesOut.size).toBe(0);
 
-    expect(cells[1]!.referencesOut).toEqual(new Set([cells[0].key]));
-    expect(cells[1]!.referencesIn).toEqual(new Set([cells[3].key]));
+    expect(new Set(cells[1]!.referencesOut.keys())).toEqual(
+      new Set([cells[0].key]),
+    );
+    expect(new Set(cells[1]!.referencesIn.keys())).toEqual(
+      new Set([cells[3].key]),
+    );
 
     expect(cells[2].referencesOut.size).toBe(0);
-    expect(cells[2].referencesIn).toEqual(new Set([cells[3].key]));
+    expect(new Set(cells[2].referencesIn.keys())).toEqual(
+      new Set([cells[3].key]),
+    );
 
-    expect(cells[3]!.referencesOut).toEqual(
+    expect(new Set(cells[3]!.referencesOut.keys())).toEqual(
       new Set([cells[0].key, cells[1].key, cells[2].key]),
     );
     expect(cells[3]!.referencesIn.size).toBe(0);
