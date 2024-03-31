@@ -11,6 +11,7 @@ import LightsheetEvent from "../event/event.ts";
 import { CoreSetCellPayload, UISetCellPayload } from "../event/events.types.ts";
 import EventType from "../event/eventType.ts";
 import { CellState } from "./cell/cellState.ts";
+import { EvaluationResult } from "../evaluation/expressionHandler.types.ts";
 
 export default class Sheet {
   defaultStyle: any;
@@ -451,7 +452,21 @@ export default class Sheet {
 
     const valueChanged = cell.value != evalResult.value;
     cell.value = evalResult.value;
+    this.updateCellReferences(cell, colKey, rowKey, valueChanged, evalResult);
 
+    return valueChanged;
+  }
+
+  /**
+   * Update reference collections of cells and emit events for all cells whose values are affected.
+   */
+  private updateCellReferences(
+    cell: Cell,
+    columnKey: ColumnKey,
+    rowKey: RowKey,
+    valueChanged: boolean,
+    evalResult: EvaluationResult,
+  ) {
     // Update referencesOut of this cell and referencesIn of newly referenced cells.
     const oldOut = new Map<CellKey, PositionInfo>(cell.referencesOut);
     cell.referencesOut.clear();
@@ -465,7 +480,7 @@ export default class Sheet {
 
       // Add this cell to the referred cell's referencesIn.
       referredCell.referencesIn.set(cell.key, {
-        columnKey: colKey,
+        columnKey: columnKey,
         rowKey: rowKey,
       });
     });
@@ -487,9 +502,7 @@ export default class Sheet {
     }
 
     // If the value of the cell hasn't changed, there's no need to update cells that reference this cell.
-    if (!valueChanged && cell.state == CellState.OK) return false;
-
-    // Return the set of cells whose values has changed as a result of updating this cell.
+    if (!valueChanged && cell.state == CellState.OK) return;
 
     // Update cells that reference this cell.
     cell.referencesIn.forEach((pos, ref) => {
@@ -511,8 +524,6 @@ export default class Sheet {
         );
       }
     });
-
-    return valueChanged;
   }
 
   private hasCircularReference(cell: Cell): boolean {
