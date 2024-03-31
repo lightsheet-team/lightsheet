@@ -2,12 +2,7 @@ import { CellKey, ColumnKey, RowKey } from "./key/keyTypes.ts";
 import Cell from "./cell/cell.ts";
 import Column from "./group/column.ts";
 import Row from "./group/row.ts";
-import {
-  CellInfo,
-  ResolveCellResult,
-  PositionInfo,
-  ShiftDirection,
-} from "./sheet.types.ts";
+import { CellInfo, PositionInfo, ShiftDirection } from "./sheet.types.ts";
 import ExpressionHandler from "../evaluation/expressionHandler.ts";
 import CellStyle from "./cellStyle.ts";
 import CellGroup from "./group/cellGroup.ts";
@@ -439,16 +434,15 @@ export default class Sheet {
     return this.cellData.get(cellKey)!;
   }
 
-  private resolveCell(
-    cell: Cell,
-    colKey: ColumnKey,
-    rowKey: RowKey,
-  ): ResolveCellResult {
+  /**
+   * Returns true if the value of the cell has changed.
+   */
+  private resolveCell(cell: Cell, colKey: ColumnKey, rowKey: RowKey): boolean {
     const evalResult = this.expressionHandler.evaluate(cell.formula);
     if (!evalResult) {
       const prevState = cell.state;
       cell.setState(CellState.INVALID_EXPRESSION);
-      return { valueChanged: prevState == CellState.OK }; // The cell's value has changed if the state changed from OK to invalid.
+      return prevState == CellState.OK; // The cell's value has changed if the state changed from OK to invalid.
     }
 
     // TODO Resolve restrictions from cell formatting here (CellState.INVALID_FORMAT).
@@ -493,11 +487,9 @@ export default class Sheet {
     }
 
     // If the value of the cell hasn't changed, there's no need to update cells that reference this cell.
-    if (!valueChanged && cell.state == CellState.OK)
-      return { valueChanged: false };
+    if (!valueChanged && cell.state == CellState.OK) return false;
 
     // Return the set of cells whose values has changed as a result of updating this cell.
-    const dirtyCells = new Map<CellKey, PositionInfo>();
 
     // Update cells that reference this cell.
     cell.referencesIn.forEach((pos, ref) => {
@@ -520,7 +512,7 @@ export default class Sheet {
       }
     });
 
-    return { valueChanged: true, dirtyCells: dirtyCells };
+    return valueChanged;
   }
 
   private hasCircularReference(cell: Cell): boolean {

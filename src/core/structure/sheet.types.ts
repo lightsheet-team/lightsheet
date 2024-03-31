@@ -1,4 +1,4 @@
-import { CellKey, ColumnKey, RowKey } from "./key/keyTypes.ts";
+import { ColumnKey, RowKey } from "./key/keyTypes.ts";
 
 import { CellState } from "./cell/cellState.ts";
 
@@ -11,11 +11,6 @@ export type CellInfo = {
   position: PositionInfo;
   value?: string;
   state?: CellState;
-};
-
-export type ResolveCellResult = {
-  valueChanged: boolean;
-  dirtyCells?: Map<CellKey, PositionInfo>;
 };
 
 export enum ShiftDirection {
