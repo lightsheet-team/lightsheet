@@ -443,7 +443,7 @@ export default class Sheet {
     if (!evalResult) {
       const prevState = cell.state;
       cell.setState(CellState.INVALID_EXPRESSION);
-      return prevState == CellState.OK; // The cell's value has changed if the state changed from OK to invalid.
+      return prevState == CellState.OK; // Consider the cell's value changed if its state changes from OK to invalid.
     }
 
     // TODO Resolve restrictions from cell formatting here (CellState.INVALID_FORMAT).
