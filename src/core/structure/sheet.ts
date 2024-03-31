@@ -60,20 +60,20 @@ export default class Sheet {
     return this.setCell(position.columnKey!, position.rowKey!, value);
   }
 
-  setCell(colKey: ColumnKey, rowKey: RowKey, value: string): CellInfo {
+  setCell(colKey: ColumnKey, rowKey: RowKey, formula: string): CellInfo {
     let cell = this.getCell(colKey, rowKey);
     const colIndex = this.getColumnIndex(colKey)!;
     const rowIndex = this.getRowIndex(rowKey)!;
 
     if (!cell) {
-      cell = this.createCell(colKey, rowKey, value);
-    } else if (value == "") {
+      cell = this.createCell(colKey, rowKey, formula);
+    } else if (formula == "") {
       // Cell exists but is being cleared.
       this.deleteCell(colKey, rowKey);
     }
 
     if (cell) {
-      cell.formula = value;
+      cell.formula = formula;
       this.resolveCell(cell, colKey, rowKey);
     }
 
