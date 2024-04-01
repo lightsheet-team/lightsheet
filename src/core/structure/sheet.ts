@@ -452,7 +452,31 @@ export default class Sheet {
 
     const valueChanged = cell.value != evalResult.value;
     cell.value = evalResult.value;
-    this.updateCellReferences(cell, colKey, rowKey, valueChanged, evalResult);
+    this.handleCellReferenceChanges(cell, colKey, rowKey, evalResult);
+
+    // If the value of the cell hasn't changed, there's no need to update cells that reference this cell.
+    if (!valueChanged && cell.state == CellState.OK) return valueChanged;
+
+    // Update cells that reference this cell.
+    for (const [ref, pos] of cell.referencesIn) {
+      const referredCell = this.cellData.get(ref)!;
+      const refUpdated = this.resolveCell(
+        referredCell,
+        pos.columnKey!,
+        pos.rowKey!,
+      );
+
+      // Emit event if the referred cell's value has changed.
+      if (refUpdated) {
+        this.emitSetCellEvent(
+          pos.columnKey!,
+          pos.rowKey!,
+          this.getColumnIndex(pos.columnKey!)!,
+          this.getRowIndex(pos.rowKey!)!,
+          referredCell,
+        );
+      }
+    }
 
     return valueChanged;
   }
@@ -460,11 +484,10 @@ export default class Sheet {
   /**
    * Update reference collections of cells and emit events for all cells whose values are affected.
    */
-  private updateCellReferences(
+  private handleCellReferenceChanges(
     cell: Cell,
     columnKey: ColumnKey,
     rowKey: RowKey,
-    valueChanged: boolean,
     evalResult: EvaluationResult,
   ) {
     // Update referencesOut of this cell and referencesIn of newly referenced cells.
@@ -500,30 +523,6 @@ export default class Sheet {
     if (evalResult.references.length && this.hasCircularReference(cell)) {
       cell.setState(CellState.CIRCULAR_REFERENCE);
     }
-
-    // If the value of the cell hasn't changed, there's no need to update cells that reference this cell.
-    if (!valueChanged && cell.state == CellState.OK) return;
-
-    // Update cells that reference this cell.
-    cell.referencesIn.forEach((pos, ref) => {
-      const referredCell = this.cellData.get(ref)!;
-      const refUpdated = this.resolveCell(
-        referredCell,
-        pos.columnKey!,
-        pos.rowKey!,
-      );
-
-      // Emit event if the referred cell's value has changed.
-      if (refUpdated) {
-        this.emitSetCellEvent(
-          pos.columnKey!,
-          pos.rowKey!,
-          this.getColumnIndex(pos.columnKey!)!,
-          this.getRowIndex(pos.rowKey!)!,
-          referredCell,
-        );
-      }
-    });
   }
 
   private hasCircularReference(cell: Cell): boolean {
