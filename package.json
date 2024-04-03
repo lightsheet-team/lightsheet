@@ -1,5 +1,5 @@
 {
-  "name": "vite-project",
+  "name": "lightsheet",
   "private": true,
   "version": "0.0.1",
   "type": "module",
@@ -9,7 +9,8 @@
     "lint:fix": "npm run lint -- --fix",
     "build": "tsc && vite build || echo 'Build failed'",
     "build:watch": "tsc && vite build --watch",
-    "test": "jest"
+    "test": "jest", 
+    "test:coverage": "jest --coverage"
   },
   "devDependencies": {
     "@types/jest": "^29.5.12",

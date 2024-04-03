@@ -63,7 +63,4 @@ new Lightsheet(document.getElementById("lightsheet"), {
     items: toolbar,
     element: document.getElementById("toolbar-dom-id"),
   },
-  onCellChange: (colIndex, rowIndex, newValue) => {
-    console.log(colIndex, rowIndex, newValue);
-  },
 });

@@ -11,6 +11,8 @@ node_modules
 dist
 dist-ssr
 *.local
+# Ignore Jest code coverage output
+coverage
 
 # Editor directories and files
 .vscode/*

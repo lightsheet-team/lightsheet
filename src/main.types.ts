@@ -3,7 +3,6 @@ export type LightSheetOptions = {
   data: any[];
   columns: LightSheetColumn[];
   toolbarOptions?: ToolbarOptions;
-  onCellChange?: (colIndex: number, rowIndex: number, value: any) => void;
 };
 
 type LightSheetColumn = { type: string; title: string; name: string };
