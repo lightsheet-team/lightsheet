@@ -49,6 +49,11 @@ export default class UI {
     lightSheetContainerDom.classList.add("light_sheet_table_content");
     this.tableEl.appendChild(lightSheetContainerDom);
 
+    /*formula bar*/
+    const lightSheetFormulaBarDom = document.createElement("div");
+    lightSheetFormulaBarDom.classList.add("light_sheet_table_formula_bar");
+    lightSheetContainerDom.appendChild(lightSheetFormulaBarDom);
+
     const tableContainerDom = document.createElement("table");
     tableContainerDom.classList.add("light_sheet_table");
     tableContainerDom.setAttribute("cellpadding", "0");
