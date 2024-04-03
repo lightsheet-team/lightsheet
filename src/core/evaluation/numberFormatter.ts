@@ -14,6 +14,6 @@ export default class NumberFormatter extends Formatter {
     const formatted = Number(value);
     if (isNaN(formatted)) return null;
 
-    return formatted.toFixed(this.digits) as string;
+    return formatted.toFixed(this.digits).toString();
   }
 }
