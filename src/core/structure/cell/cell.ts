@@ -4,9 +4,9 @@ import { PositionInfo } from "../sheet.types.ts";
 
 export default class Cell {
   key: CellKey;
-  rawValue: string;
-  resolvedValue: string;
-  formattedValue: string;
+  rawValue: string; // User input.
+  resolvedValue: string; // Resolved value of a formula in rawValue.
+  formattedValue: string; // resolvedValue with formatting rules applied.
   private cellState: CellState;
 
   // References in this cell's formula.
