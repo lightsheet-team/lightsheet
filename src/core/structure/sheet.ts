@@ -331,7 +331,10 @@ export default class Sheet {
     col.cellFormatting.set(row.key, style);
     row.cellFormatting.set(col.key, style);
 
-    this.resolveCell(this.getCell(colKey, rowKey)!, colKey, rowKey);
+    if (style.formatter) {
+      this.resolveCell(this.getCell(colKey, rowKey)!, colKey, rowKey);
+    }
+
     return true;
   }
 
@@ -356,6 +359,7 @@ export default class Sheet {
     style: CellStyle | null,
   ) {
     style = style ? new CellStyle().clone(style) : null;
+    const formatterChanged = style?.formatter != group.defaultStyle?.formatter;
     group.defaultStyle = style;
 
     // Iterate through cells in this column and clear any styling properties set by the new style.
@@ -371,7 +375,8 @@ export default class Sheet {
       this.clearCellStyle(opposingKey as ColumnKey, group.key as RowKey);
     }
 
-    // Re-evaluate each cell in this group to apply the new style.
+    if (!formatterChanged) return; // Only re-resolve cells if the formatter has changed.
+
     for (const [opposingKey] of group.cellIndex) {
       const cell = this.cellData.get(group.cellIndex.get(opposingKey)!)!;
       if (group instanceof Column) {
@@ -386,6 +391,11 @@ export default class Sheet {
     const col = this.columns.get(colKey);
     const row = this.rows.get(rowKey);
     if (!col || !row) return false;
+
+    const style = col.cellFormatting.get(row.key);
+    if (style?.formatter) {
+      this.resolveCell(this.getCell(colKey, rowKey)!, colKey, rowKey);
+    }
 
     col.cellFormatting.delete(row.key);
     row.cellFormatting.delete(col.key);
