@@ -72,30 +72,34 @@ export default class UI {
       headerCellDom.textContent = headerData[i];
       headerRowDom.appendChild(headerCellDom);
 
-      if(i > 0) {
+      if (i > 0) {
         headerCellDom.onclick = (e: MouseEvent) => {
           const selectedColumn = e.target as HTMLElement;
           if (!selectedColumn) return;
-          
+
           if (this.selectedRowNumberCell) {
             this.removeRowSelection();
           }
           if (this.selectedHeaderCell) {
             this.removeColumnSelection();
-          } 
-          if(this.selectedHeaderCell === selectedColumn){
+          }
+          if (this.selectedHeaderCell === selectedColumn) {
             this.removeColumnSelection();
             this.selectedHeaderCell = null;
-          }else {
-            selectedColumn.classList.add("lightsheet_table_selected_row_number_header_cell");
+          } else {
+            selectedColumn.classList.add(
+              "lightsheet_table_selected_row_number_header_cell",
+            );
             this.selectedHeaderCell = selectedColumn;
-  
+
             // const cellIdInfo = this.checkCellId(selectedColumn);
             // console.log(selectedColumn.id);
-  
+
             Array.from(this.tableBodyDom.children).forEach((childElement) => {
               // Code inside the forEach loop
-              childElement.children[i].classList.add("lightsheet_table_selected_row_column");
+              childElement.children[i].classList.add(
+                "lightsheet_table_selected_row_column",
+              );
             });
           }
         };
@@ -118,9 +122,9 @@ export default class UI {
     rowDom.appendChild(rowNumberCell); // Append the row number cell to the row
 
     rowNumberCell.onclick = (e: MouseEvent) => {
-      const selectedRow = e.target as HTMLElement; 
+      const selectedRow = e.target as HTMLElement;
       if (!selectedRow) return;
-      
+
       if (this.selectedRowNumberCell) {
         this.removeRowSelection();
       }
@@ -128,21 +132,25 @@ export default class UI {
         this.removeColumnSelection();
       }
 
-      if(this.selectedRowNumberCell === selectedRow){
+      if (this.selectedRowNumberCell === selectedRow) {
         this.removeRowSelection();
         this.selectedRowNumberCell = null;
       } else {
-        selectedRow.classList.add("lightsheet_table_selected_row_number_header_cell");
+        selectedRow.classList.add(
+          "lightsheet_table_selected_row_number_header_cell",
+        );
         this.selectedRowNumberCell = selectedRow;
-        
+
         const parentElement = selectedRow.parentElement;
         if (parentElement) {
-            for (let i = 1; i < parentElement.children.length; i++) {
-                const childElement = parentElement.children[i];
-                if (childElement !== selectedRow) {
-                    childElement.classList.add("lightsheet_table_selected_row_column");
-                }
+          for (let i = 1; i < parentElement.children.length; i++) {
+            const childElement = parentElement.children[i];
+            if (childElement !== selectedRow) {
+              childElement.classList.add(
+                "lightsheet_table_selected_row_column",
+              );
             }
+          }
         }
       }
     };
@@ -188,11 +196,11 @@ export default class UI {
       );
 
     inputDom.onfocus = () => {
-      if(this.selectedRowNumberCell) {
+      if (this.selectedRowNumberCell) {
         this.removeRowSelection();
       }
 
-      if(this.selectedHeaderCell) {
+      if (this.selectedHeaderCell) {
         this.removeColumnSelection();
       }
 
@@ -317,21 +325,25 @@ export default class UI {
   }
 
   removeRowSelection() {
-    this.selectedRowNumberCell?.classList.remove("lightsheet_table_selected_row_number_header_cell");
-        const parentElement = this.selectedRowNumberCell?.parentElement;
-        if (parentElement) {
-            for (let i = 1; i < parentElement.children.length; i++) {
-                const childElement = parentElement.children[i];
-                if (childElement !== this.selectedRowNumberCell) {
-                    childElement.classList.remove("lightsheet_table_selected_row_column");
-                }
-            }
+    this.selectedRowNumberCell?.classList.remove(
+      "lightsheet_table_selected_row_number_header_cell",
+    );
+    const parentElement = this.selectedRowNumberCell?.parentElement;
+    if (parentElement) {
+      for (let i = 1; i < parentElement.children.length; i++) {
+        const childElement = parentElement.children[i];
+        if (childElement !== this.selectedRowNumberCell) {
+          childElement.classList.remove("lightsheet_table_selected_row_column");
         }
+      }
+    }
   }
 
   removeColumnSelection() {
-    this.selectedHeaderCell?.classList.remove("lightsheet_table_selected_row_number_header_cell");
-    for(const childElement of this.tableBodyDom.children) {
+    this.selectedHeaderCell?.classList.remove(
+      "lightsheet_table_selected_row_number_header_cell",
+    );
+    for (const childElement of this.tableBodyDom.children) {
       Array.from(childElement.children).forEach((element: Element) => {
         element.classList.remove("lightsheet_table_selected_row_column");
       });
