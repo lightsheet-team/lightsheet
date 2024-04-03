@@ -1,36 +1,41 @@
 import UI from "./ui/render.ts";
 import { LightSheetOptions } from "./main.types.ts";
 import Sheet from "./core/structure/sheet.ts";
-import {
-  generateColumnKey,
-  generateRowKey,
-} from "./core/structure/key/keyTypes.ts";
 import { CellInfo } from "./core/structure/sheet.types.ts";
-import { GenerateRowLabel } from "../utils/helpers.ts";
+import Events from "./core/event/events.ts";
+import LightSheetHelper from "../utils/helpers.ts";
+
 export default class LightSheet {
   ui: UI;
   options: LightSheetOptions;
   sheet: Sheet;
+  events: Events;
   onCellChange?;
+  isReady: boolean = false;
 
   #defaultRowCount: number = 4;
   #defaultColCount: number = 4;
 
   constructor(targetElement: Element, options: LightSheetOptions) {
     this.options = options;
-    this.sheet = new Sheet();
+    this.events = new Events();
+    this.sheet = new Sheet(this.events);
     this.ui = new UI(
       targetElement,
       this,
       this.options.data?.length ?? this.#defaultRowCount,
     );
-    this.#initializeData();
+    this.#initializeTable();
     if (options.onCellChange) {
       this.onCellChange = options.onCellChange;
     }
+
+    if (options.onReady) options.onReady = this.options.onReady;
+    this.onTableReady();
   }
 
-  #initializeData() {
+
+  #initializeTable() {
     // Create header row and add headers
     const rowLength = this.options.data?.length
       ? this.options.data?.length
@@ -43,7 +48,7 @@ export default class LightSheet {
 
     const headerData = Array.from(
       { length: colLength + 1 }, // Adding 1 for the row number column
-      (_, i) => (i === 0 ? "" : GenerateRowLabel(i)), // Generating row labels
+      (_, i) => (i === 0 ? "" : LightSheetHelper.GenerateRowLabel(i)), // Generating row labels
     );
 
     this.ui.addHeader(headerData);
@@ -71,11 +76,9 @@ export default class LightSheet {
     }
   }
 
-  setCell(columnKeyStr: string, rowKeyStr: string, value: any): CellInfo {
-    const colKey = generateColumnKey(columnKeyStr);
-    const rowKey = generateRowKey(rowKeyStr);
-
-    return this.sheet.setCell(colKey, rowKey, value);
+  onTableReady() {
+    this.isReady = true;
+    if (this.options.onReady) this.options.onReady()
   }
 
   setCellAt(columnKey: number, rowKey: number, value: any): CellInfo {
