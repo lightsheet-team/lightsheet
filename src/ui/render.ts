@@ -3,7 +3,7 @@ import {
   generateColumnKey,
   generateRowKey,
 } from "../core/structure/key/keyTypes";
-import { CellIdInfo } from "./render.types.ts";
+import { CellIdInfo, SelectionContainer } from "./render.types.ts";
 import LightsheetEvent from "../core/event/event.ts";
 import { CoreSetCellPayload } from "../core/event/events.types.ts";
 import EventType from "../core/event/eventType.ts";
@@ -15,7 +15,8 @@ export default class UI {
   rowCount: number;
   colCount: number;
   lightSheet: LightSheet;
-  selectedCell: number[] | undefined;
+  selectedCell: number[];
+  selectedCellsContainer: SelectionContainer;
 
   constructor(
     el: Element,
@@ -28,6 +29,10 @@ export default class UI {
     this.rowCount = rowCount;
     this.lightSheet = lightSheet;
     this.selectedCell = [];
+    this.selectedCellsContainer = {
+      selectionStart: null,
+      selectionEnd: null,
+    };
     this.registerEvents();
 
     this.tableEl.classList.add("lightsheet_table_container");
