@@ -87,7 +87,7 @@ export default class ExpressionHandler {
       throw new Error("Invalid cell reference: " + name);
 
     this.cellRefCache.push(cellInfo.position);
-    return cellInfo.value!;
+    return cellInfo.resolvedValue!;
   }
 
   // TODO Translating between column names and indices should probably be a common function.

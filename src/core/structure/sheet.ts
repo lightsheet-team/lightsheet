@@ -74,14 +74,16 @@ export default class Sheet {
     }
 
     if (cell) {
-      cell.formula = formula;
+      cell.rawValue = formula;
       this.resolveCell(cell, colKey, rowKey);
     }
 
     this.emitSetCellEvent(colKey, rowKey, colIndex, rowIndex, cell);
 
     return {
-      value: cell ? cell.value : undefined,
+      rawValue: cell ? cell.rawValue : undefined,
+      resolvedValue: cell ? cell.formattedValue : undefined,
+      formattedValue: cell ? cell.formattedValue : undefined,
       state: cell ? cell.state : undefined,
       position: {
         rowKey: this.rows.has(rowKey) ? rowKey : undefined,
@@ -98,7 +100,9 @@ export default class Sheet {
     const cell = this.getCell(colKey, rowKey)!;
     return cell
       ? {
-          value: cell.value,
+          rawValue: cell.rawValue,
+          resolvedValue: cell.resolvedValue,
+          formattedValue: cell.formattedValue,
           state: cell.state,
           position: {
             columnKey: colKey,
@@ -389,7 +393,7 @@ export default class Sheet {
       for (const [colKey, cellKey] of row.cellIndex) {
         const cell = this.cellData.get(cellKey)!;
         const column = this.columns.get(colKey)!;
-        rowData.set(column.position, cell.value);
+        rowData.set(column.position, cell.formattedValue);
       }
 
       data.set(rowPos, rowData);
@@ -414,7 +418,7 @@ export default class Sheet {
     }
 
     const cell = new Cell();
-    cell.formula = value;
+    cell.rawValue = value;
     this.cellData.set(cell.key, cell);
     this.resolveCell(cell, colKey, rowKey);
 
@@ -439,19 +443,30 @@ export default class Sheet {
    * Returns true if the value of the cell has changed.
    */
   private resolveCell(cell: Cell, colKey: ColumnKey, rowKey: RowKey): boolean {
-    const evalResult = this.expressionHandler.evaluate(cell.formula);
+    const evalResult = this.expressionHandler.evaluate(cell.rawValue);
+    const prevState = cell.state;
     if (!evalResult) {
-      const prevState = cell.state;
       cell.setState(CellState.INVALID_EXPRESSION);
       return prevState == CellState.OK; // Consider the cell's value changed if its state changes from OK to invalid.
     }
 
-    // TODO Resolve restrictions from cell formatting here (CellState.INVALID_FORMAT).
+    const style = this.getCellStyle(colKey, rowKey);
+    let formattedValue: string | null = evalResult.value;
+    if (style?.formatter) {
+      formattedValue = style.formatter.format(formattedValue);
+      if (formattedValue == null) {
+        cell.setState(CellState.INVALID_FORMAT);
+        return prevState == CellState.OK;
+      }
+    }
 
     cell.setState(CellState.OK);
 
-    const valueChanged = cell.value != evalResult.value;
-    cell.value = evalResult.value;
+    // Compare to resolvedValue since formatting doesn't affect references.
+    const valueChanged = cell.resolvedValue != evalResult.value;
+    cell.resolvedValue = evalResult.value;
+    cell.formattedValue = formattedValue;
+
     this.handleCellReferenceChanges(cell, colKey, rowKey, evalResult);
 
     // If the value of the cell hasn't changed, there's no need to update cells that reference this cell.
@@ -589,8 +604,8 @@ export default class Sheet {
         columnIndex: colPos,
         rowIndex: rowPos,
       },
-      formula: cell ? cell.formula : "",
-      value: cell ? cell.value : "",
+      rawValue: cell ? cell.rawValue : "",
+      formattedValue: cell ? cell.formattedValue : "",
       clearCell: this.cellData.get(cell.key) == null,
       clearRow: this.rows.get(rowKey) == null,
     };
@@ -611,13 +626,13 @@ export default class Sheet {
       this.setCell(
         payload.keyPosition.columnKey!,
         payload.keyPosition.rowKey!,
-        payload.formula,
+        payload.rawValue,
       );
     } else if (payload.indexPosition) {
       this.setCellAt(
         payload.indexPosition.columnIndex,
         payload.indexPosition.rowIndex,
-        payload.formula,
+        payload.rawValue,
       );
     } else {
       throw new Error(

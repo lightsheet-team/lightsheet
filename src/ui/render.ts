@@ -191,7 +191,7 @@ export default class UI {
         elInfo.rowDom!,
         payload.indexPosition.columnIndex,
         payload.indexPosition.rowIndex,
-        payload.value,
+        payload.formattedValue,
         payload.position.columnKey?.toString(),
       );
     }
@@ -201,7 +201,8 @@ export default class UI {
 
     // Set cell value to resolved value from the core.
     // TODO Cell formula should be preserved. (Issue #49)
-    (elInfo.cellDom.firstChild! as HTMLInputElement).value = payload.value;
+    (elInfo.cellDom.firstChild! as HTMLInputElement).value =
+      payload.formattedValue;
   }
 
   private static getElementInfoForSetCell(payload: CoreSetCellPayload) {

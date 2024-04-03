@@ -97,10 +97,10 @@ describe("Cell references", () => {
       [0, 2], // A3
       [1, 2], // B3
     ];
-    const refValue = sheet.getCellInfoAt(1, 2)!.value; // B3
+    const refValue = sheet.getCellInfoAt(1, 2)!.resolvedValue; // B3
     for (const c of cells) {
       const cellInfo = sheet.getCellInfoAt(c[0], c[1])!;
-      expect(cellInfo.value).toBe(refValue);
+      expect(cellInfo.resolvedValue).toBe(refValue);
     }
   });
 });
