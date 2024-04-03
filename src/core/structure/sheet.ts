@@ -330,6 +330,8 @@ export default class Sheet {
 
     col.cellFormatting.set(row.key, style);
     row.cellFormatting.set(col.key, style);
+
+    this.resolveCell(this.getCell(colKey, rowKey)!, colKey, rowKey);
     return true;
   }
 
@@ -367,6 +369,16 @@ export default class Sheet {
         continue;
       }
       this.clearCellStyle(opposingKey as ColumnKey, group.key as RowKey);
+    }
+
+    // Re-evaluate each cell in this group to apply the new style.
+    for (const [opposingKey] of group.cellIndex) {
+      const cell = this.cellData.get(group.cellIndex.get(opposingKey)!)!;
+      if (group instanceof Column) {
+        this.resolveCell(cell, group.key, opposingKey as RowKey);
+        continue;
+      }
+      this.resolveCell(cell, opposingKey as ColumnKey, group.key as RowKey);
     }
   }
 
