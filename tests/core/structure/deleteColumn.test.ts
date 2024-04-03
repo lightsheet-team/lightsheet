@@ -14,9 +14,7 @@ describe("Delete column test", () => {
   });
 
   it("Should delete column shift the other columns correctly", () => {
-    console.log(sheet.exportData());
     sheet.deleteColumn(0);
-    console.log(sheet.exportData());
     expect(sheet.getCellInfoAt(0, 0)!.value).toBe("2x1");
     expect(sheet.getCellInfoAt(1, 0)!.value).toBe("3x1");
     expect(sheet.getCellInfoAt(2, 0)).toBe(null);
@@ -26,10 +24,8 @@ describe("Delete column test", () => {
   });
 
   it("Should delete empty column and reverse the insert operation", () => {
-    console.log(sheet.exportData());
     sheet.insertColumn(0);
     sheet.deleteColumn(0);
-    console.log(sheet.exportData());
     expect(sheet.getCellInfoAt(0, 0)!.value).toBe("1x1");
     expect(sheet.getCellInfoAt(1, 0)!.value).toBe("2x1");
     expect(sheet.getCellInfoAt(2, 0)!.value).toBe("3x1");
@@ -41,9 +37,7 @@ describe("Delete column test", () => {
   it("Should delete the last column and not affect other columns", () => {
     sheet.setCellAt(0, 0, "");
     sheet.setCellAt(0, 1, "");
-    console.log(sheet.exportData());
     sheet.deleteColumn(2);
-    console.log(sheet.exportData());
     expect(sheet.getCellInfoAt(0, 0)).toBe(null);
     expect(sheet.getCellInfoAt(1, 0)!.value).toBe("2x1");
     expect(sheet.getCellInfoAt(2, 0)).toBe(null);

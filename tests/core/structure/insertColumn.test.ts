@@ -14,9 +14,7 @@ describe("Insert column test", () => {
   });
 
   it("Should insert column and shift the other columns correctly", () => {
-    console.log(sheet.exportData());
     sheet.insertColumn(0);
-    console.log(sheet.exportData());
     expect(sheet.getCellInfoAt(0, 0)).toBe(null);
     expect(sheet.getCellInfoAt(1, 0)!.value).toBe("1x1");
     expect(sheet.getCellInfoAt(2, 0)!.value).toBe("2x1");
