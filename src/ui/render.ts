@@ -5,6 +5,7 @@ import { ToolbarOptions } from "../main.types";
 export default class UI {
   tableEl: Element;
   lightSheetToolBarDom: HTMLElement;
+  lightSheetFormulaBarDom: HTMLElement;
   tableHeadDom: Element;
   tableBodyDom: Element;
   rowCount: number;
@@ -50,9 +51,10 @@ export default class UI {
     this.tableEl.appendChild(lightSheetContainerDom);
 
     /*formula bar*/
-    const lightSheetFormulaBarDom = document.createElement("div");
-    lightSheetFormulaBarDom.classList.add("light_sheet_table_formula_bar");
-    lightSheetContainerDom.appendChild(lightSheetFormulaBarDom);
+    this.lightSheetFormulaBarDom = document.createElement("div");
+    this.lightSheetFormulaBarDom.classList.add("light_sheet_table_formula_bar");
+    lightSheetContainerDom.appendChild(this.lightSheetFormulaBarDom);
+    this.createFormulaBar();
 
     const tableContainerDom = document.createElement("table");
     tableContainerDom.classList.add("light_sheet_table");
@@ -68,6 +70,13 @@ export default class UI {
     //tbody
     this.tableBodyDom = document.createElement("tbody");
     tableContainerDom.appendChild(this.tableBodyDom);
+  }
+
+  createFormulaBar() {
+    // Create an input element for the formula bar
+    const formulaInput = document.createElement("input");
+    // Append the input element to the formula bar container
+    this.lightSheetFormulaBarDom.appendChild(formulaInput);
   }
 
   createToolBar() {
