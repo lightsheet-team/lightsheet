@@ -509,7 +509,7 @@ export default class Sheet {
   }
 
   /**
-   * Update reference collections of cells and emit events for all cells whose values are affected.
+   * Update reference collections of cells for all cells whose values are affected.
    */
   private handleCellReferenceChanges(
     cell: Cell,
