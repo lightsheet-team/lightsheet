@@ -3,8 +3,6 @@ import LightSheet from "../../src/main";
 describe("LightSheet", () => {
   let lightSheet: LightSheet;
   let targetElementMock;
-  const defaultRowCount = 4;
-  const defaultColCount = 5;
 
   beforeEach(() => {
     // Mocking UI and target element
@@ -12,7 +10,6 @@ describe("LightSheet", () => {
 
     // Creating instance of LightSheet with mocked dependencies
     lightSheet = new LightSheet(targetElementMock, { data: [] });
-    // lightSheet.ui = lightSheet;
   });
 
   afterEach(() => {
@@ -21,12 +18,13 @@ describe("LightSheet", () => {
 
   test("initializeData method creates header with the correct number of children in UI", () => {
     // Get the number of children of tableHeadDom
-    const colCount = lightSheet.ui.tableHeadDom.children[0].children.length;
+    const tbodyElement = document.querySelector('tbody')
+    const rowCount = tbodyElement?.children.length
     // Get the number of children of tableBodyDom
-    const rowCount = lightSheet.ui.tableBodyDom.children.length;
+    const colCount = tbodyElement?.children[0].children.length;
 
     // Expect that the number of children matches the defaultRowCount since no data is provided
-    expect(colCount).toBe(defaultColCount);
-    expect(rowCount).toBe(defaultRowCount);
+    expect(colCount).toBe(lightSheet.options.defaultColCount);
+    expect(rowCount).toBe(lightSheet.options.defaultRowCount);
   });
 });

@@ -3,5 +3,7 @@ export type LightSheetOptions = {
   data: any[];
   onCellChange?: (colIndex: number, rowIndex: number, value: any) => void;
   onCellClick?: (colIndex: number, rowIndex: number) => void;
-  onReady?: () => void
+  onReady?: () => void;
+  defaultRowCount?: number;
+  defaultColCount?: number;
 };
