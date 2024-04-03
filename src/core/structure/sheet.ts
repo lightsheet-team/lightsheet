@@ -362,7 +362,7 @@ export default class Sheet {
     const formatterChanged = style?.formatter != group.defaultStyle?.formatter;
     group.defaultStyle = style;
 
-    // Iterate through cells in this column and clear any styling properties set by the new style.
+    // Iterate through formatted cells in this group and clear any styling properties set by the new style.
     for (const [opposingKey, cellStyle] of group.cellFormatting) {
       const shouldClear = cellStyle.clearStylingSetBy(style);
       if (!shouldClear) continue;
@@ -375,8 +375,9 @@ export default class Sheet {
       this.clearCellStyle(opposingKey as ColumnKey, group.key as RowKey);
     }
 
-    if (!formatterChanged) return; // Only re-resolve cells if the formatter has changed.
+    if (!formatterChanged) return;
 
+    // Update all cells in this group if a new formatter was applied.
     for (const [opposingKey] of group.cellIndex) {
       const cell = this.cellData.get(group.cellIndex.get(opposingKey)!)!;
       if (group instanceof Column) {
