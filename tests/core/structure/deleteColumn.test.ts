@@ -17,12 +17,12 @@ describe("Delete column test", () => {
     console.log(sheet.exportData());
     sheet.deleteColumn(0);
     console.log(sheet.exportData());
-    expect(sheet.getCellValueAt(0, 0)).toBe("2x1");
-    expect(sheet.getCellValueAt(1, 0)).toBe("3x1");
-    expect(sheet.getCellValueAt(2, 0)).toBe(null);
-    expect(sheet.getCellValueAt(0, 1)).toBe("2x2");
-    expect(sheet.getCellValueAt(1, 1)).toBe("3x2");
-    expect(sheet.getCellValueAt(2, 1)).toBe(null);
+    expect(sheet.getCellInfoAt(0, 0)!.value).toBe("2x1");
+    expect(sheet.getCellInfoAt(1, 0)!.value).toBe("3x1");
+    expect(sheet.getCellInfoAt(2, 0)).toBe(null);
+    expect(sheet.getCellInfoAt(0, 1)!.value).toBe("2x2");
+    expect(sheet.getCellInfoAt(1, 1)!.value).toBe("3x2");
+    expect(sheet.getCellInfoAt(2, 1)).toBe(null);
   });
 
   it("Should delete empty column and reverse the insert operation", () => {
@@ -30,12 +30,12 @@ describe("Delete column test", () => {
     sheet.insertColumn(0);
     sheet.deleteColumn(0);
     console.log(sheet.exportData());
-    expect(sheet.getCellValueAt(0, 0)).toBe("1x1");
-    expect(sheet.getCellValueAt(1, 0)).toBe("2x1");
-    expect(sheet.getCellValueAt(2, 0)).toBe("3x1");
-    expect(sheet.getCellValueAt(0, 1)).toBe("1x2");
-    expect(sheet.getCellValueAt(1, 1)).toBe("2x2");
-    expect(sheet.getCellValueAt(2, 1)).toBe("3x2");
+    expect(sheet.getCellInfoAt(0, 0)!.value).toBe("1x1");
+    expect(sheet.getCellInfoAt(1, 0)!.value).toBe("2x1");
+    expect(sheet.getCellInfoAt(2, 0)!.value).toBe("3x1");
+    expect(sheet.getCellInfoAt(0, 1)!.value).toBe("1x2");
+    expect(sheet.getCellInfoAt(1, 1)!.value).toBe("2x2");
+    expect(sheet.getCellInfoAt(2, 1)!.value).toBe("3x2");
   });
 
   it("Should delete the last column and not affect other columns", () => {
@@ -44,11 +44,11 @@ describe("Delete column test", () => {
     console.log(sheet.exportData());
     sheet.deleteColumn(2);
     console.log(sheet.exportData());
-    expect(sheet.getCellValueAt(0, 0)).toBe(null);
-    expect(sheet.getCellValueAt(1, 0)).toBe("2x1");
-    expect(sheet.getCellValueAt(2, 0)).toBe(null);
-    expect(sheet.getCellValueAt(0, 1)).toBe(null);
-    expect(sheet.getCellValueAt(1, 1)).toBe("2x2");
-    expect(sheet.getCellValueAt(2, 1)).toBe(null);
+    expect(sheet.getCellInfoAt(0, 0)).toBe(null);
+    expect(sheet.getCellInfoAt(1, 0)!.value).toBe("2x1");
+    expect(sheet.getCellInfoAt(2, 0)).toBe(null);
+    expect(sheet.getCellInfoAt(0, 1)).toBe(null);
+    expect(sheet.getCellInfoAt(1, 1)!.value).toBe("2x2");
+    expect(sheet.getCellInfoAt(2, 1)).toBe(null);
   });
 });
