@@ -22,7 +22,7 @@ export default class LightSheet {
     this.#ui = new UI(
       targetElement,
       this,
-      this.options.data?.length ?? this.options.defaultColCount,
+      this.options.data?.length ?? this.options.defaultRowCount,
     );
     this.#initializeTable();
     if (options.onCellChange) {
