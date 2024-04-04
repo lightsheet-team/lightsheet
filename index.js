@@ -39,21 +39,7 @@ const columns = [
     width: "120px",
   },
 ];
-const toolbar = [
-  "undo",
-  "redo",
-  "save",
-  "format_bold",
-  "format_italic",
-  "format_color_text",
-  "format_color_fill",
-  "format_underlined",
-  "strikethrough_s",
-  "border_all",
-  "format_align_center",
-  "vertical_align_bottom",
-  "format_text_wrap",
-];
+const toolbar = ["undo", "redo", "save"];
 
 new Lightsheet(document.getElementById("lightsheet"), {
   data,
@@ -62,8 +48,5 @@ new Lightsheet(document.getElementById("lightsheet"), {
     showToolbar: true,
     items: toolbar,
     element: document.getElementById("toolbar-dom-id"),
-  },
-  onCellChange: (colIndex, rowIndex, newValue) => {
-    console.log(colIndex, rowIndex, newValue);
   },
 });
