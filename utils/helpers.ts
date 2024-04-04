@@ -1,7 +1,6 @@
 import { CoreSetCellPayload } from "../src/core/event/events.types";
 
 export default class LightSheetHelper {
-
   static GenerateRowLabel = (rowIndex: number) => {
     let label = "";
     const alphabet = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
@@ -45,5 +44,5 @@ export default class LightSheetHelper {
       rowDom: rowDom,
       rowDomId: newRowDomId,
     };
-  }
+  };
 }

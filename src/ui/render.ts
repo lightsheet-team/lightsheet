@@ -168,10 +168,8 @@ export default class UI {
 
   private registerEvents() {
     this.lightSheet.events.on(EventType.CORE_SET_CELL, (event) => {
-      if (this.lightSheet.isReady)
-        this.onCoreSetCell(event)
-    }
-    );
+      if (this.lightSheet.isReady) this.onCoreSetCell(event);
+    });
   }
 
   private onCoreSetCell(event: LightsheetEvent) {
@@ -201,7 +199,6 @@ export default class UI {
     // TODO Cell formula should be preserved. (Issue #49)
     (elInfo.cellDom.firstChild! as HTMLInputElement).value = payload.value;
   }
-
 
   private checkCellId(cellDom: Element): CellIdInfo | undefined {
     const keyParts = cellDom.id.split("_");

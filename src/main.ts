@@ -4,7 +4,7 @@ import Sheet from "./core/structure/sheet.ts";
 import { CellInfo } from "./core/structure/sheet.types.ts";
 import Events from "./core/event/events.ts";
 import LightSheetHelper from "../utils/helpers.ts";
-import { DefaultRowCount, DefaultColCount } from '../utils/constants.ts'
+import { DefaultRowCount, DefaultColCount } from "../utils/constants.ts";
 export default class LightSheet {
   #ui: UI;
   options: LightSheetOptions;
@@ -15,9 +15,8 @@ export default class LightSheet {
 
   constructor(targetElement: Element, options: LightSheetOptions) {
     this.options = options;
-    this.options.defaultColCount = options.defaultColCount ?? DefaultColCount
-    this.options.defaultRowCount = options.defaultRowCount ?? DefaultRowCount
-    console.log(this.options)
+    this.options.defaultColCount = options.defaultColCount ?? DefaultColCount;
+    this.options.defaultRowCount = options.defaultRowCount ?? DefaultRowCount;
     this.events = new Events();
     this.sheet = new Sheet(this.events);
     this.#ui = new UI(
@@ -33,7 +32,6 @@ export default class LightSheet {
     if (options.onReady) options.onReady = this.options.onReady;
     this.onTableReady();
   }
-
 
   #initializeTable() {
     // Create header row and add headers
@@ -78,7 +76,7 @@ export default class LightSheet {
 
   onTableReady() {
     this.isReady = true;
-    if (this.options.onReady) this.options.onReady()
+    if (this.options.onReady) this.options.onReady();
   }
 
   setCellAt(columnKey: number, rowKey: number, value: any): CellInfo {
