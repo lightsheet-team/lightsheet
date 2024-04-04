@@ -160,7 +160,6 @@ export default class UI {
       indexPosition: { columnIndex: colIndex, rowIndex: rowIndex },
       formula: newValue,
     };
-    console.log(this.lightSheet.isReady);
     this.lightSheet.events.emit(
       new LightsheetEvent(EventType.UI_SET_CELL, payload),
     );
