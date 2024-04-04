@@ -82,8 +82,13 @@ export default class ExpressionHandler {
     if (columnIndex == -1) throw new Error("Invalid symbol: " + name);
     const rowIndex = parseInt(rowStr) - 1;
 
-    const cellInfo = this.sheet.getCellInfoAt(columnIndex, rowIndex);
-    if (cellInfo == null || cellInfo.state != CellState.OK)
+    let cellInfo = this.sheet.getCellInfoAt(columnIndex, rowIndex);
+    if (!cellInfo) {
+      // Referring to a non-existent cell. Initialize it with an empty value.
+      cellInfo = this.sheet.setCellAt(columnIndex, rowIndex, "", true);
+    }
+
+    if (cellInfo.state != CellState.OK)
       throw new Error("Invalid cell reference: " + name);
 
     this.cellRefCache.push(cellInfo.position);

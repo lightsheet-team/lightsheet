@@ -56,24 +56,43 @@ export default class Sheet {
     return this.columns.get(colKey)?.position;
   }
 
-  setCellAt(colPos: number, rowPos: number, value: string): CellInfo {
+  /**
+   * Set the value of a cell at a given position.
+   * If allowEmpty is true, passing an empty value will create the cell.
+   * Only use this parameter when the cell has an incoming reference to avoid creating unused empty cells.
+   */
+  setCellAt(
+    colPos: number,
+    rowPos: number,
+    value: string,
+    allowEmpty: boolean = false,
+  ): CellInfo {
     const position = this.initializePosition(colPos, rowPos);
-    return this.setCell(position.columnKey!, position.rowKey!, value);
+    return this.setCell(
+      position.columnKey!,
+      position.rowKey!,
+      value,
+      allowEmpty,
+    );
   }
 
-  setCell(colKey: ColumnKey, rowKey: RowKey, formula: string): CellInfo {
+  setCell(
+    colKey: ColumnKey,
+    rowKey: RowKey,
+    formula: string,
+    allowEmpty: boolean = false,
+  ): CellInfo {
     let cell = this.getCell(colKey, rowKey);
     const colIndex = this.getColumnIndex(colKey)!;
     const rowIndex = this.getRowIndex(rowKey)!;
 
-    if (!cell) {
-      cell = this.createCell(colKey, rowKey, formula);
-    } else if (formula == "") {
-      // Cell exists but is being cleared.
+    if (formula == "" && !allowEmpty) {
       this.deleteCell(colKey, rowKey);
-    }
-
-    if (cell) {
+      cell = null;
+    } else {
+      if (!cell) {
+        cell = this.createCell(colKey, rowKey, formula);
+      }
       cell.formula = formula;
       this.resolveCell(cell, colKey, rowKey);
     }
@@ -322,6 +341,8 @@ export default class Sheet {
     if (style == null) {
       return this.clearCellStyle(colKey, rowKey);
     }
+
+    // TODO Style could be non-null but empty; should we allow this?
     style = new CellStyle().clone(style);
 
     col.cellFormatting.set(row.key, style);
@@ -373,6 +394,9 @@ export default class Sheet {
 
     col.cellFormatting.delete(row.key);
     row.cellFormatting.delete(col.key);
+
+    // Clearing a cell's style may leave it completely empty - delete if needed.
+    this.deleteCellIfUnused(colKey, rowKey);
 
     return true;
   }
@@ -482,6 +506,23 @@ export default class Sheet {
   }
 
   /**
+   * Delete a cell if it's empty, has no formatting and is not referenced by any other cell.
+   */
+  private deleteCellIfUnused(colKey: ColumnKey, rowKey: RowKey): boolean {
+    const cell = this.getCell(colKey, rowKey)!;
+    if (cell.formula != "") return false;
+
+    // Check if this cell is referenced by anything.
+    if (cell.referencesIn.size > 0) return false;
+
+    // Check if cell-specific formatting is set.
+    const cellCol = this.columns.get(colKey)!;
+    if (cellCol.cellFormatting.has(rowKey)) return false;
+
+    return this.deleteCell(colKey, rowKey);
+  }
+
+  /**
    * Update reference collections of cells and emit events for all cells whose values are affected.
    */
   private handleCellReferenceChanges(
@@ -514,10 +555,13 @@ export default class Sheet {
     );
 
     // Clean up the referencesIn sets of cells that are no longer referenced by the formula.
-    removedReferences.forEach((_, cellKey) => {
+    for (const [cellKey, position] of removedReferences) {
       const referredCell = this.cellData.get(cellKey)!;
       referredCell.referencesIn.delete(cell.key);
-    });
+
+      // This may result in the cell being empty and unused - delete if necessary.
+      this.deleteCellIfUnused(position.columnKey!, position.rowKey!);
+    }
 
     // After references are updated, check for circular references.
     if (evalResult.references.length && this.hasCircularReference(cell)) {
@@ -578,7 +622,7 @@ export default class Sheet {
     rowKey: RowKey,
     colPos: number,
     rowPos: number,
-    cell: Cell,
+    cell: Cell | null,
   ) {
     const payload: CoreSetCellPayload = {
       position: {
@@ -591,7 +635,7 @@ export default class Sheet {
       },
       formula: cell ? cell.formula : "",
       value: cell ? cell.value : "",
-      clearCell: this.cellData.get(cell.key) == null,
+      clearCell: cell == null,
       clearRow: this.rows.get(rowKey) == null,
     };
 
