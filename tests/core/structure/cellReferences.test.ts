@@ -103,4 +103,33 @@ describe("Cell references", () => {
       expect(cellInfo.value).toBe(refValue);
     }
   });
+
+  it("should create an empty cell with styling", () => {
+    sheet.setCellAt(0, 0, "=B2");
+    sheet.setCellAt(1, 1, "", true); // B2
+    expect(sheet.getCellInfoAt(1, 1)).not.toBeNull();
+
+    sheet.setCellAt(0, 0, "");
+    expect(sheet.getCellInfoAt(0, 0)).toBeNull();
+
+    const b2 = sheet.getCellInfoAt(1, 1);
+    expect(b2).not.toBeNull();
+
+    // Clearing the style should result in the cell being deleted.
+    sheet.setCellStyle(b2!.position.columnKey!, b2!.position.rowKey!, null);
+    expect(sheet.getCellInfoAt(1, 1)).toBeNull();
+  });
+
+  it("should create a cell with a reference to a non-existent cell", () => {
+    const colKey = sheet.columnPositions.get(1)!;
+    const rowKey = sheet.rowPositions.get(1)!;
+    sheet.deleteCell(colKey, rowKey);
+    const cell = sheet.setCellAt(0, 0, "=B2");
+    expect(cell.state).toBe(CellState.OK);
+    expect(sheet.getCellInfoAt(1, 1)).not.toBeNull();
+
+    // Delete the reference - this should result in the referred cell being deleted.
+    sheet.setCellAt(0, 0, "123");
+    expect(sheet.getCellInfoAt(1, 1)).toBeNull();
+  });
 });
