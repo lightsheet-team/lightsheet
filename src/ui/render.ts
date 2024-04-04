@@ -16,6 +16,8 @@ export default class UI {
   colCount: number;
   lightSheet: LightSheet;
   selectedCell: number[];
+  selectedRowNumberCell: HTMLElement | null = null;
+  selectedHeaderCell: HTMLElement | null = null;
   selectedCellsContainer: SelectionContainer;
 
   constructor(
@@ -69,6 +71,29 @@ export default class UI {
       );
       headerCellDom.textContent = headerData[i];
       headerRowDom.appendChild(headerCellDom);
+
+      if (i > 0) {
+        headerCellDom.onclick = (e: MouseEvent) => {
+          const selectedColumn = e.target as HTMLElement;
+          if (!selectedColumn) return;
+          const prevSelection = this.selectedHeaderCell;
+          this.removeGroupSelection();
+
+          if (prevSelection !== selectedColumn) {
+            selectedColumn.classList.add(
+              "lightsheet_table_selected_row_number_header_cell",
+            );
+            this.selectedHeaderCell = selectedColumn;
+
+            Array.from(this.tableBodyDom.children).forEach((childElement) => {
+              // Code inside the forEach loop
+              childElement.children[i].classList.add(
+                "lightsheet_table_selected_row_column",
+              );
+            });
+          }
+        };
+      }
     }
   }
 
@@ -85,6 +110,32 @@ export default class UI {
       "lightsheet_table_td",
     );
     rowDom.appendChild(rowNumberCell); // Append the row number cell to the row
+
+    rowNumberCell.onclick = (e: MouseEvent) => {
+      const selectedRow = e.target as HTMLElement;
+      if (!selectedRow) return;
+      const prevSelection = this.selectedRowNumberCell;
+      this.removeGroupSelection();
+
+      if (prevSelection !== selectedRow) {
+        selectedRow.classList.add(
+          "lightsheet_table_selected_row_number_header_cell",
+        );
+        this.selectedRowNumberCell = selectedRow;
+
+        const parentElement = selectedRow.parentElement;
+        if (parentElement) {
+          for (let i = 1; i < parentElement.children.length; i++) {
+            const childElement = parentElement.children[i];
+            if (childElement !== selectedRow) {
+              childElement.classList.add(
+                "lightsheet_table_selected_row_column",
+              );
+            }
+          }
+        }
+      }
+    };
 
     return rowDom;
   }
@@ -127,6 +178,8 @@ export default class UI {
       );
 
     inputDom.onfocus = () => {
+      this.removeGroupSelection();
+
       cellDom.classList.add("lightsheet_table_selected_cell");
 
       let columnIndex: number | undefined;
@@ -245,5 +298,44 @@ export default class UI {
     const isIndex = keyParts[0].match("^[0-9]+$") !== null;
 
     return { keyParts: keyParts, isIndex: isIndex };
+  }
+
+  removeGroupSelection() {
+    this.removeColumnSelection();
+    this.removeRowSelection();
+  }
+
+  removeRowSelection() {
+    if (!this.selectedRowNumberCell) return;
+
+    this.selectedRowNumberCell.classList.remove(
+      "lightsheet_table_selected_row_number_header_cell",
+    );
+    const parentElement = this.selectedRowNumberCell.parentElement;
+    if (parentElement) {
+      for (let i = 1; i < parentElement.children.length; i++) {
+        const childElement = parentElement.children[i];
+        if (childElement !== this.selectedRowNumberCell) {
+          childElement.classList.remove("lightsheet_table_selected_row_column");
+        }
+      }
+    }
+
+    this.selectedRowNumberCell = null;
+  }
+
+  removeColumnSelection() {
+    if (!this.selectedHeaderCell) return;
+
+    this.selectedHeaderCell.classList.remove(
+      "lightsheet_table_selected_row_number_header_cell",
+    );
+    for (const childElement of this.tableBodyDom.children) {
+      Array.from(childElement.children).forEach((element: Element) => {
+        element.classList.remove("lightsheet_table_selected_row_column");
+      });
+    }
+
+    this.selectedHeaderCell = null;
   }
 }
