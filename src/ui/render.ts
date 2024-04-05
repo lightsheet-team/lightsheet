@@ -15,6 +15,7 @@ export default class UI {
   lightSheetToolBarDom: HTMLElement;
   lightSheetFormulaBarDom: HTMLElement;
   lightSheetFormulaInput: HTMLInputElement;
+  selectedCellDisplay: HTMLElement;
   tableHeadDom: Element;
   tableBodyDom: Element;
   rowCount: number;
@@ -68,7 +69,14 @@ export default class UI {
     this.lightSheetFormulaBarDom = document.createElement("div");
     this.lightSheetFormulaBarDom.classList.add("light_sheet_table_formula_bar");
     lightSheetContainerDom.appendChild(this.lightSheetFormulaBarDom);
+
+    /* Create the selected cell display element */
+    this.selectedCellDisplay = document.createElement("div");
+    this.selectedCellDisplay.classList.add("selected_cell_display");
+    this.lightSheetFormulaBarDom.appendChild(this.selectedCellDisplay);
+
     this.lightSheetFormulaInput = document.createElement("input");
+    this.lightSheetFormulaInput.classList.add("formula_input")
     this.lightSheetFormulaBarDom.appendChild(this.lightSheetFormulaInput);
     this.setFormulaBar();
 

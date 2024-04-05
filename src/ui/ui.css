@@ -105,3 +105,31 @@
 .lightsheet_table_selected_cell {
   border: 1px solid blue;
 }
+
+/* Adjustments to the formula bar container */
+.light_sheet_table_formula_bar {
+  display: flex;
+  align-items: stretch; /* Stretch items to match container height */
+  padding: 4px;
+  background-color: var(--lightsheet-gray-200);
+  border: 1px solid var(--lightsheet-silver-400);
+  margin: 0px 2px 4px 1px;
+  position: sticky;
+  top: 0px;
+  z-index: 21;
+}
+
+/* Styling for the selected cell display */
+.selected_cell_display {
+  width: 50px; /* Set your desired width */
+  height: 25px; /* Set your desired height */
+  background-color: var(--lightsheet-white);
+  border: 1px solid black; /* Border style for selected cell display */
+  margin-right: 8px; /* Adjust as needed */
+}
+
+/* Styling for the formula input */
+.formula_input {
+  flex: 1; /* Take remaining space */
+  outline: none; /* Remove outline */
+}
