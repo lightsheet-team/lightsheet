@@ -199,7 +199,6 @@ export default class UI {
       const newValue = (e.target as HTMLInputElement).value;
       this.lightSheetFormulaInput.value = newValue;
       this.onUICellValueChange(newValue, colIndex, rowIndex);
-      console.log(colIndex, rowIndex);
     });
 
     inputDom.onfocus = () => {
