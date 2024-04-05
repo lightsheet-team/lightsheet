@@ -21,6 +21,7 @@ export default class UI {
   colCount: number;
   lightSheet: LightSheet;
   selectedCell: number[] | undefined;
+  latestSelectedCell: { col: number; row: number } | undefined;
   toolbarOptions?: ToolbarOptions;
 
   constructor(
@@ -35,6 +36,7 @@ export default class UI {
     this.rowCount = rowCount;
     this.lightSheet = lightSheet;
     this.selectedCell = [];
+    this.latestSelectedCell = undefined;
     this.registerEvents();
     this.toolbarOptions = {
       showToolbar: true,
@@ -119,31 +121,14 @@ export default class UI {
   }
 
   setFormulaBar() {
-    let focusedCell: HTMLElement | null = null;
-
-    this.tableEl.addEventListener("focusin", (event) => {
-      const target = event.target as HTMLElement;
-      if (target.classList.contains("lightsheet_table_cell_input")) {
-        focusedCell = target.parentElement as HTMLElement;
-      }
-    });
-
     // Listen for input changes in the formula bar
     this.lightSheetFormulaInput.addEventListener("input", () => {
-      if (focusedCell) {
-        const newValue = this.lightSheetFormulaInput.value;
-        const [colIndex, rowIndex] = focusedCell.id.split("_");
-        //for debug value
-        console.log(newValue);
-        console.log(colIndex);
-        console.log(rowIndex);
-        this.onUICellValueChange(
-          newValue,
-          parseInt(colIndex),
-          parseInt(rowIndex),
-        );
-      } else {
-        console.error("No cell is currently in focus.");
+      const newValue = this.lightSheetFormulaInput.value;
+      // Get the column and row indices from the latest selected cell
+      if (this.latestSelectedCell) {
+        const colIndex = this.latestSelectedCell.col;
+        const rowIndex = this.latestSelectedCell.row;
+        this.onUICellValueChange(newValue, colIndex, rowIndex);
       }
     });
   }
@@ -214,6 +199,7 @@ export default class UI {
       const newValue = (e.target as HTMLInputElement).value;
       this.lightSheetFormulaInput.value = newValue;
       this.onUICellValueChange(newValue, colIndex, rowIndex);
+      console.log(colIndex, rowIndex);
     });
 
     inputDom.onfocus = () => {
@@ -230,7 +216,7 @@ export default class UI {
         columnIndex = Number(keyParts[0]);
         rowIndex = Number(keyParts[1]);
       } else {
-        const columnKey = cellDom.id;
+        const columnKey = keyParts[0];
         const rowKey = cellDom.parentElement?.id;
 
         columnIndex = this.lightSheet.sheet.getColumnIndex(
@@ -239,6 +225,11 @@ export default class UI {
         rowIndex = this.lightSheet.sheet.getRowIndex(generateRowKey(rowKey!));
       }
       this.selectedCell?.push(Number(columnIndex), Number(rowIndex));
+      // Update latestSelectedCell with an object containing col and row properties
+      this.latestSelectedCell = {
+        col: Number(columnIndex),
+        row: Number(rowIndex),
+      };
 
       //connect with formula bar
       this.lightSheetFormulaInput.value = inputDom.value;
