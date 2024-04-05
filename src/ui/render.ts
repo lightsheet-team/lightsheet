@@ -137,7 +137,11 @@ export default class UI {
         console.log(newValue);
         console.log(colIndex);
         console.log(rowIndex);
-        this.onUICellValueChange(newValue, colIndex, rowIndex);
+        this.onUICellValueChange(
+          newValue,
+          parseInt(colIndex),
+          parseInt(rowIndex),
+        );
       } else {
         console.error("No cell is currently in focus.");
       }
