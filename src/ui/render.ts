@@ -68,6 +68,7 @@ export default class UI {
     lightSheetContainerDom.appendChild(this.lightSheetFormulaBarDom);
     this.lightSheetFormulaInput = document.createElement("input");
     this.lightSheetFormulaBarDom.appendChild(this.lightSheetFormulaInput);
+    this.setFormulaBar();
 
     const tableContainerDom = document.createElement("table");
     tableContainerDom.classList.add("lightsheet_table");
@@ -115,6 +116,32 @@ export default class UI {
     } else {
       this.lightSheetToolBarDom.style.display = "none";
     }
+  }
+
+  setFormulaBar() {
+    let focusedCell: HTMLElement | null = null;
+
+    this.tableEl.addEventListener("focusin", (event) => {
+      const target = event.target as HTMLElement;
+      if (target.classList.contains("lightsheet_table_cell_input")) {
+        focusedCell = target.parentElement as HTMLElement;
+      }
+    });
+
+    // Listen for input changes in the formula bar
+    this.lightSheetFormulaInput.addEventListener("input", () => {
+      if (focusedCell) {
+        const newValue = this.lightSheetFormulaInput.value;
+        const [colIndex, rowIndex] = focusedCell.id.split("_");
+        //for debug value
+        console.log(newValue);
+        console.log(colIndex);
+        console.log(rowIndex);
+        this.onUICellValueChange(newValue, colIndex, rowIndex);
+      } else {
+        console.error("No cell is currently in focus.");
+      }
+    });
   }
 
   addHeader(headerData: string[]) {
@@ -179,12 +206,11 @@ export default class UI {
       inputDom.value = value;
     }
 
-    inputDom.onchange = (e: Event) =>
-      this.onUICellValueChange(
-        (e.target as HTMLInputElement).value,
-        colIndex,
-        rowIndex,
-      );
+    inputDom.addEventListener("input", (e: Event) => {
+      const newValue = (e.target as HTMLInputElement).value;
+      this.lightSheetFormulaInput.value = newValue;
+      this.onUICellValueChange(newValue, colIndex, rowIndex);
+    });
 
     inputDom.onfocus = () => {
       cellDom.classList.add("lightsheet_table_selected_cell");
@@ -210,14 +236,8 @@ export default class UI {
       }
       this.selectedCell?.push(Number(columnIndex), Number(rowIndex));
 
-      // Retrieve the content of the selected cell
-      const cellContent = inputDom.value;
-
-      console.log(cellContent);
-      console.log("Formula input element:", this.lightSheetFormulaInput); // Debugging statement
-
-      // Set the content of the selected cell as the value of the formula input element
-      this.lightSheetFormulaInput.value = cellContent;
+      //connect with formula bar
+      this.lightSheetFormulaInput.value = inputDom.value;
     };
 
     inputDom.onblur = () => {
