@@ -21,8 +21,7 @@ export default class LightSheet {
     this.sheet = new Sheet(this.events);
     this.#ui = new UI(
       targetElement,
-      this,
-      this.options.data?.length ?? this.options.defaultRowCount,
+      this
     );
     this.#initializeTable();
     if (options.onCellChange) {

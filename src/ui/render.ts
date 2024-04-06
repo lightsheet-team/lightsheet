@@ -13,16 +13,14 @@ export default class UI {
   tableEl: Element;
   tableHeadDom: Element;
   tableBodyDom: Element;
-  rowCount: number;
   lightSheet: LightSheet;
   selectedCell: number[];
   selectedRowNumberCell: HTMLElement | null = null;
   selectedHeaderCell: HTMLElement | null = null;
   selectedCellsContainer: SelectionContainer;
 
-  constructor(el: Element, lightSheet: LightSheet, rowCount: number) {
+  constructor(el: Element, lightSheet: LightSheet) {
     this.tableEl = el;
-    this.rowCount = rowCount;
     this.lightSheet = lightSheet;
     this.selectedCell = [];
     this.selectedCellsContainer = {
