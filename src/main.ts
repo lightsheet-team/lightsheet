@@ -24,7 +24,6 @@ export default class LightSheet {
       this.options.isReadOnly,
     );
     this.initializeData();
-    this.setReadOnly(this.options.isReadOnly);
     if (options.onCellChange) {
       this.onCellChange = options.onCellChange;
     }
@@ -55,9 +54,9 @@ export default class LightSheet {
           const columnKeyStr = cell.position.columnKey!.toString();
 
           if (!rowDom.id) rowDom.id = rowKeyStr;
-          this.ui.addColumn(rowDom, j, i, cell.value, columnKeyStr);
+          this.ui.addCell(rowDom, j, i, cell.value, columnKeyStr);
         } else {
-          this.ui.addColumn(rowDom, j, i, "");
+          this.ui.addCell(rowDom, j, i, "");
         }
       }
     }

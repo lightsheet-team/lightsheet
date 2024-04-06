@@ -83,7 +83,7 @@ export default class UI {
     return rowDom;
   }
 
-  addColumn(
+  addCell(
     rowDom: Element,
     colIndex: number,
     rowIndex: number,
@@ -101,7 +101,7 @@ export default class UI {
     const inputDom = document.createElement("input");
     inputDom.classList.add("lightsheet_table_cell_input");
     inputDom.value = "";
-
+    inputDom.readOnly = this.isReadOnly;
     cellDom.appendChild(inputDom);
 
     if (value) {
@@ -154,7 +154,7 @@ export default class UI {
     inputElements.forEach((input) => {
       (input as HTMLInputElement).readOnly = readonly;
     });
-    this.isReadOnly = !readonly;
+    this.isReadOnly = readonly;
   }
 
   onCellValueChange(
