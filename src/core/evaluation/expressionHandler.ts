@@ -30,12 +30,12 @@ export default class ExpressionHandler {
   sheet: Sheet;
 
   private cellRefHolder: Array<PositionInfo>;
-  private value: string;
+  private rawValue: string;
 
-  constructor(sheet: Sheet, value: string) {
+  constructor(sheet: Sheet, rawValue: string) {
     this.sheet = sheet; // TODO The scope of this class should be all sheets, not just one.
 
-    this.value = value;
+    this.rawValue = rawValue;
     this.cellRefHolder = [];
 
     math.FunctionNode.onUndefinedFunction = (name: string) =>
@@ -52,10 +52,10 @@ export default class ExpressionHandler {
   }
 
   evaluate(): EvaluationResult | null {
-    if (!this.value.startsWith("="))
-      return { value: this.value, references: [] };
+    if (!this.rawValue.startsWith("="))
+      return { value: this.rawValue, references: [] };
 
-    const expression = this.value.substring(1);
+    const expression = this.rawValue.substring(1);
     try {
       const parsed = math.parse(expression);
       const value = parsed.evaluate().toString();
@@ -82,8 +82,8 @@ export default class ExpressionHandler {
       const rangeParts = symbol.split(":").filter((s) => s !== "");
       if (rangeParts.length != 2) throw new Error("Invalid range: " + symbol);
 
-      const start = ExpressionHandler.parseSymbol(rangeParts[0]);
-      const end = ExpressionHandler.parseSymbol(rangeParts[1]);
+      const start = ExpressionHandler.parseSymbolToPosition(rangeParts[0]);
+      const end = ExpressionHandler.parseSymbolToPosition(rangeParts[1]);
 
       const values: string[] = [];
       for (let i = start.rowIndex; i <= end.rowIndex; i++) {
@@ -97,19 +97,18 @@ export default class ExpressionHandler {
         }
       }
       return values;
-    } else {
-      const { colIndex, rowIndex } = ExpressionHandler.parseSymbol(symbol);
-
-      const cellInfo = this.sheet.getCellInfoAt(colIndex, rowIndex);
-      if (cellInfo == null || cellInfo.state != CellState.OK)
-        throw new Error("Invalid cell reference: " + symbol);
-
-      this.cellRefHolder.push(cellInfo.position);
-      return cellInfo.value!;
     }
+
+    const { colIndex, rowIndex } = ExpressionHandler.parseSymbolToPosition(symbol);
+    const cellInfo = this.sheet.getCellInfoAt(colIndex, rowIndex);
+    if (cellInfo == null || cellInfo.state != CellState.OK)
+      throw new Error("Invalid cell reference: " + symbol);
+
+    this.cellRefHolder.push(cellInfo.position);
+    return cellInfo.value!;
   }
 
-  private static parseSymbol(symbol: string): {
+  private static parseSymbolToPosition(symbol: string): {
     colIndex: number;
     rowIndex: number;
   } {
