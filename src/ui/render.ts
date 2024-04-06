@@ -7,28 +7,20 @@ import { CellIdInfo, SelectionContainer } from "./render.types.ts";
 import LightsheetEvent from "../core/event/event.ts";
 import { CoreSetCellPayload } from "../core/event/events.types.ts";
 import EventType from "../core/event/eventType.ts";
+import LightSheetHelper from "../../utils/helpers.ts";
 
 export default class UI {
   tableEl: Element;
   tableHeadDom: Element;
   tableBodyDom: Element;
-  rowCount: number;
-  colCount: number;
   lightSheet: LightSheet;
   selectedCell: number[];
   selectedRowNumberCell: HTMLElement | null = null;
   selectedHeaderCell: HTMLElement | null = null;
   selectedCellsContainer: SelectionContainer;
 
-  constructor(
-    el: Element,
-    lightSheet: LightSheet,
-    rowCount: number,
-    colCount: number,
-  ) {
+  constructor(el: Element, lightSheet: LightSheet) {
     this.tableEl = el;
-    this.colCount = colCount;
-    this.rowCount = rowCount;
     this.lightSheet = lightSheet;
     this.selectedCell = [];
     this.selectedCellsContainer = {
@@ -97,20 +89,16 @@ export default class UI {
     }
   }
 
-  addRow(rowLabelNumber: number): HTMLElement {
+  createRowElement(labelCount: number): HTMLElement {
     const rowDom = document.createElement("tr");
-    this.tableBodyDom.appendChild(rowDom);
-
-    //row number
     const rowNumberCell = document.createElement("td");
-    rowNumberCell.innerHTML = `${rowLabelNumber + 1}`; // Row numbers start from 1
+    rowNumberCell.innerHTML = `${labelCount + 1}`; // Row numbers start from 1
     rowNumberCell.classList.add(
       "lightsheet_table_row_number",
       "lightsheet_table_row_cell",
       "lightsheet_table_td",
     );
-    rowDom.appendChild(rowNumberCell); // Append the row number cell to the row
-
+    rowDom.appendChild(rowNumberCell);
     rowNumberCell.onclick = (e: MouseEvent) => {
       const selectedRow = e.target as HTMLElement;
       if (!selectedRow) return;
@@ -136,7 +124,12 @@ export default class UI {
         }
       }
     };
+    return rowDom;
+  }
 
+  addRow(rowLabelNumber: number): HTMLElement {
+    const rowDom = this.createRowElement(rowLabelNumber);
+    this.tableBodyDom.appendChild(rowDom);
     return rowDom;
   }
 
@@ -217,22 +210,21 @@ export default class UI {
       indexPosition: { columnIndex: colIndex, rowIndex: rowIndex },
       formula: newValue,
     };
-
     this.lightSheet.events.emit(
       new LightsheetEvent(EventType.UI_SET_CELL, payload),
     );
   }
 
   private registerEvents() {
-    this.lightSheet.events.on(EventType.CORE_SET_CELL, (event) =>
-      this.onCoreSetCell(event),
-    );
+    this.lightSheet.events.on(EventType.CORE_SET_CELL, (event) => {
+      if (this.lightSheet.isReady) this.onCoreSetCell(event);
+    });
   }
 
   private onCoreSetCell(event: LightsheetEvent) {
     const payload = event.payload as CoreSetCellPayload;
     // Get HTML elements and (new) IDs for the payload's cell and row.
-    const elInfo = UI.getElementInfoForSetCell(payload);
+    const elInfo = LightSheetHelper.getElementInfoForSetCell(payload);
 
     if (!elInfo.rowDom) {
       const row = this.addRow(payload.indexPosition.rowIndex);
@@ -255,40 +247,6 @@ export default class UI {
     // Set cell value to resolved value from the core.
     // TODO Cell formula should be preserved. (Issue #49)
     (elInfo.cellDom.firstChild! as HTMLInputElement).value = payload.value;
-  }
-
-  private static getElementInfoForSetCell(payload: CoreSetCellPayload) {
-    const colKey = payload.position.columnKey?.toString();
-    const rowKey = payload.position.rowKey?.toString();
-
-    const columnIndex = payload.indexPosition.columnIndex;
-    const rowIndex = payload.indexPosition.rowIndex;
-
-    const cellDomKey =
-      colKey && rowKey ? `${colKey!.toString()}_${rowKey!.toString()}` : null;
-
-    // Get the cell by either column and row key or position.
-    // TODO Index-based ID may not be unique if there are multiple sheets.
-    const cellDom =
-      (cellDomKey && document.getElementById(cellDomKey)) ||
-      document.getElementById(`${columnIndex}_${rowIndex}`);
-
-    const newCellDomId = payload.clearCell
-      ? `${columnIndex}_${rowIndex}`
-      : `${colKey}_${rowKey}`;
-
-    const newRowDomId = payload.clearRow ? `row_${rowIndex}` : rowKey!;
-
-    const rowDom =
-      (rowKey && document.getElementById(rowKey)) ||
-      document.getElementById(`row_${rowIndex}`);
-
-    return {
-      cellDom: cellDom,
-      cellDomId: newCellDomId,
-      rowDom: rowDom,
-      rowDomId: newRowDomId,
-    };
   }
 
   private checkCellId(cellDom: Element): CellIdInfo | undefined {
