@@ -9,7 +9,7 @@
     "lint:fix": "npm run lint -- --fix",
     "build": "tsc && vite build || echo 'Build failed'",
     "build:watch": "tsc && vite build --watch",
-    "test": "jest", 
+    "test": "jest",
     "test:coverage": "jest --coverage"
   },
   "devDependencies": {
