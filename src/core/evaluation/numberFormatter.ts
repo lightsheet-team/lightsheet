@@ -1,11 +1,11 @@
 import Formatter from "./formatter.ts";
 
 export default class NumberFormatter extends Formatter {
-  digits: number;
+  decimalDigits: number;
 
   constructor(digits: number) {
     super();
-    this.digits = digits;
+    this.decimalDigits = digits;
   }
 
   format(value: string): string | null {
@@ -14,6 +14,6 @@ export default class NumberFormatter extends Formatter {
     const formatted = Number(value);
     if (isNaN(formatted)) return null;
 
-    return formatted.toFixed(this.digits).toString();
+    return formatted.toFixed(this.decimalDigits).toString();
   }
 }
