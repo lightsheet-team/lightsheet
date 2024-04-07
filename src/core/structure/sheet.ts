@@ -56,39 +56,21 @@ export default class Sheet {
     return this.columns.get(colKey)?.position;
   }
 
-  /**
-   * Set the value of a cell at a given position.
-   * If allowEmpty is true, passing an empty value will create the cell.
-   * Only use this parameter when the cell has an incoming reference to avoid creating unused empty cells.
-   */
-  setCellAt(
-    colPos: number,
-    rowPos: number,
-    value: string,
-    allowEmpty: boolean = false,
-  ): CellInfo {
+  setCellAt(colPos: number, rowPos: number, value: string): CellInfo {
     const position = this.initializePosition(colPos, rowPos);
-    return this.setCell(
-      position.columnKey!,
-      position.rowKey!,
-      value,
-      allowEmpty,
-    );
+    return this.setCell(position.columnKey!, position.rowKey!, value)!;
   }
 
-  setCell(
-    colKey: ColumnKey,
-    rowKey: RowKey,
-    formula: string,
-    allowEmpty: boolean = false,
-  ): CellInfo {
+  setCell(colKey: ColumnKey, rowKey: RowKey, formula: string): CellInfo | null {
+    if (!this.columns.has(colKey) || !this.rows.has(rowKey)) {
+      return null;
+    }
+
     let cell = this.getCell(colKey, rowKey);
     const colIndex = this.getColumnIndex(colKey)!;
     const rowIndex = this.getRowIndex(rowKey)!;
 
-    if (formula == "" && !allowEmpty) {
-      this.deleteCell(colKey, rowKey);
-      cell = null;
+    if (formula == "") {
       const deleted = this.deleteCellIfUnused(colKey, rowKey);
       if (deleted) cell = null;
     } else {
@@ -478,7 +460,7 @@ export default class Sheet {
 
     const valueChanged = cell.value != evalResult.value;
     cell.value = evalResult.value;
-    this.handleCellReferenceChanges(cell, colKey, rowKey, evalResult);
+    this.processEvaluationReferences(cell, colKey, rowKey, evalResult);
 
     // If the value of the cell hasn't changed, there's no need to update cells that reference this cell.
     if (!valueChanged && cell.state == CellState.OK) return valueChanged;
@@ -525,9 +507,9 @@ export default class Sheet {
   }
 
   /**
-   * Update reference collections of cells and emit events for all cells whose values are affected.
+   * Update reference collections of cells and initialize referred cells if necessary.
    */
-  private handleCellReferenceChanges(
+  private processEvaluationReferences(
     cell: Cell,
     columnKey: ColumnKey,
     rowKey: RowKey,
@@ -537,11 +519,17 @@ export default class Sheet {
     const oldOut = new Map<CellKey, PositionInfo>(cell.referencesOut);
     cell.referencesOut.clear();
     evalResult.references.forEach((ref) => {
+      // Initialize the referred cell if it doesn't exist yet.
+      const position = this.initializePosition(ref.columnIndex, ref.rowIndex);
+      if (!this.getCellInfoAt(ref.columnIndex, ref.rowIndex)) {
+        this.createCell(position.columnKey!, position.rowKey!, "");
+      }
+
+      const referredCell = this.getCell(position.columnKey!, position.rowKey!)!;
       // Add referred cells to this cell's referencesOut.
-      const referredCell = this.getCell(ref.columnKey!, ref.rowKey!)!;
       cell.referencesOut.set(referredCell.key, {
-        columnKey: ref.columnKey!,
-        rowKey: ref.rowKey!,
+        columnKey: position.columnKey!,
+        rowKey: position.rowKey!,
       });
 
       // Add this cell to the referred cell's referencesIn.

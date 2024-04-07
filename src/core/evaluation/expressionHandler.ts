@@ -10,8 +10,7 @@ import {
 } from "mathjs/number";
 
 import Sheet from "../structure/sheet.ts";
-import { PositionInfo } from "../structure/sheet.types.ts";
-import { EvaluationResult } from "./expressionHandler.types.ts";
+import { CellPosition, EvaluationResult } from "./expressionHandler.types.ts";
 
 import { CellState } from "../structure/cell/cellState.ts";
 const math = create({
@@ -27,7 +26,7 @@ const math = create({
 export default class ExpressionHandler {
   sheet: Sheet;
 
-  private cellRefCache: Array<PositionInfo>;
+  private cellRefCache: Array<CellPosition>;
 
   constructor(sheet: Sheet) {
     this.sheet = sheet; // TODO The scope of this class should be all sheets, not just one.
@@ -82,17 +81,12 @@ export default class ExpressionHandler {
     if (columnIndex == -1) throw new Error("Invalid symbol: " + name);
     const rowIndex = parseInt(rowStr) - 1;
 
-    let cellInfo = this.sheet.getCellInfoAt(columnIndex, rowIndex);
-    if (!cellInfo) {
-      // Referring to a non-existent cell. Initialize it with an empty value.
-      cellInfo = this.sheet.setCellAt(columnIndex, rowIndex, "", true);
-    }
-
-    if (cellInfo.state != CellState.OK)
+    const cellInfo = this.sheet.getCellInfoAt(columnIndex, rowIndex);
+    if (cellInfo && cellInfo.state != CellState.OK)
       throw new Error("Invalid cell reference: " + name);
 
-    this.cellRefCache.push(cellInfo.position);
-    return cellInfo.value!;
+    this.cellRefCache.push({ columnIndex: columnIndex, rowIndex: rowIndex });
+    return cellInfo?.value ?? "";
   }
 
   // TODO Translating between column names and indices should probably be a common function.

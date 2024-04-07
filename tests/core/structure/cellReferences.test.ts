@@ -106,7 +106,10 @@ describe("Cell references", () => {
 
   it("should create an empty cell with styling", () => {
     sheet.setCellAt(0, 0, "=B2");
-    sheet.setCellAt(1, 1, "", true); // B2
+
+    const colKey = sheet.columnPositions.get(1)!;
+    const rowKey = sheet.rowPositions.get(1)!;
+    sheet["createCell"](colKey, rowKey, ""); // B2
     expect(sheet.getCellInfoAt(1, 1)).not.toBeNull();
 
     sheet.setCellAt(0, 0, "");
