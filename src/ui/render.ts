@@ -5,7 +5,10 @@ import {
 } from "../core/structure/key/keyTypes";
 import { CellIdInfo, SelectionContainer } from "./render.types.ts";
 import LightsheetEvent from "../core/event/event.ts";
-import { CoreSetCellPayload } from "../core/event/events.types.ts";
+import {
+  CoreSetCellPayload,
+  UISetCellPayload,
+} from "../core/event/events.types.ts";
 import EventType from "../core/event/eventType.ts";
 import LightSheetHelper from "../../utils/helpers.ts";
 
@@ -206,9 +209,9 @@ export default class UI {
   }
 
   onUICellValueChange(newValue: string, colIndex: number, rowIndex: number) {
-    const payload = {
+    const payload: UISetCellPayload = {
       indexPosition: { columnIndex: colIndex, rowIndex: rowIndex },
-      formula: newValue,
+      rawValue: newValue,
     };
     this.lightSheet.events.emit(
       new LightsheetEvent(EventType.UI_SET_CELL, payload),
