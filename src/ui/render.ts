@@ -75,8 +75,14 @@ export default class UI {
     this.selectedCellDisplay.classList.add("selected_cell_display");
     this.lightSheetFormulaBarDom.appendChild(this.selectedCellDisplay);
 
+    // Create the "fx" label element
+    const fxLabel = document.createElement("div");
+    fxLabel.textContent = "fx";
+    fxLabel.classList.add("fx_label");
+    this.lightSheetFormulaBarDom.appendChild(fxLabel);
+
     this.lightSheetFormulaInput = document.createElement("input");
-    this.lightSheetFormulaInput.classList.add("formula_input")
+    this.lightSheetFormulaInput.classList.add("formula_input");
     this.lightSheetFormulaBarDom.appendChild(this.lightSheetFormulaInput);
     this.setFormulaBar();
 

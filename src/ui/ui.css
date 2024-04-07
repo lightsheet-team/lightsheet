@@ -4,6 +4,27 @@
   --lightsheet-gray-200: #f3f3f3;
   --lightsheet-white: #ffffff;
 }
+/*Tool bar*/
+.light_sheet_table_toolbar
+{
+    display:flex;
+    background-color:var(--lightsheet-gray-200);
+    border:1px solid var(--lightsheet-silver-400);
+    padding: 6px;
+    position: relative;
+    top:0px;
+    z-index:21;
+    gap: 16px; 
+}
+
+.light_sheet_table_toolbar i.light_sheet_table_toolbar_item 
+{
+    width:24px;
+    height:24px;
+    padding:4px;
+    cursor:pointer;
+    display:inline-block;
+}
 
 .lightsheet_table_container {
   display: inline-block;
@@ -20,17 +41,44 @@
   position: relative;
 }
 
+/*Formula bar*/
+.light_sheet_table_formula_bar {
+  display: flex;
+  align-items: stretch; 
+  border: 1px solid var(--lightsheet-silver-400);
+  border-bottom: 0px 
+}
+
+.selected_cell_display {
+  width: 75px; 
+  height: 25px;
+  background-color: var(--lightsheet-white);
+  border-right: 1px solid var(--lightsheet-silver-400);
+}
+
+.fx_label {
+  width: 35px;
+  text-align: center;
+  font-family: Arial, sans-serif;
+  font-style: italic;
+  color: var(--lightsheet-silver-400);
+  display: flex; 
+  justify-content: center; 
+  align-items: center;
+}
+
+.formula_input {
+  flex: 1; 
+  border: var(--lightsheet-silver-400);
+}
+
+/*Table*/
 .lightsheet_table {
   border-collapse: separate;
   white-space: nowrap;
   empty-cells: show;
-  border: 0px;
   background-color: var(--lightsheet-white);
-
-  border-top: 1px solid var(--lightsheet-transparent);
-  border-left: 1px solid var(--lightsheet-transparent);
-  border-right: 1px solid var(--lightsheet-silver-400);
-  border-bottom: 1px solid var(--lightsheet-silver-400);
+  border: 1px solid var(--lightsheet-silver-400);
 }
 
 .lightsheet_table_td {
@@ -42,7 +90,7 @@
 }
 
 .lightsheet_table_header {
-  background-color: #f3f3f3;
+  background-color: var(--lightsheet-gray-200);
   padding: 2px;
   cursor: pointer;
   overflow: hidden;
@@ -53,7 +101,6 @@
   text-align: center;
 }
 
-/* All td's in the table below the header row */
 .lightsheet_table_row_td {
   padding: 4px;
   white-space: nowrap;
@@ -79,57 +126,7 @@
   width: 50px;
 }
 
-.light_sheet_table_toolbar
-{
-    display:flex;
-    background-color:var(--lightsheet-gray-200);
-    border:1px solid var(--lightsheet-silver-400);
-    padding:4px;
-    margin:0px 2px 4px 1px;
-    position:sticky;
-    top:0px;
-    z-index:21;
-    gap: 16px; 
-}
-
-.light_sheet_table_toolbar i.light_sheet_table_toolbar_item 
-{
-    width:24px;
-    height:24px;
-    padding:4px;
-    cursor:pointer;
-    display:inline-block;
-}
-
-
 .lightsheet_table_selected_cell {
   border: 1px solid blue;
 }
 
-/* Adjustments to the formula bar container */
-.light_sheet_table_formula_bar {
-  display: flex;
-  align-items: stretch; /* Stretch items to match container height */
-  padding: 4px;
-  background-color: var(--lightsheet-gray-200);
-  border: 1px solid var(--lightsheet-silver-400);
-  margin: 0px 2px 4px 1px;
-  position: sticky;
-  top: 0px;
-  z-index: 21;
-}
-
-/* Styling for the selected cell display */
-.selected_cell_display {
-  width: 50px; /* Set your desired width */
-  height: 25px; /* Set your desired height */
-  background-color: var(--lightsheet-white);
-  border: 1px solid black; /* Border style for selected cell display */
-  margin-right: 8px; /* Adjust as needed */
-}
-
-/* Styling for the formula input */
-.formula_input {
-  flex: 1; /* Take remaining space */
-  outline: none; /* Remove outline */
-}
