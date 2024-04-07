@@ -62,7 +62,7 @@ export default class LightSheet {
           const columnKeyStr = cell.position.columnKey!.toString();
 
           if (!rowDom.id) rowDom.id = rowKeyStr;
-          this.#ui.addColumn(rowDom, j, i, cell.value, columnKeyStr);
+          this.#ui.addColumn(rowDom, j, i, cell.formattedValue, columnKeyStr);
         } else {
           this.#ui.addColumn(rowDom, j, i, "");
         }
