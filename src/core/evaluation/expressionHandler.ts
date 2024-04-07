@@ -7,13 +7,14 @@ import {
   divideDependencies,
   SymbolNodeDependencies,
   FunctionNodeDependencies,
+  sumDependencies,
 } from "mathjs/number";
 
 import Sheet from "../structure/sheet.ts";
 import { PositionInfo } from "../structure/sheet.types.ts";
 import { EvaluationResult } from "./expressionHandler.types.ts";
-
 import { CellState } from "../structure/cell/cellState.ts";
+
 const math = create({
   parseDependencies,
   addDependencies,
@@ -22,38 +23,44 @@ const math = create({
   divideDependencies,
   SymbolNodeDependencies,
   FunctionNodeDependencies,
+  sumDependencies,
 });
 
 export default class ExpressionHandler {
   sheet: Sheet;
 
-  private cellRefCache: Array<PositionInfo>;
+  private cellRefHolder: Array<PositionInfo>;
+  private rawValue: string;
 
-  constructor(sheet: Sheet) {
+  constructor(sheet: Sheet, rawValue: string) {
     this.sheet = sheet; // TODO The scope of this class should be all sheets, not just one.
 
-    // When resolving a formula, this array is populated with a single cell's outgoing reference positions and cleared after.
-    // This allows ExpressionHandler::resolveSymbol to essentially pass values to ExpressionHandler::evaluate.
-    this.cellRefCache = [];
+    this.rawValue = rawValue;
+    this.cellRefHolder = [];
 
-    // Add our symbol resolving methods to mathjs.
     math.FunctionNode.onUndefinedFunction = (name: string) =>
       this.resolveFunction(name);
+
+    //Configure mathjs to allow colons in symbols.
+    const isAlphaOriginal = math.parse.isAlpha;
+    math.parse.isAlpha = (c: string, cPrev: string, cNext: string): boolean => {
+      return isAlphaOriginal(c, cPrev, cNext) || c == ":";
+    };
 
     math.SymbolNode.onUndefinedSymbol = (name: string) =>
       this.resolveSymbol(name);
   }
 
-  evaluate(expression: string): EvaluationResult | null {
-    if (!expression.startsWith("="))
-      return { value: expression, references: [] };
+  evaluate(): EvaluationResult | null {
+    if (!this.rawValue.startsWith("="))
+      return { value: this.rawValue, references: [] };
 
-    expression = expression.substring(1);
+    const expression = this.rawValue.substring(1);
     try {
       const parsed = math.parse(expression);
-      const value = parsed.evaluate();
-      const references = this.cellRefCache.slice();
-      this.cellRefCache = [];
+      const value = parsed.evaluate().toString();
+      const references = this.cellRefHolder.slice();
+      this.cellRefHolder = [];
       return { value: value, references: references };
     } catch (e) {
       return null;
@@ -69,25 +76,55 @@ export default class ExpressionHandler {
     return "";
   }
 
-  private resolveSymbol(name: string): string {
-    // Symbols should always be cell references in our case.
+  private resolveSymbol(symbol: string): any {
     // TODO only handling references within one sheet for now.
-    const split = name.split(/[0-9]+/);
-    if (split.length != 2) throw new Error("Invalid symbol: " + name);
+    if (symbol.includes(":")) {
+      const rangeParts = symbol.split(":").filter((s) => s !== "");
+      if (rangeParts.length != 2) throw new Error("Invalid range: " + symbol);
 
-    // Resolve column/row indices from text-based cell reference.
-    const columnStr = split[0];
-    const rowStr = name.substring(columnStr.length);
-    const columnIndex = ExpressionHandler.resolveColumnIndex(columnStr);
-    if (columnIndex == -1) throw new Error("Invalid symbol: " + name);
+      const start = ExpressionHandler.parseSymbolToPosition(rangeParts[0]);
+      const end = ExpressionHandler.parseSymbolToPosition(rangeParts[1]);
+
+      const values: string[] = [];
+      for (let i = start.rowIndex; i <= end.rowIndex; i++) {
+        for (let j = start.colIndex; j <= end.colIndex; j++) {
+          const cellInfo = this.sheet.getCellInfoAt(j, i);
+          if (cellInfo == null || cellInfo.state != CellState.OK)
+            throw new Error("Invalid cell reference: " + symbol);
+
+          this.cellRefHolder.push(cellInfo.position);
+          values.push(cellInfo.value!);
+        }
+      }
+      return values;
+    }
+
+    const { colIndex, rowIndex } =
+      ExpressionHandler.parseSymbolToPosition(symbol);
+
+    const cellInfo = this.sheet.getCellInfoAt(colIndex, rowIndex);
+    if (cellInfo == null || cellInfo.state != CellState.OK)
+      throw new Error("Invalid cell reference: " + symbol);
+
+    this.cellRefHolder.push(cellInfo.position);
+    return cellInfo.value!;
+  }
+
+  private static parseSymbolToPosition(symbol: string): {
+    colIndex: number;
+    rowIndex: number;
+  } {
+    const letterGroups = symbol.split(/[0-9]+/).filter((s) => s !== "");
+    if (letterGroups.length != 1) throw new Error("Invalid symbol: " + symbol);
+
+    const columnStr = letterGroups[0];
+    const colIndex = ExpressionHandler.resolveColumnIndex(columnStr);
+    if (colIndex == -1) throw new Error("Invalid symbol: " + symbol);
+
+    const rowStr = symbol.substring(columnStr.length);
     const rowIndex = parseInt(rowStr) - 1;
 
-    const cellInfo = this.sheet.getCellInfoAt(columnIndex, rowIndex);
-    if (cellInfo == null || cellInfo.state != CellState.OK)
-      throw new Error("Invalid cell reference: " + name);
-
-    this.cellRefCache.push(cellInfo.position);
-    return cellInfo.value!;
+    return { colIndex, rowIndex };
   }
 
   // TODO Translating between column names and indices should probably be a common function.
