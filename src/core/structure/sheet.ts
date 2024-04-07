@@ -268,7 +268,7 @@ export default class Sheet {
     return true;
   }
 
-  deleteCell(colKey: ColumnKey, rowKey: RowKey): boolean {
+  private deleteCell(colKey: ColumnKey, rowKey: RowKey): boolean {
     const col = this.columns.get(colKey);
     const row = this.rows.get(rowKey);
     if (!col || !row) return false;

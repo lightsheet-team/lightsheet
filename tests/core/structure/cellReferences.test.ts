@@ -56,8 +56,8 @@ describe("Cell references", () => {
     // Deleting cells with references.
     const cell2pos = sheet.getCellInfoAt(1, 0)!;
     const cell4pos = sheet.getCellInfoAt(2, 0)!;
-    sheet.deleteCell(cell2pos.position.columnKey!, cell2pos.position.rowKey!);
-    sheet.deleteCell(cell4pos.position.columnKey!, cell4pos.position.rowKey!);
+    sheet.setCell(cell2pos.position.columnKey!, cell2pos.position.rowKey!, "");
+    sheet.setCell(cell4pos.position.columnKey!, cell4pos.position.rowKey!, "");
 
     expect(cells[0].referencesIn.size).toBe(0);
     expect(cells[0].referencesOut.size).toBe(0);
@@ -123,7 +123,7 @@ describe("Cell references", () => {
   it("should create a cell with a reference to a non-existent cell", () => {
     const colKey = sheet.columnPositions.get(1)!;
     const rowKey = sheet.rowPositions.get(1)!;
-    sheet.deleteCell(colKey, rowKey);
+    sheet.setCell(colKey, rowKey, "");
     const cell = sheet.setCellAt(0, 0, "=B2");
     expect(cell.state).toBe(CellState.OK);
     expect(sheet.getCellInfoAt(1, 1)).not.toBeNull();
