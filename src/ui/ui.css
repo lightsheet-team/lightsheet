@@ -4,6 +4,13 @@
   --lightsheet-gray-200: #f3f3f3;
   --lightsheet-white: #ffffff;
 }
+/*Lightsheet*/
+.lightsheet_table_container {
+  display: inline-block;
+  box-sizing: border-box;
+  outline: none;
+}
+
 /*Tool bar*/
 .light_sheet_table_toolbar
 {
@@ -13,25 +20,17 @@
     padding: 6px;
     position: relative;
     top:0px;
-    z-index:21;
     gap: 16px; 
+    box-sizing: border-box;
 }
 
 .light_sheet_table_toolbar i.light_sheet_table_toolbar_item 
 {
-    width:24px;
-    height:24px;
     padding:4px;
     cursor:pointer;
     display:inline-block;
 }
 
-.lightsheet_table_container {
-  display: inline-block;
-  padding-right: 2px;
-  box-sizing: border-box;
-  outline: none;
-}
 
 .lightsheet_table_content {
   display: inline-block;
@@ -44,7 +43,6 @@
 /*Formula bar*/
 .light_sheet_table_formula_bar {
   display: flex;
-  align-items: stretch; 
   border: 1px solid var(--lightsheet-silver-400);
   border-bottom: 0px 
 }
@@ -97,7 +95,6 @@
   position: -webkit-sticky;
   position: sticky;
   top: 0;
-  z-index: 2;
   text-align: center;
 }
 
