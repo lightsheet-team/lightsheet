@@ -3,9 +3,9 @@ import Formatter from "./formatter.ts";
 export default class NumberFormatter extends Formatter {
   decimalDigits: number;
 
-  constructor(digits: number) {
+  constructor(decimalDigits: number) {
     super();
-    this.decimalDigits = digits;
+    this.decimalDigits = decimalDigits;
   }
 
   format(value: string): string | null {
