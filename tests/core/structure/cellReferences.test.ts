@@ -1,6 +1,7 @@
 import Sheet from "../../../src/core/structure/sheet";
 import { CellState } from "../../../src/core/structure/cell/cellState.ts";
 import { CellInfo } from "../../../src/core/structure/sheet.types.ts";
+import CellStyle from "../../../src/core/structure/cellStyle.ts";
 
 describe("Cell references", () => {
   let sheet: Sheet;
@@ -105,18 +106,14 @@ describe("Cell references", () => {
   });
 
   it("should create an empty cell with styling", () => {
-    sheet.setCellAt(0, 0, "=B2");
+    const b2 = sheet.getCellInfoAt(1, 1)!;
+    sheet.setCellStyle(
+      b2.position!.columnKey!,
+      b2.position!.rowKey!,
+      new CellStyle(new Map([["width", "50px"]])),
+    );
 
-    const colKey = sheet.columnPositions.get(1)!;
-    const rowKey = sheet.rowPositions.get(1)!;
-    sheet["createCell"](colKey, rowKey, ""); // B2
-    expect(sheet.getCellInfoAt(1, 1)).not.toBeNull();
-
-    sheet.setCellAt(0, 0, "");
-    expect(sheet.getCellInfoAt(0, 0)).toBeNull();
-
-    const b2 = sheet.getCellInfoAt(1, 1);
-    expect(b2).not.toBeNull();
+    sheet.setCellAt(1, 1, "");
 
     // Clearing the style should result in the cell being deleted.
     sheet.setCellStyle(b2!.position.columnKey!, b2!.position.rowKey!, null);
