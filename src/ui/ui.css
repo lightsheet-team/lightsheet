@@ -82,3 +82,12 @@
 .lightsheet_table_selected_cell {
   border: 1px solid blue;
 }
+
+.lightsheet_table_selected_row_number_header_cell {
+  background-color: darkblue;
+  color: white;
+}
+
+.lightsheet_table_selected_row_column{
+  background-color: lightblue;
+}
