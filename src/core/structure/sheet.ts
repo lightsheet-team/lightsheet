@@ -332,7 +332,7 @@ export default class Sheet {
     row.cellFormatting.set(col.key, style);
 
     if (style.formatter) {
-      this.resolveCell(this.getCell(colKey, rowKey)!, colKey, rowKey);
+      this.applyCellFormatter(this.getCell(colKey, rowKey)!, colKey, rowKey);
     }
 
     return true;
@@ -377,14 +377,18 @@ export default class Sheet {
 
     if (!formatterChanged) return;
 
-    // Update all cells in this group if a new formatter was applied.
+    // Apply new formatter to all cells in this group.
     for (const [opposingKey] of group.cellIndex) {
       const cell = this.cellData.get(group.cellIndex.get(opposingKey)!)!;
       if (group instanceof Column) {
-        this.resolveCell(cell, group.key, opposingKey as RowKey);
+        this.applyCellFormatter(cell, group.key, opposingKey as RowKey);
         continue;
       }
-      this.resolveCell(cell, opposingKey as ColumnKey, group.key as RowKey);
+      this.applyCellFormatter(
+        cell,
+        opposingKey as ColumnKey,
+        group.key as RowKey,
+      );
     }
   }
 
@@ -395,7 +399,7 @@ export default class Sheet {
 
     const style = col.cellFormatting.get(row.key);
     if (style?.formatter) {
-      this.resolveCell(this.getCell(colKey, rowKey)!, colKey, rowKey);
+      this.applyCellFormatter(this.getCell(colKey, rowKey)!, colKey, rowKey);
     }
 
     col.cellFormatting.delete(row.key);
@@ -462,10 +466,20 @@ export default class Sheet {
     return this.cellData.get(cellKey)!;
   }
 
-  /**
-   * Returns true if the value of the cell has changed.
-   */
   private resolveCell(cell: Cell, colKey: ColumnKey, rowKey: RowKey): boolean {
+    const valueChanged = this.resolveCellFormula(cell, colKey, rowKey);
+    if (valueChanged && cell.state == CellState.OK) {
+      this.applyCellFormatter(cell, colKey, rowKey);
+    }
+
+    return valueChanged;
+  }
+
+  private resolveCellFormula(
+    cell: Cell,
+    colKey: ColumnKey,
+    rowKey: RowKey,
+  ): boolean {
     const evalResult = this.expressionHandler.evaluate(cell.rawValue);
     const prevState = cell.state;
     if (!evalResult) {
@@ -473,22 +487,9 @@ export default class Sheet {
       return prevState == CellState.OK; // Consider the cell's value changed if its state changes from OK to invalid.
     }
 
-    const style = this.getCellStyle(colKey, rowKey);
-    let formattedValue: string | null = evalResult.value;
-    if (style?.formatter) {
-      formattedValue = style.formatter.format(formattedValue);
-      if (formattedValue == null) {
-        cell.setState(CellState.INVALID_FORMAT);
-        return prevState == CellState.OK;
-      }
-    }
-
     cell.setState(CellState.OK);
-
-    // Compare to resolvedValue since formatting doesn't affect references.
     const valueChanged = cell.resolvedValue != evalResult.value;
     cell.resolvedValue = evalResult.value;
-    cell.formattedValue = formattedValue;
 
     this.handleCellReferenceChanges(cell, colKey, rowKey, evalResult);
 
@@ -517,6 +518,25 @@ export default class Sheet {
     }
 
     return valueChanged;
+  }
+
+  private applyCellFormatter(
+    cell: Cell,
+    colKey: ColumnKey,
+    rowKey: RowKey,
+  ): boolean {
+    const style = this.getCellStyle(colKey, rowKey);
+    let formattedValue: string | null = cell.resolvedValue;
+    if (style?.formatter) {
+      formattedValue = style.formatter.format(formattedValue);
+      if (formattedValue == null) {
+        cell.setState(CellState.INVALID_FORMAT);
+        return false;
+      }
+    }
+
+    cell.formattedValue = formattedValue;
+    return true;
   }
 
   /**
