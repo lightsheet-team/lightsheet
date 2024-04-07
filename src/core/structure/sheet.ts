@@ -67,18 +67,21 @@ export default class Sheet {
     }
 
     let cell = this.getCell(colKey, rowKey);
+
+    if (formula == "" && !cell) return null;
+    if (!cell && formula != "") {
+      cell = this.createCell(colKey, rowKey, formula);
+    }
+
+    cell!.formula = formula;
+
     const colIndex = this.getColumnIndex(colKey)!;
     const rowIndex = this.getRowIndex(rowKey)!;
-
-    if (formula == "") {
-      const deleted = this.deleteCellIfUnused(colKey, rowKey);
-      if (deleted) cell = null;
+    const deleted = this.deleteCellIfUnused(colKey, rowKey);
+    if (deleted) {
+      cell = null;
     } else {
-      if (!cell) {
-        cell = this.createCell(colKey, rowKey, formula);
-      }
-      cell.formula = formula;
-      this.resolveCell(cell, colKey, rowKey);
+      this.resolveCell(cell!, colKey, rowKey);
     }
 
     this.emitSetCellEvent(colKey, rowKey, colIndex, rowIndex, cell);
