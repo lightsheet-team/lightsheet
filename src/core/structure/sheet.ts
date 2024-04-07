@@ -89,6 +89,8 @@ export default class Sheet {
     if (formula == "" && !allowEmpty) {
       this.deleteCell(colKey, rowKey);
       cell = null;
+      const deleted = this.deleteCellIfUnused(colKey, rowKey);
+      if (deleted) cell = null;
     } else {
       if (!cell) {
         cell = this.createCell(colKey, rowKey, formula);
