@@ -65,8 +65,8 @@ export default class Sheet {
 
     let cell = this.getCell(colKey, rowKey);
 
-    if (formula == "" && !cell) return null;
-    if (!cell && formula != "") {
+    if (!cell) {
+      if (formula == "") return null;
       cell = this.createCell(colKey, rowKey, formula);
     }
 
