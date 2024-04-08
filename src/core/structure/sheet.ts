@@ -464,8 +464,6 @@ export default class Sheet {
   }
 
   private resolveCell(cell: Cell, colKey: ColumnKey, rowKey: RowKey): boolean {
-    const expressionHandler = new ExpressionHandler(this, cell.formula);
-    const evalResult = expressionHandler.evaluate();
     const valueChanged = this.resolveCellFormula(cell, colKey, rowKey);
     if (valueChanged && cell.state == CellState.OK) {
       this.applyCellFormatter(cell, colKey, rowKey);
@@ -479,7 +477,8 @@ export default class Sheet {
     colKey: ColumnKey,
     rowKey: RowKey,
   ): boolean {
-    const evalResult = this.expressionHandler.evaluate(cell.rawValue);
+    const expressionHandler = new ExpressionHandler(this, cell.rawValue);
+    const evalResult = expressionHandler.evaluate();
     const prevState = cell.state;
     if (!evalResult) {
       cell.setState(CellState.INVALID_EXPRESSION);
