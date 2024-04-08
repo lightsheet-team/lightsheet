@@ -5,7 +5,10 @@ import {
 } from "../core/structure/key/keyTypes";
 import { CellIdInfo, SelectionContainer } from "./render.types.ts";
 import LightsheetEvent from "../core/event/event.ts";
-import { CoreSetCellPayload } from "../core/event/events.types.ts";
+import {
+  CoreSetCellPayload,
+  UISetCellPayload,
+} from "../core/event/events.types.ts";
 import EventType from "../core/event/eventType.ts";
 import LightSheetHelper from "../../utils/helpers.ts";
 
@@ -216,9 +219,9 @@ export default class UI {
   }
 
   onUICellValueChange(newValue: string, colIndex: number, rowIndex: number) {
-    const payload = {
+    const payload: UISetCellPayload = {
       indexPosition: { columnIndex: colIndex, rowIndex: rowIndex },
-      formula: newValue,
+      rawValue: newValue,
     };
     this.lightSheet.events.emit(
       new LightsheetEvent(EventType.UI_SET_CELL, payload),
@@ -246,7 +249,7 @@ export default class UI {
         elInfo.rowDom!,
         payload.indexPosition.columnIndex,
         payload.indexPosition.rowIndex,
-        payload.value,
+        payload.formattedValue,
         payload.position.columnKey?.toString(),
       );
     }
@@ -256,7 +259,8 @@ export default class UI {
 
     // Set cell value to resolved value from the core.
     // TODO Cell formula should be preserved. (Issue #49)
-    (elInfo.cellDom.firstChild! as HTMLInputElement).value = payload.value;
+    (elInfo.cellDom.firstChild! as HTMLInputElement).value =
+      payload.formattedValue;
   }
 
   private checkCellId(cellDom: Element): CellIdInfo | undefined {

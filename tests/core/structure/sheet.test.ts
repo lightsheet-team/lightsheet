@@ -18,6 +18,6 @@ describe("Sheet", () => {
     const iterator = sheet.cellData.values();
     const cell = iterator.next().value;
     expect(cell).toBeInstanceOf(Cell);
-    expect(cell!.formula).toBe(value);
+    expect(cell!.rawValue).toBe(value);
   });
 });

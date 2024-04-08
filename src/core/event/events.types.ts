@@ -8,14 +8,14 @@ export type IndexPosition = {
 export type UISetCellPayload = {
   keyPosition?: PositionInfo;
   indexPosition?: IndexPosition;
-  formula: string;
+  rawValue: string;
 };
 
 export type CoreSetCellPayload = {
   position: PositionInfo;
   indexPosition: IndexPosition;
-  formula: string;
-  value: string;
+  rawValue: string;
+  formattedValue: string;
 
   clearCell: boolean;
   clearRow: boolean;
