@@ -93,7 +93,7 @@ export default class ExpressionHandler {
             throw new Error("Invalid cell reference: " + symbol);
 
           this.cellRefHolder.push({ columnIndex: j, rowIndex: i });
-          values.push(cellInfo?.value ?? "");
+          values.push(cellInfo?.resolvedValue ?? "");
         }
       }
       return values;
@@ -107,7 +107,7 @@ export default class ExpressionHandler {
       throw new Error("Invalid cell reference: " + symbol);
 
     this.cellRefHolder.push({ columnIndex: colIndex, rowIndex: rowIndex });
-    return cellInfo?.value ?? "";
+    return cellInfo?.resolvedValue ?? "";
   }
 
   private static parseSymbolToPosition(symbol: string): {

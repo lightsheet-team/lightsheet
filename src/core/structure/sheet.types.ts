@@ -8,7 +8,9 @@ export type PositionInfo = {
 
 export type CellInfo = {
   position: PositionInfo;
-  value?: string;
+  rawValue?: string;
+  resolvedValue?: string;
+  formattedValue?: string;
   state?: CellState;
 };
 
