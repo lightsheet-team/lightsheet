@@ -25,7 +25,6 @@ export default class Sheet {
   defaultWidth: number;
   defaultHeight: number;
 
-  private expressionHandler: ExpressionHandler;
   private events: Events;
 
   constructor(events: Events | null = null) {
@@ -41,8 +40,6 @@ export default class Sheet {
 
     this.defaultWidth = 40;
     this.defaultHeight = 20;
-
-    this.expressionHandler = new ExpressionHandler(this);
 
     this.events = events ?? new Events();
     this.registerEvents();
@@ -467,6 +464,8 @@ export default class Sheet {
   }
 
   private resolveCell(cell: Cell, colKey: ColumnKey, rowKey: RowKey): boolean {
+    const expressionHandler = new ExpressionHandler(this, cell.formula);
+    const evalResult = expressionHandler.evaluate();
     const valueChanged = this.resolveCellFormula(cell, colKey, rowKey);
     if (valueChanged && cell.state == CellState.OK) {
       this.applyCellFormatter(cell, colKey, rowKey);
