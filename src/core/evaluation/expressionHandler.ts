@@ -103,7 +103,7 @@ export default class ExpressionHandler {
       ExpressionHandler.parseSymbolToPosition(symbol);
 
     const cellInfo = this.sheet.getCellInfoAt(colIndex, rowIndex);
-    if (cellInfo == null || cellInfo.state != CellState.OK)
+    if (cellInfo && cellInfo.state != CellState.OK)
       throw new Error("Invalid cell reference: " + symbol);
 
     this.cellRefHolder.push({ columnIndex: colIndex, rowIndex: rowIndex });
