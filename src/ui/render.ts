@@ -29,7 +29,7 @@ export default class UI {
       selectionEnd: null,
     };
     this.registerEvents();
-    this.isReadOnly = lightSheet.options.isReadOnly;
+    this.isReadOnly = lightSheet.options.isReadOnly || false;
 
     this.tableEl.classList.add("lightsheet_table_container");
 

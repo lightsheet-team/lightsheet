@@ -6,5 +6,5 @@ export type LightSheetOptions = {
   onReady?: () => void;
   defaultRowCount?: number;
   defaultColCount?: number;
-  isReadOnly: boolean;
+  isReadOnly?: boolean;
 };

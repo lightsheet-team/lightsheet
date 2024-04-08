@@ -13,7 +13,6 @@ describe("LightSheet", () => {
     lightSheet = new LightSheet(targetElementMock, {
       data: [],
       onReady: onReady,
-      isReadOnly: false,
     });
 
     expect(onReady).toHaveBeenCalledWith();

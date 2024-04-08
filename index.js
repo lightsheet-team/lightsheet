@@ -7,7 +7,6 @@ var data = [
 
 new Lightsheet(document.getElementById("lightsheet"), {
   data,
-  isReadOnly: true,
   onCellChange: (colIndex, rowIndex, newValue) => {
     console.log(colIndex, rowIndex, newValue);
   },
