@@ -18,28 +18,28 @@ describe("Math resolve test", () => {
     sheet.setCellAt(2, 0, "=A1");
     const cellInfo = sheet.getCellInfoAt(2, 0);
     expect(cellInfo?.state).toBe(CellState.OK);
-    expect(cellInfo?.value).toBe("1");
+    expect(cellInfo?.resolvedValue).toBe("1");
   });
 
   it("should return A1+A2 value when =A1+A2", () => {
     sheet.setCellAt(2, 0, "=A1+A2");
     const cellInfo = sheet.getCellInfoAt(2, 0);
     expect(cellInfo?.state).toBe(CellState.OK);
-    expect(cellInfo?.value).toBe("4");
+    expect(cellInfo?.resolvedValue).toBe("4");
   });
 
   it("should return A1+A2 value when =sum(A1,A2)", () => {
     sheet.setCellAt(2, 0, "=sum(A1,A2)");
     const cellInfo = sheet.getCellInfoAt(2, 0);
     expect(cellInfo?.state).toBe(CellState.OK);
-    expect(cellInfo?.value).toBe("4");
+    expect(cellInfo?.resolvedValue).toBe("4");
   });
 
   it("should return A1+A2+A3 value when =sum(A1:A3)", () => {
     sheet.setCellAt(2, 0, "=sum(A1:A3)");
     const cellInfo = sheet.getCellInfoAt(2, 0);
     expect(cellInfo?.state).toBe(CellState.OK);
-    expect(cellInfo?.value).toBe("9");
+    expect(cellInfo?.resolvedValue).toBe("9");
   });
 
   //TODO: This test should be changed to return OK instead of INVALID_EXPRESSION
@@ -47,41 +47,41 @@ describe("Math resolve test", () => {
     sheet.setCellAt(2, 0, "=A11");
     const cellInfo = sheet.getCellInfoAt(2, 0);
     expect(cellInfo?.state).toBe(CellState.INVALID_EXPRESSION);
-    expect(cellInfo?.value).toBe("");
+    expect(cellInfo?.resolvedValue).toBe("");
   });
 
   it("should return invalid value when =A", () => {
     sheet.setCellAt(2, 0, "=A");
     const cellInfo = sheet.getCellInfoAt(2, 0);
     expect(cellInfo?.state).toBe(CellState.INVALID_EXPRESSION);
-    expect(cellInfo?.value).toBe("");
+    expect(cellInfo?.resolvedValue).toBe("");
   });
 
   it("should return invalid value when =A1A2", () => {
     sheet.setCellAt(2, 0, "=A1A2");
     const cellInfo = sheet.getCellInfoAt(2, 0);
     expect(cellInfo?.state).toBe(CellState.INVALID_EXPRESSION);
-    expect(cellInfo?.value).toBe("");
+    expect(cellInfo?.resolvedValue).toBe("");
   });
 
   it("should return invalid value when =A1+", () => {
     sheet.setCellAt(2, 0, "=A1+");
     const cellInfo = sheet.getCellInfoAt(2, 0);
     expect(cellInfo?.state).toBe(CellState.INVALID_EXPRESSION);
-    expect(cellInfo?.value).toBe("");
+    expect(cellInfo?.resolvedValue).toBe("");
   });
 
   it("should return invalid value when =A/2", () => {
     sheet.setCellAt(2, 0, "=A/2");
     const cellInfo = sheet.getCellInfoAt(2, 0);
     expect(cellInfo?.state).toBe(CellState.INVALID_EXPRESSION);
-    expect(cellInfo?.value).toBe("");
+    expect(cellInfo?.resolvedValue).toBe("");
   });
 
   it("should return invalid value when =%", () => {
     sheet.setCellAt(2, 0, "=%");
     const cellInfo = sheet.getCellInfoAt(2, 0);
     expect(cellInfo?.state).toBe(CellState.INVALID_EXPRESSION);
-    expect(cellInfo?.value).toBe("");
+    expect(cellInfo?.resolvedValue).toBe("");
   });
 });
