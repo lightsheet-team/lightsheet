@@ -4,8 +4,9 @@ import { PositionInfo } from "../sheet.types.ts";
 
 export default class Cell {
   key: CellKey;
-  formula: string;
-  value: string;
+  rawValue: string; // User input.
+  resolvedValue: string; // Resolved value of a formula in rawValue.
+  formattedValue: string; // resolvedValue with formatting rules applied.
   private cellState: CellState;
 
   // References in this cell's formula.
@@ -14,8 +15,9 @@ export default class Cell {
 
   constructor() {
     this.key = generateCellKey();
-    this.formula = "";
-    this.value = "";
+    this.rawValue = "";
+    this.resolvedValue = "";
+    this.formattedValue = "";
     this.cellState = CellState.OK;
     this.referencesIn = new Map<CellKey, PositionInfo>();
     this.referencesOut = new Map<CellKey, PositionInfo>();
@@ -28,7 +30,8 @@ export default class Cell {
   setState(state: CellState) {
     this.cellState = state;
     if (state != CellState.OK) {
-      this.value = "";
+      this.resolvedValue = "";
+      this.formattedValue = "";
     }
   }
 }

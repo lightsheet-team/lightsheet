@@ -14,53 +14,45 @@ describe("move column test", () => {
   });
 
   it("should move column right and shift the other columns correctly", () => {
-    console.log(sheet.exportData());
     sheet.moveColumn(0, 2);
-    console.log(sheet.exportData());
-    expect(sheet.getCellInfoAt(2, 0)!.value).toBe("1x1");
-    expect(sheet.getCellInfoAt(0, 0)!.value).toBe("2x1");
-    expect(sheet.getCellInfoAt(1, 0)!.value).toBe("3x1");
-    expect(sheet.getCellInfoAt(0, 1)!.value).toBe("2x2");
-    expect(sheet.getCellInfoAt(1, 1)!.value).toBe("3x2");
-    expect(sheet.getCellInfoAt(2, 1)!.value).toBe("1x2");
+    expect(sheet.getCellInfoAt(2, 0)!.resolvedValue).toBe("1x1");
+    expect(sheet.getCellInfoAt(0, 0)!.resolvedValue).toBe("2x1");
+    expect(sheet.getCellInfoAt(1, 0)!.resolvedValue).toBe("3x1");
+    expect(sheet.getCellInfoAt(0, 1)!.resolvedValue).toBe("2x2");
+    expect(sheet.getCellInfoAt(1, 1)!.resolvedValue).toBe("3x2");
+    expect(sheet.getCellInfoAt(2, 1)!.resolvedValue).toBe("1x2");
   });
 
   it("should move column left and shift the other columns correctly", () => {
-    console.log(sheet.exportData());
     sheet.moveColumn(2, 0);
-    console.log(sheet.exportData());
-    expect(sheet.getCellInfoAt(2, 0)!.value).toBe("2x1");
-    expect(sheet.getCellInfoAt(0, 0)!.value).toBe("3x1");
-    expect(sheet.getCellInfoAt(1, 0)!.value).toBe("1x1");
-    expect(sheet.getCellInfoAt(0, 1)!.value).toBe("3x2");
-    expect(sheet.getCellInfoAt(1, 1)!.value).toBe("1x2");
-    expect(sheet.getCellInfoAt(2, 1)!.value).toBe("2x2");
+    expect(sheet.getCellInfoAt(2, 0)!.resolvedValue).toBe("2x1");
+    expect(sheet.getCellInfoAt(0, 0)!.resolvedValue).toBe("3x1");
+    expect(sheet.getCellInfoAt(1, 0)!.resolvedValue).toBe("1x1");
+    expect(sheet.getCellInfoAt(0, 1)!.resolvedValue).toBe("3x2");
+    expect(sheet.getCellInfoAt(1, 1)!.resolvedValue).toBe("1x2");
+    expect(sheet.getCellInfoAt(2, 1)!.resolvedValue).toBe("2x2");
   });
 
   it("should move an empty column around", () => {
-    console.log(sheet.exportData());
     sheet.insertColumn(0);
     sheet.moveColumn(0, 2);
-    console.log(sheet.exportData());
-    expect(sheet.getCellInfoAt(0, 0)!.value).toBe("1x1");
-    expect(sheet.getCellInfoAt(1, 0)!.value).toBe("2x1");
+    expect(sheet.getCellInfoAt(0, 0)!.resolvedValue).toBe("1x1");
+    expect(sheet.getCellInfoAt(1, 0)!.resolvedValue).toBe("2x1");
     expect(sheet.getCellInfoAt(2, 0)).toBe(null);
-    expect(sheet.getCellInfoAt(3, 0)!.value).toBe("3x1");
-    expect(sheet.getCellInfoAt(0, 1)!.value).toBe("1x2");
-    expect(sheet.getCellInfoAt(1, 1)!.value).toBe("2x2");
+    expect(sheet.getCellInfoAt(3, 0)!.resolvedValue).toBe("3x1");
+    expect(sheet.getCellInfoAt(0, 1)!.resolvedValue).toBe("1x2");
+    expect(sheet.getCellInfoAt(1, 1)!.resolvedValue).toBe("2x2");
     expect(sheet.getCellInfoAt(2, 1)).toBe(null);
-    expect(sheet.getCellInfoAt(3, 1)!.value).toBe("3x2");
+    expect(sheet.getCellInfoAt(3, 1)!.resolvedValue).toBe("3x2");
   });
 
   it("should move column right a single column without shifting other columns", () => {
-    console.log(sheet.exportData());
     sheet.moveColumn(0, 1);
-    console.log(sheet.exportData());
-    expect(sheet.getCellInfoAt(1, 0)!.value).toBe("1x1");
-    expect(sheet.getCellInfoAt(0, 0)!.value).toBe("2x1");
-    expect(sheet.getCellInfoAt(2, 0)!.value).toBe("3x1");
-    expect(sheet.getCellInfoAt(0, 1)!.value).toBe("2x2");
-    expect(sheet.getCellInfoAt(2, 1)!.value).toBe("3x2");
-    expect(sheet.getCellInfoAt(1, 1)!.value).toBe("1x2");
+    expect(sheet.getCellInfoAt(1, 0)!.resolvedValue).toBe("1x1");
+    expect(sheet.getCellInfoAt(0, 0)!.resolvedValue).toBe("2x1");
+    expect(sheet.getCellInfoAt(2, 0)!.resolvedValue).toBe("3x1");
+    expect(sheet.getCellInfoAt(0, 1)!.resolvedValue).toBe("2x2");
+    expect(sheet.getCellInfoAt(2, 1)!.resolvedValue).toBe("3x2");
+    expect(sheet.getCellInfoAt(1, 1)!.resolvedValue).toBe("1x2");
   });
 });
