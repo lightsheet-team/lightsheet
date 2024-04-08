@@ -21,6 +21,7 @@ export default class UI {
   selectedRowNumberCell: HTMLElement | null = null;
   selectedHeaderCell: HTMLElement | null = null;
   selectedCellsContainer: SelectionContainer;
+  isReadOnly: boolean;
 
   constructor(el: Element, lightSheet: LightSheet) {
     this.tableEl = el;
@@ -31,6 +32,7 @@ export default class UI {
       selectionEnd: null,
     };
     this.registerEvents();
+    this.isReadOnly = lightSheet.options.isReadOnly || false;
 
     this.tableEl.classList.add("lightsheet_table_container");
 
@@ -140,7 +142,7 @@ export default class UI {
     return document.getElementById(rowKey);
   }
 
-  addColumn(
+  addCell(
     rowDom: Element,
     colIndex: number,
     rowIndex: number,
@@ -158,7 +160,7 @@ export default class UI {
     const inputDom = document.createElement("input");
     inputDom.classList.add("lightsheet_table_cell_input");
     inputDom.value = "";
-
+    inputDom.readOnly = this.isReadOnly;
     cellDom.appendChild(inputDom);
 
     if (value) {
@@ -208,6 +210,14 @@ export default class UI {
     return cellDom;
   }
 
+  setReadOnly(readonly: boolean) {
+    const inputElements = this.tableBodyDom.querySelectorAll("input");
+    inputElements.forEach((input) => {
+      (input as HTMLInputElement).readOnly = readonly;
+    });
+    this.isReadOnly = readonly;
+  }
+
   onUICellValueChange(newValue: string, colIndex: number, rowIndex: number) {
     const payload: UISetCellPayload = {
       indexPosition: { columnIndex: colIndex, rowIndex: rowIndex },
@@ -235,7 +245,7 @@ export default class UI {
       row.id = elInfo.rowDomId;
     }
     if (!elInfo.cellDom) {
-      elInfo.cellDom = this.addColumn(
+      elInfo.cellDom = this.addCell(
         elInfo.rowDom!,
         payload.indexPosition.columnIndex,
         payload.indexPosition.rowIndex,

@@ -29,6 +29,10 @@ export default class LightSheet {
     this.onTableReady();
   }
 
+  setReadOnly(isReadOnly: boolean) {
+    this.#ui.setReadOnly(isReadOnly);
+  }
+
   #initializeTable() {
     // Create header row and add headers
     const rowLength = this.options.data?.length
@@ -62,9 +66,9 @@ export default class LightSheet {
           const columnKeyStr = cell.position.columnKey!.toString();
 
           if (!rowDom.id) rowDom.id = rowKeyStr;
-          this.#ui.addColumn(rowDom, j, i, cell.formattedValue, columnKeyStr);
+          this.#ui.addCell(rowDom, j, i, cell.value, columnKeyStr);
         } else {
-          this.#ui.addColumn(rowDom, j, i, "");
+          this.#ui.addCell(rowDom, j, i, "");
         }
       }
     }
