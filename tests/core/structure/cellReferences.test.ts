@@ -121,15 +121,12 @@ describe("Cell references", () => {
   });
 
   it("should create a cell with a reference to a non-existent cell", () => {
-    const colKey = sheet.columnPositions.get(1)!;
-    const rowKey = sheet.rowPositions.get(1)!;
-    sheet.setCell(colKey, rowKey, "");
-    const cell = sheet.setCellAt(0, 0, "=B2");
+    const cell = sheet.setCellAt(0, 0, "=B5");
     expect(cell.state).toBe(CellState.OK);
-    expect(sheet.getCellInfoAt(1, 1)).not.toBeNull();
+    expect(sheet.getCellInfoAt(1, 4)).not.toBeNull();
 
     // Delete the reference - this should result in the referred cell being deleted.
     sheet.setCellAt(0, 0, "123");
-    expect(sheet.getCellInfoAt(1, 1)).toBeNull();
+    expect(sheet.getCellInfoAt(1, 4)).toBeNull();
   });
 });
