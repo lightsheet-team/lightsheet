@@ -28,6 +28,5 @@
     "index.js",
     "jest.config.js",
     "tests",
-    "utils",
   ]
 }

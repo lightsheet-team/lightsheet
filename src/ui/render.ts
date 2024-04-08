@@ -1,4 +1,3 @@
-import { ToolbarItems } from "../../utils/constants";
 import LightSheet from "../main";
 import {
   generateColumnKey,
@@ -8,11 +7,9 @@ import { CellIdInfo } from "./render.types.ts";
 import LightsheetEvent from "../core/event/event.ts";
 import { CoreSetCellPayload } from "../core/event/events.types.ts";
 import EventType from "../core/event/eventType.ts";
-import { ToolbarOptions } from "../main.types";
 
 export default class UI {
   tableEl: Element;
-  lightSheetToolBarDom: HTMLElement;
   lightSheetFormulaBarDom: HTMLElement;
   lightSheetFormulaInput: HTMLInputElement;
   selectedCellDisplay: HTMLElement;
@@ -23,14 +20,12 @@ export default class UI {
   lightSheet: LightSheet;
   selectedCell: number[] | undefined;
   latestSelectedCell: { col: number; row: number } | undefined;
-  toolbarOptions?: ToolbarOptions;
 
   constructor(
     el: Element,
     lightSheet: LightSheet,
     rowCount: number,
     colCount: number,
-    toolbarOptions?: ToolbarOptions,
   ) {
     this.tableEl = el;
     this.colCount = colCount;
@@ -39,26 +34,8 @@ export default class UI {
     this.selectedCell = [];
     this.latestSelectedCell = undefined;
     this.registerEvents();
-    this.toolbarOptions = {
-      showToolbar: true,
-      element: undefined,
-      items: ToolbarItems,
-      ...toolbarOptions,
-    };
 
     this.tableEl.classList.add("lightsheet_table_container");
-
-    /*toolbar*/
-    this.lightSheetToolBarDom = document.createElement("div");
-    this.lightSheetToolBarDom.classList.add("light_sheet_table_toolbar");
-    this.lightSheetToolBarDom.style.display = "none";
-
-    if (this.toolbarOptions) {
-      this.createToolBar();
-      if (this.toolbarOptions.showToolbar) {
-        this.showToolBar(this.toolbarOptions.showToolbar);
-      }
-    }
 
     /*content*/
     const lightSheetContainerDom = document.createElement("div");
@@ -100,38 +77,6 @@ export default class UI {
     //tbody
     this.tableBodyDom = document.createElement("tbody");
     tableContainerDom.appendChild(this.tableBodyDom);
-  }
-
-  createToolBar() {
-    if (this.toolbarOptions) {
-      if (this.toolbarOptions.element != null) {
-        this.toolbarOptions.element.appendChild(this.lightSheetToolBarDom);
-      } else {
-        //insert the tool bar as first child
-        this.tableEl.insertBefore(
-          this.lightSheetToolBarDom,
-          this.tableEl.firstChild,
-        );
-      }
-
-      const toolbarContent = this.toolbarOptions.items;
-
-      for (let i = 0; i < toolbarContent.length; i++) {
-        const toolbarItem = document.createElement("i");
-        toolbarItem.classList.add("lightSheet_toolbar_item");
-        toolbarItem.classList.add("material-symbols-outlined");
-        toolbarItem.textContent = toolbarContent[i];
-        this.lightSheetToolBarDom.appendChild(toolbarItem);
-      }
-    }
-  }
-
-  showToolBar(isShown: boolean) {
-    if (isShown) {
-      this.lightSheetToolBarDom.style.display = "flex";
-    } else {
-      this.lightSheetToolBarDom.style.display = "none";
-    }
   }
 
   setFormulaBar() {

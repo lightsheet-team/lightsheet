@@ -19,13 +19,8 @@ export default class LightSheet {
       this,
       this.options.data.length,
       this.options.data[0].length,
-      this.options.toolbarOptions,
     );
     this.initializeData();
-  }
-
-  showToolbar(isShown: boolean) {
-    this.ui.showToolBar(isShown);
   }
 
   initializeData() {
