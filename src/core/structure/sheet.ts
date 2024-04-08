@@ -25,7 +25,6 @@ export default class Sheet {
   defaultWidth: number;
   defaultHeight: number;
 
-  private expressionHandler: ExpressionHandler;
   private events: Events;
 
   constructor(events: Events | null = null) {
@@ -41,8 +40,6 @@ export default class Sheet {
 
     this.defaultWidth = 40;
     this.defaultHeight = 20;
-
-    this.expressionHandler = new ExpressionHandler(this);
 
     this.events = events ?? new Events();
     this.registerEvents();
@@ -450,7 +447,8 @@ export default class Sheet {
    * Returns true if the value of the cell has changed.
    */
   private resolveCell(cell: Cell, colKey: ColumnKey, rowKey: RowKey): boolean {
-    const evalResult = this.expressionHandler.evaluate(cell.formula);
+    const expressionHandler = new ExpressionHandler(this, cell.formula);
+    const evalResult = expressionHandler.evaluate();
     if (!evalResult) {
       const prevState = cell.state;
       cell.setState(CellState.INVALID_EXPRESSION);
