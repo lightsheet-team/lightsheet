@@ -1,6 +1,7 @@
 import Sheet from "../../../src/core/structure/sheet";
 import { CellState } from "../../../src/core/structure/cell/cellState.ts";
 import { CellInfo } from "../../../src/core/structure/sheet.types.ts";
+import CellStyle from "../../../src/core/structure/cellStyle.ts";
 
 describe("Cell references", () => {
   let sheet: Sheet;
@@ -56,8 +57,8 @@ describe("Cell references", () => {
     // Deleting cells with references.
     const cell2pos = sheet.getCellInfoAt(1, 0)!;
     const cell4pos = sheet.getCellInfoAt(2, 0)!;
-    sheet.deleteCell(cell2pos.position.columnKey!, cell2pos.position.rowKey!);
-    sheet.deleteCell(cell4pos.position.columnKey!, cell4pos.position.rowKey!);
+    sheet.setCell(cell2pos.position.columnKey!, cell2pos.position.rowKey!, "");
+    sheet.setCell(cell4pos.position.columnKey!, cell4pos.position.rowKey!, "");
 
     expect(cells[0].referencesIn.size).toBe(0);
     expect(cells[0].referencesOut.size).toBe(0);
@@ -102,5 +103,30 @@ describe("Cell references", () => {
       const cellInfo = sheet.getCellInfoAt(c[0], c[1])!;
       expect(cellInfo.resolvedValue).toBe(refValue);
     }
+  });
+
+  it("should create an empty cell with styling", () => {
+    const b2 = sheet.getCellInfoAt(1, 1)!;
+    sheet.setCellStyle(
+      b2.position!.columnKey!,
+      b2.position!.rowKey!,
+      new CellStyle(new Map([["width", "50px"]])),
+    );
+
+    sheet.setCellAt(1, 1, "");
+
+    // Clearing the style should result in the cell being deleted.
+    sheet.setCellStyle(b2!.position.columnKey!, b2!.position.rowKey!, null);
+    expect(sheet.getCellInfoAt(1, 1)).toBeNull();
+  });
+
+  it("should create a cell with a reference to a non-existent cell", () => {
+    const cell = sheet.setCellAt(0, 0, "=B5");
+    expect(cell.state).toBe(CellState.OK);
+    expect(sheet.getCellInfoAt(1, 4)).not.toBeNull();
+
+    // Delete the reference - this should result in the referred cell being deleted.
+    sheet.setCellAt(0, 0, "123");
+    expect(sheet.getCellInfoAt(1, 4)).toBeNull();
   });
 });

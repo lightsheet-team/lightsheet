@@ -42,14 +42,6 @@ describe("Math resolve test", () => {
     expect(cellInfo?.resolvedValue).toBe("9");
   });
 
-  //TODO: This test should be changed to return OK instead of INVALID_EXPRESSION
-  it("should return invalid value when =A11", () => {
-    sheet.setCellAt(2, 0, "=A11");
-    const cellInfo = sheet.getCellInfoAt(2, 0);
-    expect(cellInfo?.state).toBe(CellState.INVALID_EXPRESSION);
-    expect(cellInfo?.resolvedValue).toBe("");
-  });
-
   it("should return invalid value when =A", () => {
     sheet.setCellAt(2, 0, "=A");
     const cellInfo = sheet.getCellInfoAt(2, 0);
