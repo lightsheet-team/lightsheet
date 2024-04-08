@@ -55,24 +55,30 @@ export default class Sheet {
 
   setCellAt(colPos: number, rowPos: number, value: string): CellInfo {
     const position = this.initializePosition(colPos, rowPos);
-    return this.setCell(position.columnKey!, position.rowKey!, value);
+    return this.setCell(position.columnKey!, position.rowKey!, value)!;
   }
 
-  setCell(colKey: ColumnKey, rowKey: RowKey, formula: string): CellInfo {
-    let cell = this.getCell(colKey, rowKey);
-    const colIndex = this.getColumnIndex(colKey)!;
-    const rowIndex = this.getRowIndex(rowKey)!;
-
-    if (!cell) {
-      cell = this.createCell(colKey, rowKey, formula);
-    } else if (formula == "") {
-      // Cell exists but is being cleared.
-      this.deleteCell(colKey, rowKey);
+  setCell(colKey: ColumnKey, rowKey: RowKey, formula: string): CellInfo | null {
+    if (!this.columns.has(colKey) || !this.rows.has(rowKey)) {
+      return null;
     }
 
-    if (cell) {
-      cell.formula = formula;
-      this.resolveCell(cell, colKey, rowKey);
+    let cell = this.getCell(colKey, rowKey);
+
+    if (!cell) {
+      if (formula == "") return null;
+      cell = this.createCell(colKey, rowKey, formula);
+    }
+
+    cell!.formula = formula;
+
+    const colIndex = this.getColumnIndex(colKey)!;
+    const rowIndex = this.getRowIndex(rowKey)!;
+    const deleted = this.deleteCellIfUnused(colKey, rowKey);
+    if (deleted) {
+      cell = null;
+    } else {
+      this.resolveCell(cell!, colKey, rowKey);
     }
 
     this.emitSetCellEvent(colKey, rowKey, colIndex, rowIndex, cell);
@@ -244,7 +250,7 @@ export default class Sheet {
     return true;
   }
 
-  deleteCell(colKey: ColumnKey, rowKey: RowKey): boolean {
+  private deleteCell(colKey: ColumnKey, rowKey: RowKey): boolean {
     const col = this.columns.get(colKey);
     const row = this.rows.get(rowKey);
     if (!col || !row) return false;
@@ -319,6 +325,8 @@ export default class Sheet {
     if (style == null) {
       return this.clearCellStyle(colKey, rowKey);
     }
+
+    // TODO Style could be non-null but empty; should we allow this?
     style = new CellStyle().clone(style);
 
     col.cellFormatting.set(row.key, style);
@@ -370,6 +378,9 @@ export default class Sheet {
 
     col.cellFormatting.delete(row.key);
     row.cellFormatting.delete(col.key);
+
+    // Clearing a cell's style may leave it completely empty - delete if needed.
+    this.deleteCellIfUnused(colKey, rowKey);
 
     return true;
   }
@@ -450,7 +461,7 @@ export default class Sheet {
 
     const valueChanged = cell.value != evalResult.value;
     cell.value = evalResult.value;
-    this.handleCellReferenceChanges(cell, colKey, rowKey, evalResult);
+    this.processEvaluationReferences(cell, colKey, rowKey, evalResult);
 
     // If the value of the cell hasn't changed, there's no need to update cells that reference this cell.
     if (!valueChanged && cell.state == CellState.OK) return valueChanged;
@@ -480,9 +491,26 @@ export default class Sheet {
   }
 
   /**
-   * Update reference collections of cells and emit events for all cells whose values are affected.
+   * Delete a cell if it's empty, has no formatting and is not referenced by any other cell.
    */
-  private handleCellReferenceChanges(
+  private deleteCellIfUnused(colKey: ColumnKey, rowKey: RowKey): boolean {
+    const cell = this.getCell(colKey, rowKey)!;
+    if (cell.formula != "") return false;
+
+    // Check if this cell is referenced by anything.
+    if (cell.referencesIn.size > 0) return false;
+
+    // Check if cell-specific formatting is set.
+    const cellCol = this.columns.get(colKey)!;
+    if (cellCol.cellFormatting.has(rowKey)) return false;
+
+    return this.deleteCell(colKey, rowKey);
+  }
+
+  /**
+   * Update reference collections of cells and initialize referred cells if necessary.
+   */
+  private processEvaluationReferences(
     cell: Cell,
     columnKey: ColumnKey,
     rowKey: RowKey,
@@ -492,11 +520,17 @@ export default class Sheet {
     const oldOut = new Map<CellKey, PositionInfo>(cell.referencesOut);
     cell.referencesOut.clear();
     evalResult.references.forEach((ref) => {
+      // Initialize the referred cell if it doesn't exist yet.
+      const position = this.initializePosition(ref.columnIndex, ref.rowIndex);
+      if (!this.getCellInfoAt(ref.columnIndex, ref.rowIndex)) {
+        this.createCell(position.columnKey!, position.rowKey!, "");
+      }
+
+      const referredCell = this.getCell(position.columnKey!, position.rowKey!)!;
       // Add referred cells to this cell's referencesOut.
-      const referredCell = this.getCell(ref.columnKey!, ref.rowKey!)!;
       cell.referencesOut.set(referredCell.key, {
-        columnKey: ref.columnKey!,
-        rowKey: ref.rowKey!,
+        columnKey: position.columnKey!,
+        rowKey: position.rowKey!,
       });
 
       // Add this cell to the referred cell's referencesIn.
@@ -512,10 +546,13 @@ export default class Sheet {
     );
 
     // Clean up the referencesIn sets of cells that are no longer referenced by the formula.
-    removedReferences.forEach((_, cellKey) => {
+    for (const [cellKey, position] of removedReferences) {
       const referredCell = this.cellData.get(cellKey)!;
       referredCell.referencesIn.delete(cell.key);
-    });
+
+      // This may result in the cell being empty and unused - delete if necessary.
+      this.deleteCellIfUnused(position.columnKey!, position.rowKey!);
+    }
 
     // After references are updated, check for circular references.
     if (evalResult.references.length && this.hasCircularReference(cell)) {
@@ -576,7 +613,7 @@ export default class Sheet {
     rowKey: RowKey,
     colPos: number,
     rowPos: number,
-    cell: Cell,
+    cell: Cell | null,
   ) {
     const payload: CoreSetCellPayload = {
       position: {
@@ -589,7 +626,7 @@ export default class Sheet {
       },
       formula: cell ? cell.formula : "",
       value: cell ? cell.value : "",
-      clearCell: this.cellData.get(cell.key) == null,
+      clearCell: cell == null,
       clearRow: this.rows.get(rowKey) == null,
     };
 

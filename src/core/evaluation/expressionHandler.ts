@@ -11,8 +11,8 @@ import {
 } from "mathjs/number";
 
 import Sheet from "../structure/sheet.ts";
-import { PositionInfo } from "../structure/sheet.types.ts";
-import { EvaluationResult } from "./expressionHandler.types.ts";
+import { CellPosition, EvaluationResult } from "./expressionHandler.types.ts";
+
 import { CellState } from "../structure/cell/cellState.ts";
 
 const math = create({
@@ -29,7 +29,7 @@ const math = create({
 export default class ExpressionHandler {
   sheet: Sheet;
 
-  private cellRefHolder: Array<PositionInfo>;
+  private cellRefHolder: Array<CellPosition>;
   private rawValue: string;
 
   constructor(sheet: Sheet, rawValue: string) {
@@ -89,11 +89,11 @@ export default class ExpressionHandler {
       for (let i = start.rowIndex; i <= end.rowIndex; i++) {
         for (let j = start.colIndex; j <= end.colIndex; j++) {
           const cellInfo = this.sheet.getCellInfoAt(j, i);
-          if (cellInfo == null || cellInfo.state != CellState.OK)
+          if (cellInfo && cellInfo.state != CellState.OK)
             throw new Error("Invalid cell reference: " + symbol);
 
-          this.cellRefHolder.push(cellInfo.position);
-          values.push(cellInfo.value!);
+          this.cellRefHolder.push({ columnIndex: j, rowIndex: i });
+          values.push(cellInfo?.value ?? "");
         }
       }
       return values;
@@ -103,11 +103,11 @@ export default class ExpressionHandler {
       ExpressionHandler.parseSymbolToPosition(symbol);
 
     const cellInfo = this.sheet.getCellInfoAt(colIndex, rowIndex);
-    if (cellInfo == null || cellInfo.state != CellState.OK)
+    if (cellInfo && cellInfo.state != CellState.OK)
       throw new Error("Invalid cell reference: " + symbol);
 
-    this.cellRefHolder.push(cellInfo.position);
-    return cellInfo.value!;
+    this.cellRefHolder.push({ columnIndex: colIndex, rowIndex: rowIndex });
+    return cellInfo?.value ?? "";
   }
 
   private static parseSymbolToPosition(symbol: string): {
@@ -123,6 +123,8 @@ export default class ExpressionHandler {
 
     const rowStr = symbol.substring(columnStr.length);
     const rowIndex = parseInt(rowStr) - 1;
+
+    if (isNaN(rowIndex)) throw new Error("Invalid symbol: " + symbol);
 
     return { colIndex, rowIndex };
   }
