@@ -124,6 +124,8 @@ export default class ExpressionHandler {
     const rowStr = symbol.substring(columnStr.length);
     const rowIndex = parseInt(rowStr) - 1;
 
+    if (isNaN(rowIndex)) throw new Error("Invalid symbol: " + symbol);
+
     return { colIndex, rowIndex };
   }
 
