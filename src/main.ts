@@ -63,7 +63,6 @@ export default class LightSheet {
           const cell = this.sheet.setCellAt(j, i, data);
           const rowKeyStr = cell.position.rowKey!.toString();
           rowDom = this.#ui.getRow(rowKeyStr)!;
-          if (!rowDom.id) rowDom.id = rowKeyStr;
         } else {
           if (!rowDom) {
             rowDom = this.#ui.addRow(i);
