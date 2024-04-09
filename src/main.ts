@@ -52,8 +52,7 @@ export default class LightSheet {
     this.#ui.addHeader(headerData);
 
     for (let i = 0; i < rowLength!; i++) {
-      //create new row
-      const rowDom = this.#ui.addRow(i);
+      let rowDom;
       for (let j = 0; j < colLength; j++) {
         const data =
           this.options.data[i] && this.options.data[i].length - 1 >= j
@@ -63,11 +62,12 @@ export default class LightSheet {
         if (data) {
           const cell = this.sheet.setCellAt(j, i, data);
           const rowKeyStr = cell.position.rowKey!.toString();
-          const columnKeyStr = cell.position.columnKey!.toString();
-
+          rowDom = this.#ui.getRow(rowKeyStr)!;
           if (!rowDom.id) rowDom.id = rowKeyStr;
-          this.#ui.addCell(rowDom, j, i, cell.resolvedValue, columnKeyStr);
         } else {
+          if (!rowDom) {
+            rowDom = this.#ui.addRow(i);
+          }
           this.#ui.addCell(rowDom, j, i, "");
         }
       }
