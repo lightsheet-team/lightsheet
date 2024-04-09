@@ -84,10 +84,7 @@ export default class UI {
       if (this.toolbarOptions.element != null) {
         this.toolbarOptions.element.appendChild(this.toolBarDom);
       } else {
-        this.tableEl.insertBefore(
-          this.toolBarDom,
-          this.tableEl.firstChild,
-        );
+        this.tableEl.insertBefore(this.toolBarDom, this.tableEl.firstChild);
       }
 
       const toolbarContent = this.toolbarOptions.items!;

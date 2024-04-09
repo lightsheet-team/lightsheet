@@ -1,7 +1,7 @@
 import LightSheet from "../../src/main";
 
 describe("Tool bar", () => {
-  let targetElementMock: HTMLElement = document.createElement("div");
+  const targetElementMock: HTMLElement = document.createElement("div");
 
   afterEach(() => {
     jest.clearAllMocks();
