@@ -14,8 +14,8 @@ import LightSheetHelper from "../../utils/helpers.ts";
 
 export default class UI {
   tableEl: Element;
-  lightSheetFormulaBarDom: HTMLElement;
-  lightSheetFormulaInput: HTMLInputElement;
+  FormulaBarDom: HTMLElement;
+  FormulaInput: HTMLInputElement;
   selectedCellDisplay: HTMLElement;
   tableHeadDom: Element;
   tableBodyDom: Element;
@@ -47,25 +47,25 @@ export default class UI {
     this.tableEl.appendChild(lightSheetContainerDom);
 
     /*formula bar*/
-    this.lightSheetFormulaBarDom = document.createElement("div");
-    this.lightSheetFormulaBarDom.classList.add("light_sheet_table_formula_bar");
-    lightSheetContainerDom.appendChild(this.lightSheetFormulaBarDom);
+    this.FormulaBarDom = document.createElement("div");
+    this.FormulaBarDom.classList.add("light_sheet_table_formula_bar");
+    lightSheetContainerDom.appendChild(this.FormulaBarDom);
 
     //selected cell display element
     this.selectedCellDisplay = document.createElement("div");
     this.selectedCellDisplay.classList.add("selected_cell_display");
-    this.lightSheetFormulaBarDom.appendChild(this.selectedCellDisplay);
+    this.FormulaBarDom.appendChild(this.selectedCellDisplay);
 
     //"fx" label element
     const fxLabel = document.createElement("div");
     fxLabel.textContent = "fx";
     fxLabel.classList.add("fx_label");
-    this.lightSheetFormulaBarDom.appendChild(fxLabel);
+    this.FormulaBarDom.appendChild(fxLabel);
 
     //formula input
-    this.lightSheetFormulaInput = document.createElement("input");
-    this.lightSheetFormulaInput.classList.add("formula_input");
-    this.lightSheetFormulaBarDom.appendChild(this.lightSheetFormulaInput);
+    this.FormulaInput = document.createElement("input");
+    this.FormulaInput.classList.add("formula_input");
+    this.FormulaBarDom.appendChild(this.FormulaInput);
     this.setFormulaBar();
 
     const tableContainerDom = document.createElement("table");
@@ -86,8 +86,8 @@ export default class UI {
 
   setFormulaBar() {
     // Listen for input changes in the formula bar
-    this.lightSheetFormulaInput.addEventListener("input", () => {
-      const newValue = this.lightSheetFormulaInput.value;
+    this.FormulaInput.addEventListener("input", () => {
+      const newValue = this.FormulaInput.value;
       // Get the column and row indices from the latest selected cell
       if (this.latestSelectedCell) {
         const colIndex = this.latestSelectedCell.col;
@@ -211,7 +211,7 @@ export default class UI {
 
     inputDom.addEventListener("input", (e: Event) => {
       const newValue = (e.target as HTMLInputElement).value;
-      this.lightSheetFormulaInput.value = newValue;
+      this.FormulaInput.value = newValue;
       this.onUICellValueChange(newValue, colIndex, rowIndex);
     });
 
@@ -247,7 +247,7 @@ export default class UI {
       };
 
       //connect with formula bar
-      this.lightSheetFormulaInput.value = inputDom.value;
+      this.FormulaInput.value = inputDom.value;
     };
 
     inputDom.onblur = () => {
