@@ -16,30 +16,26 @@ describe("move row test", () => {
   });
 
   it("should move row right and shift the other rows correctly", () => {
-    console.log(sheet.exportData());
     sheet.moveRow(0, 2);
-    console.log(sheet.exportData());
-    expect(sheet.getCellInfoAt(0, 0)!.value).toBe("1x2");
-    expect(sheet.getCellInfoAt(1, 0)!.value).toBe("2x2");
+    expect(sheet.getCellInfoAt(0, 0)!.resolvedValue).toBe("1x2");
+    expect(sheet.getCellInfoAt(1, 0)!.resolvedValue).toBe("2x2");
 
-    expect(sheet.getCellInfoAt(0, 1)!.value).toBe("1x3");
-    expect(sheet.getCellInfoAt(1, 1)!.value).toBe("2x3");
+    expect(sheet.getCellInfoAt(0, 1)!.resolvedValue).toBe("1x3");
+    expect(sheet.getCellInfoAt(1, 1)!.resolvedValue).toBe("2x3");
 
-    expect(sheet.getCellInfoAt(0, 2)!.value).toBe("1x1");
-    expect(sheet.getCellInfoAt(1, 2)!.value).toBe("2x1");
+    expect(sheet.getCellInfoAt(0, 2)!.resolvedValue).toBe("1x1");
+    expect(sheet.getCellInfoAt(1, 2)!.resolvedValue).toBe("2x1");
   });
 
   it("should move row left and shift the other rows correctly", () => {
-    console.log(sheet.exportData());
     sheet.moveRow(2, 0);
-    console.log(sheet.exportData());
-    expect(sheet.getCellInfoAt(0, 0)!.value).toBe("1x3");
-    expect(sheet.getCellInfoAt(1, 0)!.value).toBe("2x3");
+    expect(sheet.getCellInfoAt(0, 0)!.resolvedValue).toBe("1x3");
+    expect(sheet.getCellInfoAt(1, 0)!.resolvedValue).toBe("2x3");
 
-    expect(sheet.getCellInfoAt(0, 1)!.value).toBe("1x1");
-    expect(sheet.getCellInfoAt(1, 1)!.value).toBe("2x1");
+    expect(sheet.getCellInfoAt(0, 1)!.resolvedValue).toBe("1x1");
+    expect(sheet.getCellInfoAt(1, 1)!.resolvedValue).toBe("2x1");
 
-    expect(sheet.getCellInfoAt(0, 2)!.value).toBe("1x2");
-    expect(sheet.getCellInfoAt(1, 2)!.value).toBe("2x2");
+    expect(sheet.getCellInfoAt(0, 2)!.resolvedValue).toBe("1x2");
+    expect(sheet.getCellInfoAt(1, 2)!.resolvedValue).toBe("2x2");
   });
 });
