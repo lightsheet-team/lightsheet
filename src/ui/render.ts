@@ -132,7 +132,6 @@ export default class UI {
               "lightsheet_table_selected_row_number_header_cell",
             );
             this.selectedHeaderCell = selectedColumn;
-
             Array.from(this.tableBodyDom.children).forEach((childElement) => {
               // Code inside the forEach loop
               childElement.children[i].classList.add(

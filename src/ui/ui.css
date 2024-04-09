@@ -29,6 +29,7 @@
   border-left: 1px solid var(--lightsheet-silver-400);
   border-right: 0px;
   border-bottom: 0px;
+  background-color: white;
 }
 
 thead > tr:first-child > td {
@@ -66,7 +67,7 @@ td:first-child {
   height: 100%;
   margin: 0px;
   padding: 2px;
-  background-color: white;
+  background-color: transparent;
 }
 
 .lightsheet_table_row_number {
