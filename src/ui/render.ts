@@ -173,8 +173,9 @@ export default class UI {
     return rowDom;
   }
 
-  addRow(rowLabelNumber: number): HTMLElement {
-    const rowDom = this.createRowElement(rowLabelNumber);
+  addRow(rowIndex: number): HTMLElement {
+    const rowDom = this.createRowElement(rowIndex);
+    rowDom.id = `row_${rowIndex}`; // TODO ID should be unique (see getElementInfoForSetCell).
     this.tableBodyDom.appendChild(rowDom);
     return rowDom;
   }
