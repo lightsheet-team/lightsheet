@@ -20,22 +20,20 @@ export default class UI {
   tableHeadDom: Element;
   tableBodyDom: Element;
   lightSheet: LightSheet;
-  selectedCell: number[];
   selectedRowNumberCell: HTMLElement | null = null;
   selectedHeaderCell: HTMLElement | null = null;
   selectedCellsContainer: SelectionContainer;
   isReadOnly: boolean;
-  latestSelectedCell: { col: number; row: number } | undefined;
+  selectedCell: { col: number; row: number } | undefined;
 
   constructor(el: Element, lightSheet: LightSheet) {
     this.tableEl = el;
     this.lightSheet = lightSheet;
-    this.selectedCell = [];
     this.selectedCellsContainer = {
       selectionStart: null,
       selectionEnd: null,
     };
-    this.latestSelectedCell = undefined;
+    this.selectedCell = undefined;
     this.registerEvents();
     this.isReadOnly = lightSheet.options.isReadOnly || false;
 
@@ -89,9 +87,9 @@ export default class UI {
     this.FormulaInput.addEventListener("input", () => {
       const newValue = this.FormulaInput.value;
       // Get the column and row indices from the latest selected cell
-      if (this.latestSelectedCell) {
-        const colIndex = this.latestSelectedCell.col;
-        const rowIndex = this.latestSelectedCell.row;
+      if (this.selectedCell) {
+        const colIndex = this.selectedCell.col;
+        const rowIndex = this.selectedCell.row;
         this.onUICellValueChange(newValue, colIndex, rowIndex);
       }
     });
@@ -239,9 +237,7 @@ export default class UI {
         );
         rowIndex = this.lightSheet.sheet.getRowIndex(generateRowKey(rowKey!));
       }
-      this.selectedCell?.push(Number(columnIndex), Number(rowIndex));
-      // Update latestSelectedCell with an object containing col and row properties
-      this.latestSelectedCell = {
+      this.selectedCell = {
         col: Number(columnIndex),
         row: Number(rowIndex),
       };
@@ -251,7 +247,6 @@ export default class UI {
     };
 
     inputDom.onblur = () => {
-      this.selectedCell = [];
       cellDom.classList.remove("lightsheet_table_selected_cell");
     };
 
