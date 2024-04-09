@@ -13,7 +13,7 @@ new Lightsheet(document.getElementById("lightsheet"), {
     console.log(colIndex, rowIndex, newValue);
   },
   toolbarOptions: {
-    showToolbar: true,
+    showToolbar: false,
     items: toolbar,
     element: document.getElementById("toolbar-dom-id"),
   },
