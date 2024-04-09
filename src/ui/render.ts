@@ -66,7 +66,7 @@ export default class UI {
   createFormulaBar(lightSheetContainerDom: HTMLDivElement) {
     /*formula bar*/
     this.FormulaBarDom = document.createElement("div");
-    this.FormulaBarDom.classList.add("light_sheet_table_formula_bar");
+    this.FormulaBarDom.classList.add("lightsheet_table_formula_bar");
     lightSheetContainerDom.appendChild(this.FormulaBarDom);
 
     //selected cell display element
