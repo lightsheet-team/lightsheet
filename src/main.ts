@@ -19,11 +19,7 @@ export default class LightSheet {
     this.options.defaultRowCount = options.defaultRowCount ?? DefaultRowCount;
     this.events = new Events();
     this.sheet = new Sheet(this.events);
-    this.#ui = new UI(
-      targetElement,
-      this,
-      this.options.toolbarOptions,
-    );
+    this.#ui = new UI(targetElement, this, this.options.toolbarOptions);
     this.#initializeTable();
     if (options.onCellChange) {
       this.onCellChange = options.onCellChange;
