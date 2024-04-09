@@ -12,7 +12,7 @@ import { ToolbarOptions } from "../main.types";
 
 export default class UI {
   tableEl: Element;
-  lightSheetToolBarDom: HTMLElement;
+  toolBarDom: HTMLElement;
   tableHeadDom: Element;
   tableBodyDom: Element;
   rowCount: number;
@@ -20,7 +20,7 @@ export default class UI {
   lightSheet: LightSheet;
   selectedCell: number[];
   selectedCellsContainer: SelectionContainer;
-  toolbarOptions?: ToolbarOptions;
+  toolbarOptions: ToolbarOptions;
 
   constructor(
     el: Element,
@@ -49,9 +49,9 @@ export default class UI {
     this.tableEl.classList.add("lightsheet_table_container");
 
     /*toolbar*/
-    this.lightSheetToolBarDom = document.createElement("div");
-    this.lightSheetToolBarDom.classList.add("lightsheet_table_toolbar");
-    this.lightSheetToolBarDom.style.display = "none";
+    this.toolBarDom = document.createElement("div");
+    this.toolBarDom.classList.add("lightsheet_table_toolbar");
+    this.toolBarDom.style.display = "none";
     this.createToolBar();
 
     /*content*/
@@ -78,34 +78,33 @@ export default class UI {
     if (this.toolbarOptions) {
       //Element
       if (this.toolbarOptions.element != null) {
-        this.toolbarOptions.element.appendChild(this.lightSheetToolBarDom);
+        this.toolbarOptions.element.appendChild(this.toolBarDom);
       } else {
         this.tableEl.insertBefore(
-          this.lightSheetToolBarDom,
+          this.toolBarDom,
           this.tableEl.firstChild,
         );
       }
 
-      // there is no way the items can be null because we already defined the default value above?
-      const toolbarContent = this.toolbarOptions.items;
+      const toolbarContent = this.toolbarOptions.items!;
       for (let i = 0; i < toolbarContent.length; i++) {
         const toolbarItem = document.createElement("i");
         toolbarItem.classList.add("lightSheet_toolbar_item");
         toolbarItem.classList.add("material-symbols-outlined");
         toolbarItem.textContent = toolbarContent[i];
-        this.lightSheetToolBarDom.appendChild(toolbarItem);
+        this.toolBarDom.appendChild(toolbarItem);
       }
 
       //showToolBar
-      this.showToolBar(this.toolbarOptions.showToolbar);
+      this.showToolBar(this.toolbarOptions.showToolbar!);
     }
   }
 
   showToolBar(isShown: boolean) {
     if (isShown) {
-      this.lightSheetToolBarDom.style.display = "flex";
+      this.toolBarDom.style.display = "flex";
     } else {
-      this.lightSheetToolBarDom.style.display = "none";
+      this.toolBarDom.style.display = "none";
     }
   }
 
