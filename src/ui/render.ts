@@ -14,9 +14,9 @@ import LightSheetHelper from "../../utils/helpers.ts";
 
 export default class UI {
   tableEl: Element;
-  FormulaBarDom: HTMLElement;
-  FormulaInput: HTMLInputElement;
-  selectedCellDisplay: HTMLElement;
+  FormulaBarDom!: HTMLElement;
+  FormulaInput!: HTMLInputElement;
+  selectedCellDisplay!: HTMLElement;
   tableHeadDom: Element;
   tableBodyDom: Element;
   lightSheet: LightSheet;
@@ -44,6 +44,26 @@ export default class UI {
     lightSheetContainerDom.classList.add("lightsheet_table_content");
     this.tableEl.appendChild(lightSheetContainerDom);
 
+    this.createFormulaBar(lightSheetContainerDom);
+    this.setFormulaBar();
+
+    const tableContainerDom = document.createElement("table");
+    tableContainerDom.classList.add("lightsheet_table");
+    tableContainerDom.setAttribute("cellpadding", "0");
+    tableContainerDom.setAttribute("cellspacing", "0");
+    tableContainerDom.setAttribute("unselectable", "yes");
+    lightSheetContainerDom.appendChild(tableContainerDom);
+
+    //thead
+    this.tableHeadDom = document.createElement("thead");
+    tableContainerDom.appendChild(this.tableHeadDom);
+
+    //tbody
+    this.tableBodyDom = document.createElement("tbody");
+    tableContainerDom.appendChild(this.tableBodyDom);
+  }
+
+  createFormulaBar(lightSheetContainerDom: HTMLDivElement) {
     /*formula bar*/
     this.FormulaBarDom = document.createElement("div");
     this.FormulaBarDom.classList.add("light_sheet_table_formula_bar");
@@ -64,22 +84,6 @@ export default class UI {
     this.FormulaInput = document.createElement("input");
     this.FormulaInput.classList.add("formula_input");
     this.FormulaBarDom.appendChild(this.FormulaInput);
-    this.setFormulaBar();
-
-    const tableContainerDom = document.createElement("table");
-    tableContainerDom.classList.add("lightsheet_table");
-    tableContainerDom.setAttribute("cellpadding", "0");
-    tableContainerDom.setAttribute("cellspacing", "0");
-    tableContainerDom.setAttribute("unselectable", "yes");
-    lightSheetContainerDom.appendChild(tableContainerDom);
-
-    //thead
-    this.tableHeadDom = document.createElement("thead");
-    tableContainerDom.appendChild(this.tableHeadDom);
-
-    //tbody
-    this.tableBodyDom = document.createElement("tbody");
-    tableContainerDom.appendChild(this.tableBodyDom);
   }
 
   setFormulaBar() {
