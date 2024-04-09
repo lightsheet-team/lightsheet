@@ -48,6 +48,7 @@
 .formula_input {
   flex: 1; 
   border: var(--lightsheet-silver-400);
+  outline: none;
 }
 
 /*Table*/
