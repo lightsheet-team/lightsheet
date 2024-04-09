@@ -50,13 +50,12 @@ export default class UI {
 
     /*toolbar*/
     this.lightSheetToolBarDom = document.createElement("div");
-    this.lightSheetToolBarDom.classList.add("light_sheet_table_toolbar");
+    this.lightSheetToolBarDom.classList.add("lightsheet_table_toolbar");
     this.lightSheetToolBarDom.style.display = "none";
     this.createToolBar();
 
     /*content*/
     const lightSheetContainerDom = document.createElement("div");
-    lightSheetContainerDom.classList.add("lightsheet_table_content");
     this.tableEl.appendChild(lightSheetContainerDom);
 
     const tableContainerDom = document.createElement("table");

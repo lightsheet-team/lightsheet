@@ -14,7 +14,7 @@ describe("Tool bar", () => {
   test("should create toolbar with default value if there is no tool bar option", () => {
     // Get the toolbar element
     const toolBarElement = targetElementMock.querySelector(
-      ".light_sheet_table_toolbar",
+      ".lightsheet_table_toolbar",
     );
 
     // Expect that the toolbar element exists
@@ -42,7 +42,7 @@ describe("Tool bar", () => {
 
     // Check if the toolbar is created inside the provided DOM element
     const toolbarElement = mockElement.querySelector(
-      ".light_sheet_table_toolbar",
+      ".lightsheet_table_toolbar",
     );
     expect(toolbarElement).toBeTruthy();
   });
@@ -50,7 +50,7 @@ describe("Tool bar", () => {
   test("should create toolbar as the first child in the table container if no element is provided", () => {
     // Get the toolbar element
     const toolBarElement = targetElementMock.querySelector(
-      ".light_sheet_table_toolbar",
+      ".lightsheet_table_toolbar",
     );
 
     // Expect that the toolbar element exists and is the first child
@@ -63,7 +63,7 @@ describe("Tool bar", () => {
 
     // Get the toolbar element
     const toolBarElement = targetElementMock.querySelector(
-      ".light_sheet_table_toolbar",
+      ".lightsheet_table_toolbar",
     );
 
     // Expect that the toolbar element has children based on toolbarItems array
@@ -75,7 +75,7 @@ describe("Tool bar", () => {
 
     // Get the toolbar element
     const toolBarElement = targetElementMock.querySelector(
-      ".light_sheet_table_toolbar",
+      ".lightsheet_table_toolbar",
     );
 
     expect(toolBarElement.children.length).toBe(toolbarItems.length);
@@ -84,7 +84,7 @@ describe("Tool bar", () => {
   test("should show toolbar when showToolbar option is true", () => {
     // Get the toolbar element
     const toolBarElement = targetElementMock.querySelector(
-      ".light_sheet_table_toolbar",
+      ".lightsheet_table_toolbar",
     );
 
     expect(toolBarElement.style.display).toBe("flex");
@@ -93,7 +93,7 @@ describe("Tool bar", () => {
   test("should hide toolbar when showToolbar option is false", () => {
     // Get the toolbar element
     const toolBarElement = targetElementMock.querySelector(
-      ".light_sheet_table_toolbar",
+      ".lightsheet_table_toolbar",
     );
 
     expect(toolBarElement.style.display).toBe("none");
@@ -102,7 +102,7 @@ describe("Tool bar", () => {
   test("should hide toolbar when there is no show toolbar option", () => {
     // Get the toolbar element
     const toolBarElement = targetElementMock.querySelector(
-      ".light_sheet_table_toolbar",
+      ".lightsheet_table_toolbar",
     );
 
     expect(toolBarElement.style.display).toBe("none");
