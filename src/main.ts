@@ -22,8 +22,6 @@ export default class LightSheet {
     this.#ui = new UI(
       targetElement,
       this,
-      this.options.data.length,
-      this.options.data[0].length,
       this.options.toolbarOptions,
     );
     this.#initializeTable();

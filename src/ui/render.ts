@@ -30,8 +30,6 @@ export default class UI {
   constructor(
     el: Element,
     lightSheet: LightSheet,
-    rowCount: number,
-    colCount: number,
     toolbarOptions?: ToolbarOptions,
   ) {
     this.tableEl = el;
