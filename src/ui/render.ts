@@ -25,6 +25,7 @@ export default class UI {
   selectedHeaderCell: HTMLElement | null = null;
   selectedCellsContainer: SelectionContainer;
   toolbarOptions: ToolbarOptions;
+  isReadOnly: boolean;
 
   constructor(
     el: Element,

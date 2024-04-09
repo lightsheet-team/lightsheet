@@ -1,11 +1,7 @@
 import LightSheet from "../../src/main";
 
 describe("Tool bar", () => {
-  let targetElementMock;
-
-  beforeEach(() => {
-    targetElementMock = document.createElement("div");
-  });
+  let targetElementMock: HTMLElement = document.createElement("div");
 
   afterEach(() => {
     jest.clearAllMocks();
@@ -20,9 +16,9 @@ describe("Tool bar", () => {
     // Expect that the toolbar element exists
     expect(toolBarElement).toBeTruthy();
     // Expect that the toolbar element has 13 children
-    expect(toolBarElement.children.length).toBe(13);
+    expect(toolBarElement!.children.length).toBe(13);
     // Expect that the toolbar element is initially hidden
-    expect(toolBarElement.style.display).toBe("none");
+    expect((toolBarElement! as HTMLElement).style.display).toBe("none");
   });
 
   test("should create toolbar inside the provided dom if element is provided", () => {
@@ -34,7 +30,6 @@ describe("Tool bar", () => {
     // Instantiate LightSheet with the provided mock element
     new LightSheet(targetElementMock, {
       data: [],
-      columns: [],
       toolbarOptions: {
         element: mockElement,
       },
@@ -67,7 +62,7 @@ describe("Tool bar", () => {
     );
 
     // Expect that the toolbar element has children based on toolbarItems array
-    expect(toolBarElement.children.length).toBe(toolbarItems.length);
+    expect(toolBarElement!.children.length).toBe(toolbarItems.length);
   });
 
   test("should create items in toolbar in the table container if items provided", () => {
@@ -78,7 +73,7 @@ describe("Tool bar", () => {
       ".lightsheet_table_toolbar",
     );
 
-    expect(toolBarElement.children.length).toBe(toolbarItems.length);
+    expect(toolBarElement!.children.length).toBe(toolbarItems.length);
   });
 
   test("should show toolbar when showToolbar option is true", () => {
@@ -87,7 +82,7 @@ describe("Tool bar", () => {
       ".lightsheet_table_toolbar",
     );
 
-    expect(toolBarElement.style.display).toBe("flex");
+    expect((toolBarElement! as HTMLElement).style.display).toBe("flex");
   });
 
   test("should hide toolbar when showToolbar option is false", () => {
@@ -96,7 +91,7 @@ describe("Tool bar", () => {
       ".lightsheet_table_toolbar",
     );
 
-    expect(toolBarElement.style.display).toBe("none");
+    expect((toolBarElement! as HTMLElement).style.display).toBe("none");
   });
 
   test("should hide toolbar when there is no show toolbar option", () => {
@@ -105,6 +100,6 @@ describe("Tool bar", () => {
       ".lightsheet_table_toolbar",
     );
 
-    expect(toolBarElement.style.display).toBe("none");
+    expect((toolBarElement! as HTMLElement).style.display).toBe("none");
   });
 });

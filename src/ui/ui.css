@@ -93,11 +93,13 @@ td:first-child {
   height: 24px;
   padding: 4px;
   cursor: pointer;
+}
+
 .lightsheet_table_selected_row_number_header_cell {
   background-color: darkblue;
   color: white;
 }
 
-.lightsheet_table_selected_row_column{
+.lightsheet_table_selected_row_column {
   background-color: lightblue;
 }

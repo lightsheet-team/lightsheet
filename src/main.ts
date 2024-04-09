@@ -34,9 +34,9 @@ export default class LightSheet {
   setReadOnly(isReadOnly: boolean) {
     this.#ui.setReadOnly(isReadOnly);
   }
-  
-    showToolbar(isShown: boolean) {
-    this.ui.showToolBar(isShown);
+
+  showToolbar(isShown: boolean) {
+    this.#ui.showToolBar(isShown);
   }
 
   #initializeTable() {
