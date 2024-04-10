@@ -1,4 +1,10 @@
-import { CellKey, ColumnKey, RowKey } from "./key/keyTypes.ts";
+import {
+  CellKey,
+  ColumnKey,
+  generateSheetKey,
+  RowKey,
+  SheetKey,
+} from "./key/keyTypes.ts";
 import Cell from "./cell/cell.ts";
 import Column from "./group/column.ts";
 import Row from "./group/row.ts";
@@ -12,8 +18,12 @@ import { CoreSetCellPayload, UISetCellPayload } from "../event/events.types.ts";
 import EventType from "../event/eventType.ts";
 import { CellState } from "./cell/cellState.ts";
 import { EvaluationResult } from "../evaluation/expressionHandler.types.ts";
+import SheetHolder from "./sheetHolder.ts";
 
 export default class Sheet {
+  key: SheetKey;
+  sheetHolder: SheetHolder;
+
   defaultStyle: any;
   settings: any;
   cellData: Map<CellKey, Cell>;
@@ -27,9 +37,11 @@ export default class Sheet {
 
   private events: Events;
 
-  constructor(events: Events | null = null) {
-    this.defaultStyle = new CellStyle(); // TODO This should be configurable.
+  constructor(sheetHolder: SheetHolder, events: Events | null = null) {
+    this.key = generateSheetKey();
+    this.sheetHolder = sheetHolder;
 
+    this.defaultStyle = new CellStyle(); // TODO This should be configurable.
     this.settings = null;
     this.cellData = new Map<CellKey, Cell>();
     this.rows = new Map<RowKey, Row>();
@@ -488,7 +500,11 @@ export default class Sheet {
     colKey: ColumnKey,
     rowKey: RowKey,
   ): boolean {
-    const expressionHandler = new ExpressionHandler(this, cell.rawValue);
+    const expressionHandler = new ExpressionHandler(
+      this.sheetHolder,
+      this,
+      cell.rawValue,
+    );
     const evalResult = expressionHandler.evaluate();
     const prevState = cell.state;
     if (!evalResult) {

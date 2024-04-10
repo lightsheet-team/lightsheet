@@ -6,7 +6,8 @@ var data = [
 ];
 
 new Lightsheet(document.getElementById("lightsheet"), {
-  data,
+  data: data,
+  sheetName: "Sheet1",
   onCellChange: (colIndex, rowIndex, newValue) => {
     console.log(colIndex, rowIndex, newValue);
   },

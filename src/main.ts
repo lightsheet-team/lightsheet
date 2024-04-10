@@ -5,10 +5,13 @@ import { CellInfo } from "./core/structure/sheet.types.ts";
 import Events from "./core/event/events.ts";
 import LightSheetHelper from "../utils/helpers.ts";
 import { DefaultRowCount, DefaultColCount } from "../utils/constants.ts";
+import SheetHolder from "./core/structure/sheetHolder.ts";
+
 export default class LightSheet {
   #ui: UI;
   options: LightSheetOptions;
   sheet: Sheet;
+  sheetHolder: SheetHolder;
   events: Events;
   onCellChange?;
   isReady: boolean = false;
@@ -18,9 +21,12 @@ export default class LightSheet {
     this.options.defaultColCount = options.defaultColCount ?? DefaultColCount;
     this.options.defaultRowCount = options.defaultRowCount ?? DefaultRowCount;
     this.events = new Events();
-    this.sheet = new Sheet(this.events);
+    this.sheetHolder = this.registerSheet();
+    this.sheet = new Sheet(this.sheetHolder, this.events);
+    this.sheetHolder.addSheet(this);
     this.#ui = new UI(targetElement, this);
     this.#initializeTable();
+
     if (options.onCellChange) {
       this.onCellChange = options.onCellChange;
     }
@@ -77,6 +83,21 @@ export default class LightSheet {
   onTableReady() {
     this.isReady = true;
     if (this.options.onReady) this.options.onReady();
+  }
+
+  registerSheet(): SheetHolder {
+    if (!window.sheetHolder) {
+      window.sheetHolder = new SheetHolder();
+    }
+    return window.sheetHolder;
+  }
+
+  getKey() {
+    return this.sheet.key;
+  }
+
+  getName() {
+    return this.options.sheetName;
   }
 
   setCellAt(columnKey: number, rowKey: number, value: any): CellInfo {
