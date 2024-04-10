@@ -177,29 +177,11 @@ export default class UI {
 
     inputDom.onfocus = () => {
       this.removeGroupSelection();
-
       cellDom.classList.add("lightsheet_table_selected_cell");
-
-      let columnIndex: number | undefined;
-      let rowIndex: number | undefined;
-
-      const cellIdInfo = this.checkCellId(cellDom);
-      if (!cellIdInfo) return;
-      const { keyParts, isIndex } = cellIdInfo;
-
-      if (isIndex) {
-        columnIndex = Number(keyParts[0]);
-        rowIndex = Number(keyParts[1]);
-      } else {
-        const columnKey = cellDom.id;
-        const rowKey = cellDom.parentElement?.id;
-
-        columnIndex = this.lightSheet.sheet.getColumnIndex(
-          generateColumnKey(columnKey!),
-        );
-        rowIndex = this.lightSheet.sheet.getRowIndex(generateRowKey(rowKey!));
+      const { columnIndex, rowIndex } = this.getColumnAndRowIndex(cellDom);
+      if (columnIndex !== undefined && rowIndex !== undefined) {
+      this.selectedCell.push(columnIndex, rowIndex);
       }
-      this.selectedCell?.push(Number(columnIndex), Number(rowIndex));
     };
 
     inputDom.onblur = () => {
@@ -270,6 +252,30 @@ export default class UI {
     const isIndex = keyParts[0].match("^[0-9]+$") !== null;
 
     return { keyParts: keyParts, isIndex: isIndex };
+  }
+
+  private getColumnAndRowIndex(cellDom: Element): { columnIndex?: number, rowIndex?: number } {
+    let columnIndex: number | undefined;
+    let rowIndex: number | undefined;
+
+    const cellIdInfo = this.checkCellId(cellDom);
+    if (!cellIdInfo) return {};
+    const { keyParts, isIndex } = cellIdInfo;
+
+    if (isIndex) {
+      columnIndex = Number(keyParts[0]);
+      rowIndex = Number(keyParts[1]);
+    } else {
+      const columnKey = cellDom.id;
+      const rowKey = cellDom.parentElement?.id;
+
+      columnIndex = this.lightSheet.sheet.getColumnIndex(
+        generateColumnKey(columnKey!)
+      );
+      rowIndex = this.lightSheet.sheet.getRowIndex(generateRowKey(rowKey!));
+    }
+
+    return { columnIndex, rowIndex };
   }
 
   removeGroupSelection() {
