@@ -183,7 +183,7 @@ export default class UI {
       cellDom.classList.add("lightsheet_table_selected_cell");
       const { columnIndex, rowIndex } = this.getColumnAndRowIndex(cellDom);
       if (columnIndex !== undefined && rowIndex !== undefined) {
-      this.selectedCell.push(columnIndex, rowIndex);
+        this.selectedCell.push(columnIndex, rowIndex);
       }
     };
 
@@ -194,11 +194,11 @@ export default class UI {
 
     inputDom.onmousedown = (e: MouseEvent) => {
       this.handleMouseDown(e, cellDom);
-    }
+    };
 
     inputDom.onmouseup = (e: MouseEvent) => {
       this.handleMouseUp(e, cellDom);
-    }
+    };
 
     return cellDom;
   }
@@ -265,7 +265,10 @@ export default class UI {
     return { keyParts: keyParts, isIndex: isIndex };
   }
 
-  private getColumnAndRowIndex(cellDom: Element): { columnIndex?: number, rowIndex?: number } {
+  private getColumnAndRowIndex(cellDom: Element): {
+    columnIndex?: number;
+    rowIndex?: number;
+  } {
     let columnIndex: number | undefined;
     let rowIndex: number | undefined;
 
@@ -279,9 +282,8 @@ export default class UI {
       const columnKey = cellDom.id.split("_")[0];
       const rowKey = cellDom.parentElement?.id;
 
-      
       columnIndex = this.lightSheet.sheet.getColumnIndex(
-        generateColumnKey(columnKey!)
+        generateColumnKey(columnKey!),
       );
       rowIndex = this.lightSheet.sheet.getRowIndex(generateRowKey(rowKey!));
     }
@@ -329,8 +331,10 @@ export default class UI {
   }
 
   removeCellRangeSelection() {
-    const cells = Array.from(document.querySelectorAll('td'));
-    cells.forEach(cell => cell.classList.remove('lightsheet_table_selected_cell_range'));
+    const cells = Array.from(document.querySelectorAll("td"));
+    cells.forEach((cell) =>
+      cell.classList.remove("lightsheet_table_selected_cell_range"),
+    );
   }
 
   cellInRange(cell: HTMLTableCellElement) {
@@ -339,40 +343,72 @@ export default class UI {
       return false;
     }
 
-    const { columnIndex: cellColumnIndex, rowIndex: cellRowIndex } = this.getColumnAndRowIndex(cell);
+    const { columnIndex: cellColumnIndex, rowIndex: cellRowIndex } =
+      this.getColumnAndRowIndex(cell);
 
-    if(cellColumnIndex === undefined || cellRowIndex === undefined) return false;
+    if (cellColumnIndex === undefined || cellRowIndex === undefined)
+      return false;
 
-    const withinX = (cellColumnIndex >= selectionStart.columnPosition && cellColumnIndex <= selectionEnd.columnPosition) ||
-                    (cellColumnIndex <= selectionStart.columnPosition && cellColumnIndex >= selectionEnd.columnPosition);
-    const withinY = (cellRowIndex >= selectionStart.rowPosition && cellRowIndex <= selectionEnd.rowPosition) ||
-                    (cellRowIndex <= selectionStart.rowPosition && cellRowIndex >= selectionEnd.rowPosition);
+    const withinX =
+      (cellColumnIndex >= selectionStart.columnPosition &&
+        cellColumnIndex <= selectionEnd.columnPosition) ||
+      (cellColumnIndex <= selectionStart.columnPosition &&
+        cellColumnIndex >= selectionEnd.columnPosition);
+    const withinY =
+      (cellRowIndex >= selectionStart.rowPosition &&
+        cellRowIndex <= selectionEnd.rowPosition) ||
+      (cellRowIndex <= selectionStart.rowPosition &&
+        cellRowIndex >= selectionEnd.rowPosition);
 
     return withinX && withinY;
   }
 
   updateSelection() {
     this.removeCellRangeSelection();
-    const cells = Array.from(document.querySelectorAll('td'));
-    cells.forEach(cell => {
-      if (this.cellInRange(cell) && !cell.classList.contains('lightsheet_table_selected_cell')) {        
-        cell.classList.add('lightsheet_table_selected_cell_range');
+    const cells = Array.from(document.querySelectorAll("td"));
+    cells.forEach((cell) => {
+      if (
+        this.cellInRange(cell) &&
+        !cell.classList.contains("lightsheet_table_selected_cell")
+      ) {
+        cell.classList.add("lightsheet_table_selected_cell_range");
       }
     });
   }
 
   handleMouseDown(e: MouseEvent, cellDom: Element) {
     if (e.button === 0) {
-      const { columnIndex: cellColumnIndex, rowIndex: cellRowIndex } =  this.getColumnAndRowIndex(cellDom);
-      this.selectedCellsContainer.selectionStart = (cellColumnIndex!=null||undefined) && (cellRowIndex!=null||undefined) ? { rowPosition: Number(cellRowIndex), columnPosition: Number(cellColumnIndex) } : null;
-    } 
+      const { columnIndex: cellColumnIndex, rowIndex: cellRowIndex } =
+        this.getColumnAndRowIndex(cellDom);
+      this.selectedCellsContainer.selectionStart =
+        (cellColumnIndex != null || undefined) &&
+        (cellRowIndex != null || undefined)
+          ? {
+              rowPosition: Number(cellRowIndex),
+              columnPosition: Number(cellColumnIndex),
+            }
+          : null;
+    }
   }
 
   handleMouseUp(e: MouseEvent, cellDom: Element) {
     if (e.button === 0) {
-      const { columnIndex: cellColumnIndex, rowIndex: cellRowIndex } =  this.getColumnAndRowIndex(cellDom);
-      this.selectedCellsContainer.selectionEnd = (cellColumnIndex!=null||undefined) && (cellRowIndex!=null||undefined) ? { rowPosition: Number(cellRowIndex), columnPosition: Number(cellColumnIndex) } : null;
-      if (this.selectedCellsContainer.selectionStart && this.selectedCellsContainer.selectionEnd && this.selectedCellsContainer.selectionStart !== this.selectedCellsContainer.selectionEnd) {
+      const { columnIndex: cellColumnIndex, rowIndex: cellRowIndex } =
+        this.getColumnAndRowIndex(cellDom);
+      this.selectedCellsContainer.selectionEnd =
+        (cellColumnIndex != null || undefined) &&
+        (cellRowIndex != null || undefined)
+          ? {
+              rowPosition: Number(cellRowIndex),
+              columnPosition: Number(cellColumnIndex),
+            }
+          : null;
+      if (
+        this.selectedCellsContainer.selectionStart &&
+        this.selectedCellsContainer.selectionEnd &&
+        this.selectedCellsContainer.selectionStart !==
+          this.selectedCellsContainer.selectionEnd
+      ) {
         this.updateSelection();
       }
     }
