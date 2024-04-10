@@ -21,7 +21,7 @@
 }
 
 /*Formula bar*/
-.light_sheet_table_formula_bar {
+.lightsheet_table_formula_bar {
   display: flex;
   border: 1px solid var(--lightsheet-silver-400);
   border-bottom: 0px 

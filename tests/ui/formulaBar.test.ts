@@ -66,7 +66,7 @@ describe("UI", () => {
     // Wait for a short delay to allow the focus to change
     setTimeout(() => {
       // Assert that the content of the last selected cell retains focus
-      expect(uiInstance.latestSelectedCell).toEqual({ col: 1, row: 1 });
+      expect(uiInstance.selectedCell).toEqual({ col: 1, row: 1 });
     }, 100);
   });
 

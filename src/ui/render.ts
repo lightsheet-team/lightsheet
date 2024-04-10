@@ -3,7 +3,7 @@ import {
   generateColumnKey,
   generateRowKey,
 } from "../core/structure/key/keyTypes";
-import { CellIdInfo, SelectionContainer } from "./render.types.ts";
+import { CellIdInfo, SelectCell, SelectionContainer } from "./render.types.ts";
 import LightsheetEvent from "../core/event/event.ts";
 import {
   CoreSetCellPayload,
@@ -14,28 +14,26 @@ import LightSheetHelper from "../../utils/helpers.ts";
 
 export default class UI {
   tableEl: Element;
-  lightSheetFormulaBarDom: HTMLElement;
-  lightSheetFormulaInput: HTMLInputElement;
-  selectedCellDisplay: HTMLElement;
+  FormulaBarDom!: HTMLElement;
+  FormulaInput!: HTMLInputElement;
+  selectedCellDisplay!: HTMLElement;
   tableHeadDom: Element;
   tableBodyDom: Element;
   lightSheet: LightSheet;
-  selectedCell: number[];
   selectedRowNumberCell: HTMLElement | null = null;
   selectedHeaderCell: HTMLElement | null = null;
   selectedCellsContainer: SelectionContainer;
   isReadOnly: boolean;
-  latestSelectedCell: { col: number; row: number } | undefined;
+  selectedCell: SelectCell | undefined;
 
   constructor(el: Element, lightSheet: LightSheet) {
     this.tableEl = el;
     this.lightSheet = lightSheet;
-    this.selectedCell = [];
     this.selectedCellsContainer = {
       selectionStart: null,
       selectionEnd: null,
     };
-    this.latestSelectedCell = undefined;
+    this.selectedCell = undefined;
     this.registerEvents();
     this.isReadOnly = lightSheet.options.isReadOnly || false;
 
@@ -46,26 +44,7 @@ export default class UI {
     lightSheetContainerDom.classList.add("lightsheet_table_content");
     this.tableEl.appendChild(lightSheetContainerDom);
 
-    /*formula bar*/
-    this.lightSheetFormulaBarDom = document.createElement("div");
-    this.lightSheetFormulaBarDom.classList.add("light_sheet_table_formula_bar");
-    lightSheetContainerDom.appendChild(this.lightSheetFormulaBarDom);
-
-    //selected cell display element
-    this.selectedCellDisplay = document.createElement("div");
-    this.selectedCellDisplay.classList.add("selected_cell_display");
-    this.lightSheetFormulaBarDom.appendChild(this.selectedCellDisplay);
-
-    //"fx" label element
-    const fxLabel = document.createElement("div");
-    fxLabel.textContent = "fx";
-    fxLabel.classList.add("fx_label");
-    this.lightSheetFormulaBarDom.appendChild(fxLabel);
-
-    //formula input
-    this.lightSheetFormulaInput = document.createElement("input");
-    this.lightSheetFormulaInput.classList.add("formula_input");
-    this.lightSheetFormulaBarDom.appendChild(this.lightSheetFormulaInput);
+    this.createFormulaBar(lightSheetContainerDom);
     this.setFormulaBar();
 
     const tableContainerDom = document.createElement("table");
@@ -84,14 +63,37 @@ export default class UI {
     tableContainerDom.appendChild(this.tableBodyDom);
   }
 
+  createFormulaBar(lightSheetContainerDom: HTMLDivElement) {
+    /*formula bar*/
+    this.FormulaBarDom = document.createElement("div");
+    this.FormulaBarDom.classList.add("lightsheet_table_formula_bar");
+    lightSheetContainerDom.appendChild(this.FormulaBarDom);
+
+    //selected cell display element
+    this.selectedCellDisplay = document.createElement("div");
+    this.selectedCellDisplay.classList.add("selected_cell_display");
+    this.FormulaBarDom.appendChild(this.selectedCellDisplay);
+
+    //"fx" label element
+    const fxLabel = document.createElement("div");
+    fxLabel.textContent = "fx";
+    fxLabel.classList.add("fx_label");
+    this.FormulaBarDom.appendChild(fxLabel);
+
+    //formula input
+    this.FormulaInput = document.createElement("input");
+    this.FormulaInput.classList.add("formula_input");
+    this.FormulaBarDom.appendChild(this.FormulaInput);
+  }
+
   setFormulaBar() {
     // Listen for input changes in the formula bar
-    this.lightSheetFormulaInput.addEventListener("input", () => {
-      const newValue = this.lightSheetFormulaInput.value;
+    this.FormulaInput.addEventListener("input", () => {
+      const newValue = this.FormulaInput.value;
       // Get the column and row indices from the latest selected cell
-      if (this.latestSelectedCell) {
-        const colIndex = this.latestSelectedCell.col;
-        const rowIndex = this.latestSelectedCell.row;
+      if (this.selectedCell) {
+        const colIndex = this.selectedCell.col;
+        const rowIndex = this.selectedCell.row;
         this.onUICellValueChange(newValue, colIndex, rowIndex);
       }
     });
@@ -238,19 +240,16 @@ export default class UI {
         );
         rowIndex = this.lightSheet.sheet.getRowIndex(generateRowKey(rowKey!));
       }
-      this.selectedCell?.push(Number(columnIndex), Number(rowIndex));
-      // Update latestSelectedCell with an object containing col and row properties
-      this.latestSelectedCell = {
+      this.selectedCell = {
         col: Number(columnIndex),
         row: Number(rowIndex),
       };
 
       //connect with formula bar
-      this.lightSheetFormulaInput.value = inputDom.getAttribute("rawValue")!;
+      this.FormulaInput.value = inputDom.getAttribute("rawValue")!;
     };
 
     inputDom.onblur = () => {
-      this.selectedCell = [];
       cellDom.classList.remove("lightsheet_table_selected_cell");
     };
 
