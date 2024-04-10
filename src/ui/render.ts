@@ -85,7 +85,7 @@ export default class UI {
     this.formulaInput.classList.add("formula_input");
     this.formulaBarDom.appendChild(this.formulaInput);
 
-    this.formulaBarDom.style.display = "none";
+    //this.formulaBarDom.style.display = "none";
   }
 
   setFormulaBar() {
@@ -177,8 +177,9 @@ export default class UI {
     return rowDom;
   }
 
-  addRow(rowLabelNumber: number): HTMLElement {
-    const rowDom = this.createRowElement(rowLabelNumber);
+  addRow(rowIndex: number): HTMLElement {
+    const rowDom = this.createRowElement(rowIndex);
+    rowDom.id = `row_${rowIndex}`; // TODO ID should be unique (see getElementInfoForSetCell).
     this.tableBodyDom.appendChild(rowDom);
     return rowDom;
   }
@@ -191,7 +192,7 @@ export default class UI {
     rowDom: Element,
     colIndex: number,
     rowIndex: number,
-    value: any,
+    rawValue: any,
     columnKey?: string,
   ): HTMLElement {
     const cellDom = document.createElement("td");
@@ -204,18 +205,19 @@ export default class UI {
     cellDom.id = `${colIndex}_${rowIndex}`;
     const inputDom = document.createElement("input");
     inputDom.classList.add("lightsheet_table_cell_input");
-    inputDom.value = "";
     inputDom.readOnly = this.isReadOnly;
     cellDom.appendChild(inputDom);
 
-    if (value) {
+    if (rawValue) {
       cellDom.id = `${columnKey}_${rowDom.id}`;
-      inputDom.value = value;
     }
+    this.onUICellValueChange(rawValue, colIndex, rowIndex);
 
     inputDom.addEventListener("input", (e: Event) => {
       const newValue = (e.target as HTMLInputElement).value;
       this.formulaInput.value = newValue;
+      if (newValue == "=") this.formulaInput.focus();
+
       this.onUICellValueChange(newValue, colIndex, rowIndex);
     });
 
@@ -249,7 +251,7 @@ export default class UI {
       };
 
       //connect with formula bar
-      this.formulaInput.value = inputDom.value;
+      this.formulaInput.value = inputDom.getAttribute("rawValue")!;
     };
 
     inputDom.onblur = () => {
@@ -272,10 +274,10 @@ export default class UI {
     }
   }
 
-  onUICellValueChange(newValue: string, colIndex: number, rowIndex: number) {
+  onUICellValueChange(rawValue: string, colIndex: number, rowIndex: number) {
     const payload: UISetCellPayload = {
       indexPosition: { columnIndex: colIndex, rowIndex: rowIndex },
-      rawValue: newValue,
+      rawValue: rawValue,
     };
     this.lightSheet.events.emit(
       new LightsheetEvent(EventType.UI_SET_CELL, payload),
@@ -284,7 +286,7 @@ export default class UI {
 
   private registerEvents() {
     this.lightSheet.events.on(EventType.CORE_SET_CELL, (event) => {
-      if (this.lightSheet.isReady) this.onCoreSetCell(event);
+      this.onCoreSetCell(event);
     });
   }
 
@@ -311,10 +313,10 @@ export default class UI {
     elInfo.cellDom.id = elInfo.cellDomId;
     elInfo.rowDom.id = elInfo.rowDomId;
 
-    // Set cell value to resolved value from the core.
-    // TODO Cell formula should be preserved. (Issue #49)
-    (elInfo.cellDom.firstChild! as HTMLInputElement).value =
-      payload.formattedValue;
+    // Update input element with values from the core.
+    const inputEl = elInfo.cellDom.firstChild! as HTMLInputElement;
+    inputEl.setAttribute("rawValue", payload.rawValue);
+    inputEl.value = payload.formattedValue;
   }
 
   private checkCellId(cellDom: Element): CellIdInfo | undefined {
