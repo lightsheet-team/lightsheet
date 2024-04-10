@@ -12,8 +12,3 @@ export type Coordinate = {
   rowPosition: number;
   columnPosition: number;
 };
-
-export type SelectCell = {
-  col: number;
-  row: number;
-};

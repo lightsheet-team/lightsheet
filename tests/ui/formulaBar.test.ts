@@ -1,7 +1,6 @@
 // Import other necessary dependencies and utilities for testing
 import LightSheet from "../../src/main";
 import UI from "../../src/ui/render";
-
 describe("UI", () => {
   let targetElementMock: HTMLElement;
   let lightSheetInstance: LightSheet;
@@ -34,7 +33,7 @@ describe("UI", () => {
     expect(formulaInputField).toBeTruthy(); // Using a truthy assertion instead
   });
 
-  test("Retains focus last selected cell", () => {
+  test("Retains focus last selected cell", async () => {
     // Find the first cell input element
     const firstCell = document.querySelector(
       "tbody tr:first-child td:first-child .lightsheet_table_cell_input",
@@ -63,9 +62,7 @@ describe("UI", () => {
       secondCell.dispatchEvent(clickEvent);
     }
 
-    // Wait for a short delay to allow the focus to change
     setTimeout(() => {
-      // Assert that the content of the last selected cell retains focus
       expect(uiInstance.selectedCell).toEqual({ col: 1, row: 1 });
     }, 100);
   });

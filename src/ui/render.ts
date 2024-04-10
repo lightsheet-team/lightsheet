@@ -3,7 +3,7 @@ import {
   generateColumnKey,
   generateRowKey,
 } from "../core/structure/key/keyTypes";
-import { CellIdInfo, SelectCell, SelectionContainer } from "./render.types.ts";
+import { CellIdInfo, Coordinate, SelectionContainer } from "./render.types.ts";
 import LightsheetEvent from "../core/event/event.ts";
 import {
   CoreSetCellPayload,
@@ -14,8 +14,8 @@ import LightSheetHelper from "../../utils/helpers.ts";
 
 export default class UI {
   tableEl: Element;
-  FormulaBarDom!: HTMLElement;
-  FormulaInput!: HTMLInputElement;
+  formulaBarDom!: HTMLElement;
+  formulaInput!: HTMLInputElement;
   selectedCellDisplay!: HTMLElement;
   tableHeadDom: Element;
   tableBodyDom: Element;
@@ -24,7 +24,7 @@ export default class UI {
   selectedHeaderCell: HTMLElement | null = null;
   selectedCellsContainer: SelectionContainer;
   isReadOnly: boolean;
-  selectedCell: SelectCell | undefined;
+  selectedCell: Coordinate | undefined;
 
   constructor(el: Element, lightSheet: LightSheet) {
     this.tableEl = el;
@@ -65,35 +65,37 @@ export default class UI {
 
   createFormulaBar(lightSheetContainerDom: HTMLDivElement) {
     /*formula bar*/
-    this.FormulaBarDom = document.createElement("div");
-    this.FormulaBarDom.classList.add("lightsheet_table_formula_bar");
-    lightSheetContainerDom.appendChild(this.FormulaBarDom);
+    this.formulaBarDom = document.createElement("div");
+    this.formulaBarDom.classList.add("lightsheet_table_formula_bar");
+    lightSheetContainerDom.appendChild(this.formulaBarDom);
 
     //selected cell display element
     this.selectedCellDisplay = document.createElement("div");
     this.selectedCellDisplay.classList.add("selected_cell_display");
-    this.FormulaBarDom.appendChild(this.selectedCellDisplay);
+    this.formulaBarDom.appendChild(this.selectedCellDisplay);
 
     //"fx" label element
     const fxLabel = document.createElement("div");
     fxLabel.textContent = "fx";
     fxLabel.classList.add("fx_label");
-    this.FormulaBarDom.appendChild(fxLabel);
+    this.formulaBarDom.appendChild(fxLabel);
 
     //formula input
-    this.FormulaInput = document.createElement("input");
-    this.FormulaInput.classList.add("formula_input");
-    this.FormulaBarDom.appendChild(this.FormulaInput);
+    this.formulaInput = document.createElement("input");
+    this.formulaInput.classList.add("formula_input");
+    this.formulaBarDom.appendChild(this.formulaInput);
+
+    this.formulaBarDom.style.display = "none";
   }
 
   setFormulaBar() {
     // Listen for input changes in the formula bar
-    this.FormulaInput.addEventListener("input", () => {
-      const newValue = this.FormulaInput.value;
+    this.formulaInput.addEventListener("input", () => {
+      const newValue = this.formulaInput.value;
       // Get the column and row indices from the latest selected cell
       if (this.selectedCell) {
-        const colIndex = this.selectedCell.col;
-        const rowIndex = this.selectedCell.row;
+        const colIndex = this.selectedCell.columnPosition;
+        const rowIndex = this.selectedCell.rowPosition;
         this.onUICellValueChange(newValue, colIndex, rowIndex);
       }
     });
@@ -213,7 +215,7 @@ export default class UI {
 
     inputDom.addEventListener("input", (e: Event) => {
       const newValue = (e.target as HTMLInputElement).value;
-      this.FormulaInput.value = newValue;
+      this.formulaInput.value = newValue;
       this.onUICellValueChange(newValue, colIndex, rowIndex);
     });
 
@@ -242,12 +244,12 @@ export default class UI {
         rowIndex = this.lightSheet.sheet.getRowIndex(generateRowKey(rowKey!));
       }
       this.selectedCell = {
-        col: Number(columnIndex),
-        row: Number(rowIndex),
+        columnPosition: Number(columnIndex),
+        rowPosition: Number(rowIndex),
       };
 
       //connect with formula bar
-      this.FormulaInput.value = inputDom.value;
+      this.formulaInput.value = inputDom.value;
     };
 
     inputDom.onblur = () => {
@@ -263,6 +265,11 @@ export default class UI {
       (input as HTMLInputElement).readOnly = readonly;
     });
     this.isReadOnly = readonly;
+    if (this.isReadOnly) {
+      this.formulaBarDom.style.display = "none";
+    } else {
+      this.formulaBarDom.style.display = "flex";
+    }
   }
 
   onUICellValueChange(newValue: string, colIndex: number, rowIndex: number) {
