@@ -91,3 +91,7 @@
 .lightsheet_table_selected_row_column{
   background-color: lightblue;
 }
+
+.lightsheet_table_selected_cell_range{
+  background-color: lightblue;
+}
