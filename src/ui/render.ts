@@ -193,6 +193,10 @@ export default class UI {
       this.handleMouseDown(e, cellDom);
     }
 
+    inputDom.onmouseup = (e: MouseEvent) => {
+      this.handleMouseUp(e, cellDom);
+    }
+
     return cellDom;
   }
 
@@ -331,5 +335,15 @@ export default class UI {
       const { columnIndex: cellColumnIndex, rowIndex: cellRowIndex } =  this.getColumnAndRowIndex(cellDom);
       this.selectedCellsContainer.selectionStart = cellColumnIndex && cellRowIndex ? { rowPosition: Number(cellRowIndex), columnPosition: Number(cellColumnIndex) } : null;
     } 
+  }
+
+  handleMouseUp(e: MouseEvent, cellDom: Element) {
+    if (e.button === 0) {
+      const { columnIndex: cellColumnIndex, rowIndex: cellRowIndex } =  this.getColumnAndRowIndex(cellDom);
+      this.selectedCellsContainer.selectionEnd = cellColumnIndex && cellRowIndex ? { rowPosition: Number(cellRowIndex), columnPosition: Number(cellColumnIndex) } : null;
+      if (this.selectedCellsContainer.selectionStart && this.selectedCellsContainer.selectionEnd) {
+        // TODO
+      }
+    }
   }
 }
