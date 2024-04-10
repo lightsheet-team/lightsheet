@@ -189,6 +189,10 @@ export default class UI {
       cellDom.classList.remove("lightsheet_table_selected_cell");
     };
 
+    inputDom.onmousedown = (e: MouseEvent) => {
+      this.handleMouseDown(e, cellDom);
+    }
+
     return cellDom;
   }
 
@@ -315,5 +319,12 @@ export default class UI {
     }
 
     this.selectedHeaderCell = null;
+  }
+
+  handleMouseDown(e: MouseEvent, cellDom: Element) {
+    if (e.button === 0) {
+      const { columnIndex: cellColumnIndex, rowIndex: cellRowIndex } =  this.getColumnAndRowIndex(cellDom);
+      this.selectedCellsContainer.selectionStart = cellColumnIndex && cellRowIndex ? { rowPosition: Number(cellRowIndex), columnPosition: Number(cellColumnIndex) } : null;
+    } 
   }
 }
