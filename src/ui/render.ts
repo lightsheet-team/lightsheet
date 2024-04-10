@@ -321,6 +321,11 @@ export default class UI {
     this.selectedHeaderCell = null;
   }
 
+  removeCellRangeSelection() {
+    const cells = Array.from(document.querySelectorAll('td'));
+    cells.forEach(cell => cell.classList.remove('lightsheet_table_selected_cell_range'));
+  }
+
   handleMouseDown(e: MouseEvent, cellDom: Element) {
     if (e.button === 0) {
       const { columnIndex: cellColumnIndex, rowIndex: cellRowIndex } =  this.getColumnAndRowIndex(cellDom);
