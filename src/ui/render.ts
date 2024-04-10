@@ -64,7 +64,6 @@ export default class UI {
   }
 
   createFormulaBar(lightSheetContainerDom: HTMLDivElement) {
-    /*formula bar*/
     this.formulaBarDom = document.createElement("div");
     this.formulaBarDom.classList.add("lightsheet_table_formula_bar");
     lightSheetContainerDom.appendChild(this.formulaBarDom);
@@ -86,6 +85,11 @@ export default class UI {
     this.formulaBarDom.appendChild(this.formulaInput);
 
     //this.formulaBarDom.style.display = "none";
+    if (this.isReadOnly) {
+      this.formulaBarDom.style.display = "none";
+    } else {
+      this.formulaBarDom.style.display = "flex";
+    }
   }
 
   setFormulaBar() {
@@ -267,11 +271,6 @@ export default class UI {
       (input as HTMLInputElement).readOnly = readonly;
     });
     this.isReadOnly = readonly;
-    if (this.isReadOnly) {
-      this.formulaBarDom.style.display = "none";
-    } else {
-      this.formulaBarDom.style.display = "flex";
-    }
   }
 
   onUICellValueChange(rawValue: string, colIndex: number, rowIndex: number) {
