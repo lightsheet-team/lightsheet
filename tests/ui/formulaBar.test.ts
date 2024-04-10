@@ -22,7 +22,7 @@ describe("UI", () => {
   test("Exist formula bar in dom", () => {
     // Find the formula bar container
     const formulaBarContainer = targetElementMock.querySelector(
-      ".light_sheet_table_formula_bar",
+      ".lightsheet_table_formula_bar",
     );
 
     // Assert that the formula bar container exists in the DOM
