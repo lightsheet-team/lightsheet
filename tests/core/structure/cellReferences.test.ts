@@ -21,7 +21,7 @@ describe("Cell references", () => {
       const cKey = sheet.columns
         .get(cInfo.position.columnKey!)!
         .cellIndex.get(cInfo.position.rowKey!)!;
-      return sheet.cellData.get(cKey)!;
+      return window.sheetHolder.cellData.get(cKey)!;
     };
 
     const cells = [

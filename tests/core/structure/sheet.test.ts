@@ -15,7 +15,7 @@ describe("Sheet", () => {
 
     sheet.setCellAt(colPos, rowPos, value);
 
-    const iterator = sheet.cellData.values();
+    const iterator = window.sheetHolder.cellData.values();
     const cell = iterator.next().value;
     expect(cell).toBeInstanceOf(Cell);
     expect(cell!.rawValue).toBe(value);

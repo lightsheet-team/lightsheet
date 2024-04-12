@@ -26,7 +26,6 @@ export default class Sheet {
 
   defaultStyle: any;
   settings: any;
-  cellData: Map<CellKey, Cell>;
   rows: Map<RowKey, Row>;
   columns: Map<ColumnKey, Column>;
   rowPositions: Map<number, RowKey>;
@@ -43,7 +42,6 @@ export default class Sheet {
 
     this.defaultStyle = new CellStyle(); // TODO This should be configurable.
     this.settings = null;
-    this.cellData = new Map<CellKey, Cell>();
     this.rows = new Map<RowKey, Row>();
     this.columns = new Map<ColumnKey, Column>();
 
@@ -275,9 +273,9 @@ export default class Sheet {
     const cellKey = col.cellIndex.get(row.key)!;
 
     // Remove references to this cell from other cells' referencesOut.
-    const cell = this.cellData.get(cellKey)!;
+    const cell = this.sheetHolder.cellData.get(cellKey)!;
     cell.referencesIn.forEach((_, refCell) => {
-      const referredCell = this.cellData.get(refCell)!;
+      const referredCell = this.sheetHolder.cellData.get(refCell)!;
       referredCell.referencesOut.delete(cellKey);
 
       // Invalidate cells that reference this cell.
@@ -286,12 +284,12 @@ export default class Sheet {
 
     // Remove this cell from other cells' referencesIn.
     cell.referencesOut.forEach((_, refCell) => {
-      const referredCell = this.cellData.get(refCell)!;
+      const referredCell = this.sheetHolder.cellData.get(refCell)!;
       referredCell.referencesIn.delete(cellKey);
     });
 
     // Delete cell data and all references to it in its column and row.
-    this.cellData.delete(cellKey);
+    this.sheetHolder.cellData.delete(cellKey);
 
     col.cellIndex.delete(row.key);
     col.cellFormatting.delete(row.key);
@@ -396,7 +394,9 @@ export default class Sheet {
 
     // Apply new formatter to all cells in this group.
     for (const [opposingKey] of group.cellIndex) {
-      const cell = this.cellData.get(group.cellIndex.get(opposingKey)!)!;
+      const cell = this.sheetHolder.cellData.get(
+        group.cellIndex.get(opposingKey)!,
+      )!;
       if (group instanceof Column) {
         this.applyCellFormatter(cell, group.key, opposingKey as RowKey);
         continue;
@@ -438,7 +438,7 @@ export default class Sheet {
 
       // Use row's cell index to get keys for each cell and their corresponding columns.
       for (const [colKey, cellKey] of row.cellIndex) {
-        const cell = this.cellData.get(cellKey)!;
+        const cell = this.sheetHolder.cellData.get(cellKey)!;
         const column = this.columns.get(colKey)!;
         rowData.set(column.position, cell.formattedValue);
       }
@@ -466,7 +466,7 @@ export default class Sheet {
 
     const cell = new Cell();
     cell.rawValue = value;
-    this.cellData.set(cell.key, cell);
+    this.sheetHolder.cellData.set(cell.key, cell);
     this.resolveCell(cell, colKey, rowKey);
 
     col.cellIndex.set(row.key, cell.key);
@@ -483,7 +483,7 @@ export default class Sheet {
 
     if (!col.cellIndex.has(row.key)) return null;
     const cellKey = col.cellIndex.get(row.key)!;
-    return this.cellData.get(cellKey)!;
+    return this.sheetHolder.cellData.get(cellKey)!;
   }
 
   private resolveCell(cell: Cell, colKey: ColumnKey, rowKey: RowKey): boolean {
@@ -523,7 +523,7 @@ export default class Sheet {
 
     // Update cells that reference this cell.
     for (const [ref, pos] of cell.referencesIn) {
-      const referredCell = this.cellData.get(ref)!;
+      const referredCell = this.sheetHolder.cellData.get(ref)!;
       const refUpdated = this.resolveCell(
         referredCell,
         pos.columnKey!,
@@ -595,15 +595,17 @@ export default class Sheet {
     cell.referencesOut.clear();
     evalResult.references.forEach((ref) => {
       // Initialize the referred cell if it doesn't exist yet.
-      const position = this.initializePosition(
-        ref.position.column,
-        ref.position.row,
-      );
-      if (!this.getCellInfoAt(ref.position.column, ref.position.row)) {
-        this.createCell(position.columnKey!, position.rowKey!, "");
+      const sheet = this.sheetHolder.getSheet(ref.sheetKey)!.sheet;
+      const position = sheet.initializePosition(ref.position.column, ref.position.row);
+
+      if (!sheet.getCellInfoAt(ref.position.column, ref.position.row)) {
+        sheet.createCell(position.columnKey!, position.rowKey!, "");
       }
 
-      const referredCell = this.getCell(position.columnKey!, position.rowKey!)!;
+      const referredCell = sheet.getCell(
+        position.columnKey!,
+        position.rowKey!,
+      )!;
       // Add referred cells to this cell's referencesOut.
       cell.referencesOut.set(referredCell.key, {
         columnKey: position.columnKey!,
@@ -624,7 +626,7 @@ export default class Sheet {
 
     // Clean up the referencesIn sets of cells that are no longer referenced by the formula.
     for (const [cellKey, position] of removedReferences) {
-      const referredCell = this.cellData.get(cellKey)!;
+      const referredCell = this.sheetHolder.cellData.get(cellKey)!;
       referredCell.referencesIn.delete(cell.key);
 
       // This may result in the cell being empty and unused - delete if necessary.
@@ -647,7 +649,7 @@ export default class Sheet {
       if (current === cell.key && !initial) return true;
       initial = false;
 
-      const currentCell = this.cellData.get(current)!;
+      const currentCell = this.sheetHolder.cellData.get(current)!;
       currentCell.referencesOut.forEach((_, ref) => {
         stack.push(ref);
       });
