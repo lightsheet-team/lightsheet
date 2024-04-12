@@ -3,9 +3,9 @@ import { LightSheetOptions } from "./main.types.ts";
 import Sheet from "./core/structure/sheet.ts";
 import { CellInfo } from "./core/structure/sheet.types.ts";
 import Events from "./core/event/events.ts";
-import LightSheetHelper from "../utils/helpers.ts";
-import { DefaultRowCount, DefaultColCount } from "../utils/constants.ts";
 import SheetHolder from "./core/structure/sheetHolder.ts";
+import { DefaultColCount, DefaultRowCount } from "./utils/constants.ts";
+import LightSheetHelper from "./utils/helpers.ts";
 
 export default class LightSheet {
   #ui: UI;

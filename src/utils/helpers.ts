@@ -1,4 +1,4 @@
-import { CoreSetCellPayload } from "../src/core/event/events.types";
+import { CoreSetCellPayload } from "../core/event/events.types.ts";
 
 export default class LightSheetHelper {
   static GenerateRowLabel = (rowIndex: number) => {
@@ -13,11 +13,11 @@ export default class LightSheetHelper {
   };
 
   static getElementInfoForSetCell = (payload: CoreSetCellPayload) => {
-    const colKey = payload.position.columnKey?.toString();
-    const rowKey = payload.position.rowKey?.toString();
+    const colKey = payload.keyPosition.columnKey?.toString();
+    const rowKey = payload.keyPosition.rowKey?.toString();
 
-    const columnIndex = payload.indexPosition.columnIndex;
-    const rowIndex = payload.indexPosition.rowIndex;
+    const columnIndex = payload.indexPosition.columnPosition;
+    const rowIndex = payload.indexPosition.rowPosition;
 
     const cellDomKey =
       colKey && rowKey ? `${colKey!.toString()}_${rowKey!.toString()}` : null;

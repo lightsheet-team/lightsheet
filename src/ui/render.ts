@@ -10,7 +10,7 @@ import {
   UISetCellPayload,
 } from "../core/event/events.types.ts";
 import EventType from "../core/event/eventType.ts";
-import LightSheetHelper from "../../utils/helpers.ts";
+import LightSheetHelper from "../utils/helpers.ts";
 
 export default class UI {
   tableEl: Element;
@@ -220,7 +220,7 @@ export default class UI {
 
   onUICellValueChange(newValue: string, colIndex: number, rowIndex: number) {
     const payload: UISetCellPayload = {
-      indexPosition: { columnIndex: colIndex, rowIndex: rowIndex },
+      indexPosition: { columnPosition: colIndex, rowPosition: rowIndex },
       rawValue: newValue,
     };
     this.lightSheet.events.emit(
@@ -240,17 +240,17 @@ export default class UI {
     const elInfo = LightSheetHelper.getElementInfoForSetCell(payload);
 
     if (!elInfo.rowDom) {
-      const row = this.addRow(payload.indexPosition.rowIndex);
+      const row = this.addRow(payload.indexPosition.rowPosition);
       elInfo.rowDom = row;
       row.id = elInfo.rowDomId;
     }
     if (!elInfo.cellDom) {
       elInfo.cellDom = this.addCell(
         elInfo.rowDom!,
-        payload.indexPosition.columnIndex,
-        payload.indexPosition.rowIndex,
+        payload.indexPosition.columnPosition,
+        payload.indexPosition.rowPosition,
         payload.formattedValue,
-        payload.position.columnKey?.toString(),
+        payload.keyPosition.columnKey?.toString(),
       );
     }
 

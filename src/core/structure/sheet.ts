@@ -690,13 +690,13 @@ export default class Sheet {
     cell: Cell | null,
   ) {
     const payload: CoreSetCellPayload = {
-      position: {
+      keyPosition: {
         rowKey: rowKey,
         columnKey: colKey,
       },
       indexPosition: {
-        columnIndex: colPos,
-        rowIndex: rowPos,
+        columnPosition: colPos,
+        rowPosition: rowPos,
       },
       rawValue: cell ? cell.rawValue : "",
       formattedValue: cell ? cell.formattedValue : "",
@@ -724,8 +724,8 @@ export default class Sheet {
       );
     } else if (payload.indexPosition) {
       this.setCellAt(
-        payload.indexPosition.columnIndex,
-        payload.indexPosition.rowIndex,
+        payload.indexPosition.columnPosition,
+        payload.indexPosition.rowPosition,
         payload.rawValue,
       );
     } else {
