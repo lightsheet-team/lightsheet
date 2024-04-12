@@ -9,7 +9,6 @@ describe("Multiple sheet test", () => {
     targetMocks = [
       document.createElement("div"),
       document.createElement("div"),
-      document.createElement("div"),
     ];
 
     for (let i = 0; i < targetMocks.length; i++) {
