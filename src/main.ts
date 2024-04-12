@@ -36,11 +36,11 @@ export default class LightSheet {
       this.#initializeTable();
     }
 
-    if (options?.onCellChange) {
+    if (options.onCellChange) {
       this.onCellChange = options.onCellChange;
     }
 
-    if (options?.onReady) options.onReady = this.options.onReady;
+    if (options.onReady) options.onReady = this.options.onReady;
     this.onTableReady();
   }
 
