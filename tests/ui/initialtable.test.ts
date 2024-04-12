@@ -12,6 +12,7 @@ describe("LightSheet", () => {
     // Creating instance of LightSheet with mocked dependencies
     lightSheet = new LightSheet(targetElementMock, {
       data: [],
+      sheetName: "Sheet",
       onReady: onReady,
     });
 
