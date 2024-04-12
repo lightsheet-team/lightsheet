@@ -81,7 +81,6 @@ export default class ExpressionHandler {
 
   private resolveSymbol(symbol: string): any {
     let targetSheet = this.sheet;
-    console.log(symbol);
     if (symbol.includes("!")) {
       const parts = symbol.split("!").filter((s) => s !== "");
       if (parts.length != 2)
@@ -89,11 +88,9 @@ export default class ExpressionHandler {
 
       const sheetName = parts[0];
       const refSheet = this.sheetHolder.getSheetByName(sheetName);
-      console.log(refSheet);
       if (!refSheet) throw new Error("Invalid sheet reference: " + symbol);
       targetSheet = refSheet.sheet;
       symbol = parts[1];
-      console.log(parts);
     }
 
     // TODO only handling references within one sheet for now.
