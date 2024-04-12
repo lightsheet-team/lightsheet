@@ -1,7 +1,7 @@
 import LightSheet from "../../../src/main.ts";
 import SheetHolder from "../../../src/core/structure/sheetHolder.ts";
 
-describe("Multiple sheet test", () => {
+describe("Multiple sheets test", () => {
   beforeEach(() => {
     window.sheetHolder?.clear();
     for (let i = 0; i < 2; i++) {
