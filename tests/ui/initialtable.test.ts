@@ -10,6 +10,7 @@ describe("LightSheet", () => {
     targetElementMock = document.createElement("div");
 
     // Creating instance of LightSheet with mocked dependencies
+    window.sheetHolder?.clear();
     lightSheet = new LightSheet(
       {
         data: [],
