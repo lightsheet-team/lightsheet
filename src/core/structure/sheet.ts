@@ -19,6 +19,7 @@ import EventType from "../event/eventType.ts";
 import { CellState } from "./cell/cellState.ts";
 import { EvaluationResult } from "../evaluation/expressionHandler.types.ts";
 import SheetHolder from "./sheetHolder.ts";
+import { CellReference } from "./cell/types.cell.ts";
 
 export default class Sheet {
   key: SheetKey;
@@ -277,21 +278,19 @@ export default class Sheet {
 
     if (!col.cellIndex.has(row.key)) return false;
     const cellKey = col.cellIndex.get(row.key)!;
+    const cell = this.sheetHolder.cellData.get(cellKey)!;
+
+    // Clear the cell's formula to clean up any outgoing references.
+    cell.rawValue = "";
+    this.resolveCellFormula(cell, colKey, rowKey);
 
     // Remove references to this cell from other cells' referencesOut.
-    const cell = this.sheetHolder.cellData.get(cellKey)!;
     cell.referencesIn.forEach((_, refCell) => {
       const referredCell = this.sheetHolder.cellData.get(refCell)!;
       referredCell.referencesOut.delete(cellKey);
 
       // Invalidate cells that reference this cell.
       referredCell.setState(CellState.INVALID_REFERENCE);
-    });
-
-    // Remove this cell from other cells' referencesIn.
-    cell.referencesOut.forEach((_, refCell) => {
-      const referredCell = this.sheetHolder.cellData.get(refCell)!;
-      referredCell.referencesIn.delete(cellKey);
     });
 
     // Delete cell data and all references to it in its column and row.
@@ -524,22 +523,23 @@ export default class Sheet {
     if (!valueChanged && cell.state == CellState.OK) return valueChanged;
 
     // Update cells that reference this cell.
-    for (const [ref, pos] of cell.referencesIn) {
-      const referredCell = this.sheetHolder.cellData.get(ref)!;
-      const refUpdated = this.resolveCell(
-        referredCell,
-        pos.columnKey!,
-        pos.rowKey!,
+    for (const [refKey, refInfo] of cell.referencesIn) {
+      const referringCell = this.sheetHolder.cellData.get(refKey)!;
+      const referringSheet = this.sheetHolder.getSheet(refInfo.sheetKey)!.sheet;
+      const refUpdated = referringSheet.resolveCell(
+        referringCell,
+        refInfo.column,
+        refInfo.row,
       );
 
-      // Emit event if the referred cell's value has changed.
+      // Emit event if the referred cell's value has changed (for the referring sheet's events).
       if (refUpdated) {
-        this.emitSetCellEvent(
-          pos.columnKey!,
-          pos.rowKey!,
-          this.getColumnIndex(pos.columnKey!)!,
-          this.getRowIndex(pos.rowKey!)!,
-          referredCell,
+        referringSheet.emitSetCellEvent(
+          refInfo.column,
+          refInfo.row,
+          referringSheet.getColumnIndex(refInfo.column)!,
+          referringSheet.getRowIndex(refInfo.row)!,
+          referringCell,
         );
       }
     }
@@ -593,49 +593,53 @@ export default class Sheet {
     evalResult: EvaluationResult,
   ) {
     // Update referencesOut of this cell and referencesIn of newly referenced cells.
-    const oldOut = new Map<CellKey, PositionInfo>(cell.referencesOut);
+    const oldOut = new Map<CellKey, CellReference>(cell.referencesOut);
     cell.referencesOut.clear();
     evalResult.references.forEach((ref) => {
+      const refSheet = this.sheetHolder.getSheet(ref.sheetKey)!.sheet;
+
       // Initialize the referred cell if it doesn't exist yet.
-      const sheet = this.sheetHolder.getSheet(ref.sheetKey)!.sheet;
-      const position = sheet.initializePosition(
+      const position = refSheet.initializePosition(
         ref.position.column,
         ref.position.row,
       );
-
-      if (!sheet.getCellInfoAt(ref.position.column, ref.position.row)) {
-        sheet.createCell(position.columnKey!, position.rowKey!, "");
+      if (!refSheet.getCellInfoAt(ref.position.column, ref.position.row)) {
+        refSheet.createCell(position.columnKey!, position.rowKey!, "");
       }
 
-      const referredCell = sheet.getCell(
+      const referredCell = refSheet.getCell(
         position.columnKey!,
         position.rowKey!,
       )!;
+
       // Add referred cells to this cell's referencesOut.
       cell.referencesOut.set(referredCell.key, {
-        columnKey: position.columnKey!,
-        rowKey: position.rowKey!,
+        sheetKey: refSheet.key,
+        column: position.columnKey!,
+        row: position.rowKey!,
       });
 
       // Add this cell to the referred cell's referencesIn.
       referredCell.referencesIn.set(cell.key, {
-        columnKey: columnKey,
-        rowKey: rowKey,
+        sheetKey: this.key,
+        column: columnKey,
+        row: rowKey,
       });
     });
 
     // Resolve (oldOut - newOut) to get references that were removed from the formula.
-    const removedReferences = new Map<CellKey, PositionInfo>(
+    const removedReferences = new Map<CellKey, CellReference>(
       [...oldOut].filter(([cellKey]) => !cell.referencesOut.has(cellKey)),
     );
 
     // Clean up the referencesIn sets of cells that are no longer referenced by the formula.
-    for (const [cellKey, position] of removedReferences) {
+    for (const [cellKey, refInfo] of removedReferences) {
       const referredCell = this.sheetHolder.cellData.get(cellKey)!;
       referredCell.referencesIn.delete(cell.key);
 
-      // This may result in the cell being empty and unused - delete if necessary.
-      this.deleteCellIfUnused(position.columnKey!, position.rowKey!);
+      // This may result in the cell being unused - delete if necessary.
+      const referredSheet = this.sheetHolder.getSheet(refInfo.sheetKey)!.sheet;
+      referredSheet.deleteCellIfUnused(refInfo.column, refInfo.row);
     }
 
     // After references are updated, check for circular references.

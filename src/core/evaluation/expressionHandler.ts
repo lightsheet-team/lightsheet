@@ -11,7 +11,10 @@ import {
 } from "mathjs/number";
 
 import Sheet from "../structure/sheet.ts";
-import { CellReference, EvaluationResult } from "./expressionHandler.types.ts";
+import {
+  CellSheetPosition,
+  EvaluationResult,
+} from "./expressionHandler.types.ts";
 
 import { CellState } from "../structure/cell/cellState.ts";
 
@@ -29,7 +32,7 @@ const math = create({
 export default class ExpressionHandler {
   private sheet: Sheet;
 
-  private cellRefHolder: Array<CellReference>;
+  private cellRefHolder: Array<CellSheetPosition>;
   private rawValue: string;
 
   constructor(targetSheet: Sheet, rawValue: string) {
