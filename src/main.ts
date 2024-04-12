@@ -112,6 +112,6 @@ export default class LightSheet {
   }
 
   setCellAt(columnKey: number, rowKey: number, value: any): CellInfo {
-    return this.sheet.setCellAt(columnKey, rowKey, value);
+    return this.sheet.setCellAt(columnKey, rowKey, value.toString());
   }
 }
