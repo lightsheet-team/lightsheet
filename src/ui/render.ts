@@ -220,7 +220,7 @@ export default class UI {
 
   onUICellValueChange(newValue: string, colIndex: number, rowIndex: number) {
     const payload: UISetCellPayload = {
-      indexPosition: { columnPosition: colIndex, rowPosition: rowIndex },
+      indexPosition: { column: colIndex, row: rowIndex },
       rawValue: newValue,
     };
     this.lightSheet.events.emit(
@@ -240,15 +240,15 @@ export default class UI {
     const elInfo = LightSheetHelper.getElementInfoForSetCell(payload);
 
     if (!elInfo.rowDom) {
-      const row = this.addRow(payload.indexPosition.rowPosition);
+      const row = this.addRow(payload.indexPosition.row);
       elInfo.rowDom = row;
       row.id = elInfo.rowDomId;
     }
     if (!elInfo.cellDom) {
       elInfo.cellDom = this.addCell(
         elInfo.rowDom!,
-        payload.indexPosition.columnPosition,
-        payload.indexPosition.rowPosition,
+        payload.indexPosition.column,
+        payload.indexPosition.row,
         payload.formattedValue,
         payload.keyPosition.columnKey?.toString(),
       );

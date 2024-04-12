@@ -1,10 +1,12 @@
-// TODO This should be a common type (Coordinate in render.types.ts, IndexPosition in events.types.ts)
-export type CellPosition = {
-  rowIndex: number;
-  columnIndex: number;
+import { SheetKey } from "../structure/key/keyTypes.ts";
+import { Coordinate } from "../../utils/common.types.ts";
+
+export type CellReference = {
+  sheetKey: SheetKey;
+  position: Coordinate;
 };
 
 export type EvaluationResult = {
   value: string;
-  references: CellPosition[];
+  references: CellReference[];
 };

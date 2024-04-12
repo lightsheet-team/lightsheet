@@ -595,8 +595,11 @@ export default class Sheet {
     cell.referencesOut.clear();
     evalResult.references.forEach((ref) => {
       // Initialize the referred cell if it doesn't exist yet.
-      const position = this.initializePosition(ref.columnIndex, ref.rowIndex);
-      if (!this.getCellInfoAt(ref.columnIndex, ref.rowIndex)) {
+      const position = this.initializePosition(
+        ref.position.column,
+        ref.position.row,
+      );
+      if (!this.getCellInfoAt(ref.position.column, ref.position.row)) {
         this.createCell(position.columnKey!, position.rowKey!, "");
       }
 
@@ -695,8 +698,8 @@ export default class Sheet {
         columnKey: colKey,
       },
       indexPosition: {
-        columnPosition: colPos,
-        rowPosition: rowPos,
+        column: colPos,
+        row: rowPos,
       },
       rawValue: cell ? cell.rawValue : "",
       formattedValue: cell ? cell.formattedValue : "",
@@ -724,8 +727,8 @@ export default class Sheet {
       );
     } else if (payload.indexPosition) {
       this.setCellAt(
-        payload.indexPosition.columnPosition,
-        payload.indexPosition.rowPosition,
+        payload.indexPosition.column,
+        payload.indexPosition.row,
         payload.rawValue,
       );
     } else {

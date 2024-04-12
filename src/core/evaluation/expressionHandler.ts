@@ -11,7 +11,7 @@ import {
 } from "mathjs/number";
 
 import Sheet from "../structure/sheet.ts";
-import { CellPosition, EvaluationResult } from "./expressionHandler.types.ts";
+import { CellReference, EvaluationResult } from "./expressionHandler.types.ts";
 
 import { CellState } from "../structure/cell/cellState.ts";
 import SheetHolder from "../structure/sheetHolder.ts";
@@ -31,7 +31,7 @@ export default class ExpressionHandler {
   private sheet: Sheet;
   private sheetHolder: SheetHolder;
 
-  private cellRefHolder: Array<CellPosition>;
+  private cellRefHolder: Array<CellReference>;
   private rawValue: string;
 
   constructor(sheetHolder: SheetHolder, targetSheet: Sheet, rawValue: string) {
@@ -111,7 +111,10 @@ export default class ExpressionHandler {
           if (cellInfo && cellInfo.state != CellState.OK)
             throw new Error("Invalid cell reference: " + symbol);
 
-          this.cellRefHolder.push({ columnIndex: j, rowIndex: i });
+          this.cellRefHolder.push({
+            sheetKey: targetSheet.key,
+            position: { column: j, row: i },
+          });
           values.push(cellInfo?.resolvedValue ?? "");
         }
       }
@@ -125,7 +128,13 @@ export default class ExpressionHandler {
     if (cellInfo && cellInfo.state != CellState.OK)
       throw new Error("Invalid cell reference: " + symbol);
 
-    this.cellRefHolder.push({ columnIndex: colIndex, rowIndex: rowIndex });
+    this.cellRefHolder.push({
+      sheetKey: targetSheet.key,
+      position: {
+        column: colIndex,
+        row: rowIndex,
+      },
+    });
     return cellInfo?.resolvedValue ?? "";
   }
 

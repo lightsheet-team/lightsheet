@@ -16,8 +16,8 @@ export default class LightSheetHelper {
     const colKey = payload.keyPosition.columnKey?.toString();
     const rowKey = payload.keyPosition.rowKey?.toString();
 
-    const columnIndex = payload.indexPosition.columnPosition;
-    const rowIndex = payload.indexPosition.rowPosition;
+    const columnIndex = payload.indexPosition.column;
+    const rowIndex = payload.indexPosition.row;
 
     const cellDomKey =
       colKey && rowKey ? `${colKey!.toString()}_${rowKey!.toString()}` : null;
