@@ -280,16 +280,14 @@ export default class Sheet {
     const cellKey = col.cellIndex.get(row.key)!;
     const cell = this.sheetHolder.cellData.get(cellKey)!;
 
-    // Clear the cell's formula to clean up any outgoing references.
+    // Clear the cell's formula to clean up any references it may have.
     cell.rawValue = "";
     this.resolveCellFormula(cell, colKey, rowKey);
 
-    // Remove references to this cell from other cells' referencesOut.
+    // If other cells are referring to this cell, remove the reference and invalidate them.
     cell.referencesIn.forEach((_, refCell) => {
       const referredCell = this.sheetHolder.cellData.get(refCell)!;
       referredCell.referencesOut.delete(cellKey);
-
-      // Invalidate cells that reference this cell.
       referredCell.setState(CellState.INVALID_REFERENCE);
     });
 
