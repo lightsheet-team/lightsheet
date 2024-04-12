@@ -7,7 +7,7 @@ describe("Sheet", () => {
 
   beforeEach(() => {
     window.sheetHolder?.clear();
-    sheet = new LightSheet({ sheetName: "Sheet1" }).sheet;
+    sheet = new LightSheet({ sheetName: "Sheet" }).sheet;
   });
 
   it("should set a cell value at a specified position", () => {

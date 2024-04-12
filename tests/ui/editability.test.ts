@@ -16,7 +16,7 @@ describe("LightSheet", () => {
     new LightSheet(
       {
         data: [],
-        sheetName: "Sheet1",
+        sheetName: "Sheet",
         isReadOnly: true,
       },
       targetElementMock,
@@ -39,7 +39,7 @@ describe("LightSheet", () => {
     new LightSheet(
       {
         data: [],
-        sheetName: "Sheet1",
+        sheetName: "Sheet",
         isReadOnly: false,
       },
       targetElementMock,

@@ -9,7 +9,7 @@ describe("Formatter test", () => {
 
   beforeEach(() => {
     window.sheetHolder?.clear();
-    sheet = new LightSheet({ sheetName: "Sheet1" }).sheet;
+    sheet = new LightSheet({ sheetName: "Sheet" }).sheet;
     sheet.setCellAt(0, 0, "ABC"); // A1
     sheet.setCellAt(0, 1, "12.3"); // A2
     sheet.setCellAt(1, 0, "3,14"); // B1

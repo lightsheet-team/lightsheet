@@ -6,7 +6,7 @@ describe("Delete column test", () => {
 
   beforeEach(() => {
     window.sheetHolder?.clear();
-    sheet = new LightSheet({ sheetName: "Sheet1" }).sheet;
+    sheet = new LightSheet({ sheetName: "Sheet" }).sheet;
     sheet.setCellAt(0, 0, "1x1");
     sheet.setCellAt(1, 0, "2x1");
     sheet.setCellAt(2, 0, "3x1");

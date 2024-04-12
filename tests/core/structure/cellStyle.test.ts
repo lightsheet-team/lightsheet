@@ -7,7 +7,7 @@ describe("CellStyle", () => {
 
   beforeEach(() => {
     window.sheetHolder?.clear();
-    sheet = new LightSheet({ sheetName: "Sheet1" }).sheet;
+    sheet = new LightSheet({ sheetName: "Sheet" }).sheet;
   });
 
   it("should apply cell styling rules that are properly combined by getCellStyle", () => {

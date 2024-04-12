@@ -7,7 +7,7 @@ describe("Math resolve test", () => {
 
   beforeEach(() => {
     window.sheetHolder?.clear();
-    sheet = new LightSheet({ sheetName: "Sheet1" }).sheet;
+    sheet = new LightSheet({ sheetName: "Sheet" }).sheet;
     sheet.setCellAt(0, 0, "1"); // A1
     sheet.setCellAt(1, 0, "2"); // B1
     sheet.setCellAt(0, 1, "3"); // A2
