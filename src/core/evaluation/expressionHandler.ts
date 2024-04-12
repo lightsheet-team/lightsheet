@@ -87,9 +87,9 @@ export default class ExpressionHandler {
         throw new Error("Invalid sheet reference: " + symbol);
 
       const sheetName = parts[0];
-      const refSheet = this.sheetHolder.getSheetByName(sheetName);
+      const refSheet = this.sheetHolder.getSheetByName(sheetName)?.sheet;
       if (!refSheet) throw new Error("Invalid sheet reference: " + symbol);
-      targetSheet = refSheet.sheet;
+      targetSheet = refSheet;
       symbol = parts[1];
     }
 

@@ -11,18 +11,30 @@ export default class SheetHolder {
     this.sheets = new Map();
     this.sheetNames = new Map();
     this.cellData = new Map();
+
+    if (window.sheetHolder) {
+      return window.sheetHolder;
+    }
+    window.sheetHolder = this;
   }
 
-  addSheet(sheet: LightSheet): boolean {
-    if (
-      this.sheets.has(sheet.getKey()) ||
-      this.sheetNames.has(sheet.getName())
-    ) {
-      return false;
+  clear() {
+    this.sheets.clear();
+    this.sheetNames.clear();
+    this.cellData.clear();
+  }
+
+  addSheet(sheet: LightSheet) {
+    if (this.sheets.has(sheet.getKey())) {
+      throw new Error(`Sheet with key ${sheet.getKey()} already exists.`);
     }
+
+    if (this.sheetNames.has(sheet.getName())) {
+      throw new Error(`Sheet with name ${sheet.getName()} already exists.`);
+    }
+
     this.sheets.set(sheet.getKey(), sheet);
     this.sheetNames.set(sheet.getName(), sheet.getKey());
-    return true;
   }
 
   getSheetByName(sheetName: string): LightSheet | null {
@@ -33,12 +45,5 @@ export default class SheetHolder {
 
   getSheet(sheetKey: SheetKey): LightSheet | null {
     return this.sheets.get(sheetKey) ?? null;
-  }
-
-  getCellFromSheet(sheetName: string, cellKey: CellKey): Cell | null {
-    const sheetKey = this.sheetNames.get(sheetName);
-    if (!sheetKey || !this.sheets.has(sheetKey)) return null;
-    const lightsheet = this.sheets.get(sheetKey)!;
-    return lightsheet.sheetHolder.cellData.get(cellKey) ?? null; // TODO Shouldn't directly access cellData or return a Cell object.
   }
 }

@@ -1,11 +1,13 @@
 import Sheet from "../../../src/core/structure/sheet.ts";
 import CellStyle from "../../../src/core/structure/cellStyle.ts";
+import LightSheet from "../../../src/main.ts";
 
 describe("CellStyle", () => {
   let sheet: Sheet;
 
   beforeEach(() => {
-    sheet = new Sheet();
+    window.sheetHolder?.clear();
+    sheet = new LightSheet({ sheetName: "Sheet1" }).sheet;
   });
 
   it("should apply cell styling rules that are properly combined by getCellStyle", () => {

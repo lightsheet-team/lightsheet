@@ -5,10 +5,13 @@ var data = [
   ["3", "Jorge", "img/nophoto.jpg", "Marketing", "3120"],
 ];
 
-new Lightsheet(document.getElementById("lightsheet"), {
-  data: data,
-  sheetName: "Sheet1",
-  onCellChange: (colIndex, rowIndex, newValue) => {
-    console.log(colIndex, rowIndex, newValue);
+new Lightsheet(
+  {
+    data: data,
+    sheetName: "Sheet1",
+    onCellChange: (colIndex, rowIndex, newValue) => {
+      console.log(colIndex, rowIndex, newValue);
+    },
   },
-});
+  document.getElementById("lightsheet"),
+);

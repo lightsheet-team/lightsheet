@@ -8,7 +8,7 @@ import { DefaultColCount, DefaultRowCount } from "./utils/constants.ts";
 import LightSheetHelper from "./utils/helpers.ts";
 
 export default class LightSheet {
-  #ui: UI;
+  #ui: UI | undefined;
   options: LightSheetOptions;
   sheet: Sheet;
   sheetHolder: SheetHolder;
@@ -16,33 +16,44 @@ export default class LightSheet {
   onCellChange?;
   isReady: boolean = false;
 
-  constructor(targetElement: Element, options: LightSheetOptions) {
-    this.options = options;
-    this.options.defaultColCount = options.defaultColCount ?? DefaultColCount;
-    this.options.defaultRowCount = options.defaultRowCount ?? DefaultRowCount;
+  constructor(
+    options: LightSheetOptions,
+    targetElement: Element | null = null,
+  ) {
+    this.options = {
+      data: [],
+      defaultColCount: DefaultColCount,
+      defaultRowCount: DefaultRowCount,
+      ...options,
+    };
     this.events = new Events();
-    this.sheetHolder = this.registerSheet();
-    this.sheet = new Sheet(this.sheetHolder, this.events);
+    this.sheetHolder = this.getSheetHolder();
+    this.sheet = new Sheet(this.events);
     this.sheetHolder.addSheet(this);
-    this.#ui = new UI(targetElement, this);
-    this.#initializeTable();
 
-    if (options.onCellChange) {
+    if (targetElement) {
+      this.#ui = new UI(targetElement, this);
+      this.#initializeTable();
+    }
+
+    if (options?.onCellChange) {
       this.onCellChange = options.onCellChange;
     }
 
-    if (options.onReady) options.onReady = this.options.onReady;
+    if (options?.onReady) options.onReady = this.options.onReady;
     this.onTableReady();
   }
 
   setReadOnly(isReadOnly: boolean) {
-    this.#ui.setReadOnly(isReadOnly);
+    this.#ui?.setReadOnly(isReadOnly);
   }
 
   #initializeTable() {
+    if (!this.#ui || !this.options.data) return;
+
     // Create header row and add headers
-    const rowLength = this.options.data?.length
-      ? this.options.data?.length
+    const rowLength = this.options.data.length
+      ? this.options.data.length
       : this.options.defaultRowCount;
     let colLength = this.options.data?.reduce(
       (total, item) => (total > item.length ? total : item.length),
@@ -85,9 +96,9 @@ export default class LightSheet {
     if (this.options.onReady) this.options.onReady();
   }
 
-  registerSheet(): SheetHolder {
+  getSheetHolder(): SheetHolder {
     if (!window.sheetHolder) {
-      window.sheetHolder = new SheetHolder();
+      new SheetHolder();
     }
     return window.sheetHolder;
   }

@@ -4,6 +4,7 @@ describe("LightSheet", () => {
   let targetElementMock: HTMLElement;
 
   beforeEach(() => {
+    window.sheetHolder?.clear();
     targetElementMock = document.createElement("div");
   });
 
@@ -12,11 +13,14 @@ describe("LightSheet", () => {
   });
 
   test("All input elements within the table have readonly property set to true when isReadOnly is true", () => {
-    new LightSheet(targetElementMock, {
-      data: [],
-      sheetName: "Sheet1",
-      isReadOnly: true,
-    });
+    new LightSheet(
+      {
+        data: [],
+        sheetName: "Sheet1",
+        isReadOnly: true,
+      },
+      targetElementMock,
+    );
 
     const tableBody = targetElementMock.querySelector("tbody");
     if (!tableBody) {
@@ -32,11 +36,14 @@ describe("LightSheet", () => {
   });
 
   test("All input elements within the table have readonly property set to true when isReadOnly is false", () => {
-    new LightSheet(targetElementMock, {
-      data: [],
-      sheetName: "Sheet1",
-      isReadOnly: false,
-    });
+    new LightSheet(
+      {
+        data: [],
+        sheetName: "Sheet1",
+        isReadOnly: false,
+      },
+      targetElementMock,
+    );
 
     const tableBody = targetElementMock.querySelector("tbody");
     if (!tableBody) {

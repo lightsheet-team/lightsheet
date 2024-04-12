@@ -36,9 +36,15 @@ export default class Sheet {
 
   private events: Events;
 
-  constructor(sheetHolder: SheetHolder, events: Events | null = null) {
+  constructor(events: Events | null = null) {
     this.key = generateSheetKey();
-    this.sheetHolder = sheetHolder;
+
+    if (!window.sheetHolder) {
+      throw new Error(
+        "SheetHolder is not initialized. Only instantiate Sheet using a Lightsheet instance.",
+      );
+    }
+    this.sheetHolder = window.sheetHolder;
 
     this.defaultStyle = new CellStyle(); // TODO This should be configurable.
     this.settings = null;
@@ -596,7 +602,10 @@ export default class Sheet {
     evalResult.references.forEach((ref) => {
       // Initialize the referred cell if it doesn't exist yet.
       const sheet = this.sheetHolder.getSheet(ref.sheetKey)!.sheet;
-      const position = sheet.initializePosition(ref.position.column, ref.position.row);
+      const position = sheet.initializePosition(
+        ref.position.column,
+        ref.position.row,
+      );
 
       if (!sheet.getCellInfoAt(ref.position.column, ref.position.row)) {
         sheet.createCell(position.columnKey!, position.rowKey!, "");

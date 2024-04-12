@@ -1,11 +1,13 @@
 import Sheet from "../../../src/core/structure/sheet";
 import Cell from "../../../src/core/structure/cell/cell.ts";
+import LightSheet from "../../../src/main.ts";
 
 describe("Sheet", () => {
   let sheet: Sheet;
 
   beforeEach(() => {
-    sheet = new Sheet();
+    window.sheetHolder?.clear();
+    sheet = new LightSheet({ sheetName: "Sheet1" }).sheet;
   });
 
   it("should set a cell value at a specified position", () => {

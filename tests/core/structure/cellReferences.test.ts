@@ -2,12 +2,14 @@ import Sheet from "../../../src/core/structure/sheet";
 import { CellState } from "../../../src/core/structure/cell/cellState.ts";
 import { CellInfo } from "../../../src/core/structure/sheet.types.ts";
 import CellStyle from "../../../src/core/structure/cellStyle.ts";
+import LightSheet from "../../../src/main.ts";
 
 describe("Cell references", () => {
   let sheet: Sheet;
 
   beforeEach(() => {
-    sheet = new Sheet();
+    window.sheetHolder?.clear();
+    sheet = new LightSheet({ sheetName: "Sheet1" }).sheet;
     sheet.setCellAt(0, 0, "1"); // A1
     sheet.setCellAt(1, 0, "2"); // B1
     sheet.setCellAt(0, 1, "3"); // A2

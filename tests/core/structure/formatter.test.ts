@@ -2,12 +2,14 @@ import Sheet from "../../../src/core/structure/sheet.ts";
 import CellStyle from "../../../src/core/structure/cellStyle.ts";
 import NumberFormatter from "../../../src/core/evaluation/numberFormatter.ts";
 import { CellState } from "../../../src/core/structure/cell/cellState.ts";
+import LightSheet from "../../../src/main.ts";
 
 describe("Formatter test", () => {
   let sheet: Sheet;
 
   beforeEach(() => {
-    sheet = new Sheet();
+    window.sheetHolder?.clear();
+    sheet = new LightSheet({ sheetName: "Sheet1" }).sheet;
     sheet.setCellAt(0, 0, "ABC"); // A1
     sheet.setCellAt(0, 1, "12.3"); // A2
     sheet.setCellAt(1, 0, "3,14"); // B1

@@ -10,11 +10,14 @@ describe("LightSheet", () => {
     targetElementMock = document.createElement("div");
 
     // Creating instance of LightSheet with mocked dependencies
-    lightSheet = new LightSheet(targetElementMock, {
-      data: [],
-      sheetName: "Sheet",
-      onReady: onReady,
-    });
+    lightSheet = new LightSheet(
+      {
+        data: [],
+        sheetName: "Sheet",
+        onReady: onReady,
+      },
+      targetElementMock,
+    );
 
     expect(onReady).toHaveBeenCalledWith();
   });
