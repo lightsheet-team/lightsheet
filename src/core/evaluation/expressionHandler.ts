@@ -14,7 +14,6 @@ import Sheet from "../structure/sheet.ts";
 import { CellReference, EvaluationResult } from "./expressionHandler.types.ts";
 
 import { CellState } from "../structure/cell/cellState.ts";
-import SheetHolder from "../structure/sheetHolder.ts";
 
 const math = create({
   parseDependencies,
@@ -29,13 +28,11 @@ const math = create({
 
 export default class ExpressionHandler {
   private sheet: Sheet;
-  private sheetHolder: SheetHolder;
 
   private cellRefHolder: Array<CellReference>;
   private rawValue: string;
 
-  constructor(sheetHolder: SheetHolder, targetSheet: Sheet, rawValue: string) {
-    this.sheetHolder = sheetHolder;
+  constructor(targetSheet: Sheet, rawValue: string) {
     this.sheet = targetSheet;
 
     this.rawValue = rawValue;
@@ -87,7 +84,7 @@ export default class ExpressionHandler {
         throw new Error("Invalid sheet reference: " + symbol);
 
       const sheetName = parts[0];
-      const refSheet = this.sheetHolder.getSheetByName(sheetName)?.sheet;
+      const refSheet = this.sheet.sheetHolder.getSheetByName(sheetName)?.sheet;
       if (!refSheet) throw new Error("Invalid sheet reference: " + symbol);
       targetSheet = refSheet;
       symbol = parts[1];

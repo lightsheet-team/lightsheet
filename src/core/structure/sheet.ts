@@ -506,11 +506,7 @@ export default class Sheet {
     colKey: ColumnKey,
     rowKey: RowKey,
   ): boolean {
-    const expressionHandler = new ExpressionHandler(
-      this.sheetHolder,
-      this,
-      cell.rawValue,
-    );
+    const expressionHandler = new ExpressionHandler(this, cell.rawValue);
     const evalResult = expressionHandler.evaluate();
     const prevState = cell.state;
     if (!evalResult) {
