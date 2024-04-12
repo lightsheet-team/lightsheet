@@ -36,7 +36,7 @@ export default class Sheet {
 
   private events: Events;
 
-  constructor(events: Events | null = null) {
+  constructor(events: Events) {
     this.key = generateSheetKey();
 
     if (!window.sheetHolder) {
@@ -57,7 +57,7 @@ export default class Sheet {
     this.defaultWidth = 40;
     this.defaultHeight = 20;
 
-    this.events = events ?? new Events();
+    this.events = events;
     this.registerEvents();
   }
 
