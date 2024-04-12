@@ -2,22 +2,11 @@ import LightSheet from "../../../src/main.ts";
 import SheetHolder from "../../../src/core/structure/sheetHolder.ts";
 
 describe("Multiple sheet test", () => {
-  let targetMocks: HTMLElement[];
-
   beforeEach(() => {
     window.sheetHolder?.clear();
-    targetMocks = [
-      document.createElement("div"),
-      document.createElement("div"),
-    ];
-
-    for (let i = 0; i < targetMocks.length; i++) {
-      new LightSheet({ data: [], sheetName: `Sheet${i + 1}` }, targetMocks[i]);
+    for (let i = 0; i < 2; i++) {
+      new LightSheet({ data: [], sheetName: `Sheet${i + 1}` });
     }
-  });
-
-  afterEach(() => {
-    jest.clearAllMocks();
   });
 
   it("should call the SheetHolder constructor without effect", () => {
@@ -29,7 +18,7 @@ describe("Multiple sheet test", () => {
 
   it("should find the global SheetHolder object and all initialized sheets", () => {
     expect(window.sheetHolder).toBeDefined();
-    for (let i = 0; i < targetMocks.length; i++) {
+    for (let i = 0; i < 2; i++) {
       expect(window.sheetHolder.getSheetByName(`Sheet${i + 1}`)).toBeDefined();
     }
   });
