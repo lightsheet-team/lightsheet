@@ -213,7 +213,9 @@ export default class UI {
     if (rawValue) {
       cellDom.id = `${columnKey}_${rowDom.id}`;
     }
-    this.onUICellValueChange(rawValue, colIndex, rowIndex);
+
+    if (this.lightSheet.isReady)
+      this.onUICellValueChange(rawValue, colIndex, rowIndex);
 
     inputDom.addEventListener("input", (e: Event) => {
       const newValue = (e.target as HTMLInputElement).value;
