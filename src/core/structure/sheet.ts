@@ -1,11 +1,17 @@
 import { CellKey, ColumnKey, RowKey } from "./key/keyTypes.ts";
-import Cell, { CellState } from "./cell/cell.ts";
+import Cell from "./cell/cell.ts";
 import Column from "./group/column.ts";
 import Row from "./group/row.ts";
 import { CellInfo, PositionInfo, ShiftDirection } from "./sheet.types.ts";
 import ExpressionHandler from "../evaluation/expressionHandler.ts";
 import CellStyle from "./cellStyle.ts";
 import CellGroup from "./group/cellGroup.ts";
+import Events from "../event/events.ts";
+import LightsheetEvent from "../event/event.ts";
+import { CoreSetCellPayload, UISetCellPayload } from "../event/events.types.ts";
+import EventType from "../event/eventType.ts";
+import { CellState } from "./cell/cellState.ts";
+import { EvaluationResult } from "../evaluation/expressionHandler.types.ts";
 
 export default class Sheet {
   defaultStyle: any;
@@ -19,9 +25,9 @@ export default class Sheet {
   defaultWidth: number;
   defaultHeight: number;
 
-  private expressionHandler: ExpressionHandler;
+  private events: Events;
 
-  constructor() {
+  constructor(events: Events | null = null) {
     this.defaultStyle = new CellStyle(); // TODO This should be configurable.
 
     this.settings = null;
@@ -35,7 +41,8 @@ export default class Sheet {
     this.defaultWidth = 40;
     this.defaultHeight = 20;
 
-    this.expressionHandler = new ExpressionHandler(this);
+    this.events = events ?? new Events();
+    this.registerEvents();
   }
 
   getRowIndex(rowKey: RowKey): number | undefined {
@@ -48,25 +55,39 @@ export default class Sheet {
 
   setCellAt(colPos: number, rowPos: number, value: string): CellInfo {
     const position = this.initializePosition(colPos, rowPos);
-    return this.setCell(position.columnKey!, position.rowKey!, value);
+    return this.setCell(position.columnKey!, position.rowKey!, value)!;
   }
 
-  setCell(colKey: ColumnKey, rowKey: RowKey, value: string): CellInfo {
-    let cell = this.getCell(colKey, rowKey);
-    if (!cell) {
-      cell = this.createCell(colKey, rowKey, value);
-    } else if (value == "") {
-      // Cell exists but is being cleared.
-      this.deleteCell(colKey, rowKey);
+  setCell(colKey: ColumnKey, rowKey: RowKey, formula: string): CellInfo | null {
+    if (!this.columns.has(colKey) || !this.rows.has(rowKey)) {
+      return null;
     }
 
-    if (cell) {
-      cell.formula = value;
-      this.resolveCell(cell);
+    let cell = this.getCell(colKey, rowKey);
+
+    if (!cell) {
+      if (formula == "") return null;
+      cell = this.createCell(colKey, rowKey, formula);
     }
+
+    cell!.rawValue = formula;
+
+    const colIndex = this.getColumnIndex(colKey)!;
+    const rowIndex = this.getRowIndex(rowKey)!;
+    const deleted = this.deleteCellIfUnused(colKey, rowKey);
+    if (deleted) {
+      cell = null;
+    } else {
+      this.resolveCell(cell!, colKey, rowKey);
+    }
+
+    this.emitSetCellEvent(colKey, rowKey, colIndex, rowIndex, cell);
 
     return {
-      value: cell ? cell.value : undefined,
+      rawValue: cell ? cell.rawValue : undefined,
+      resolvedValue: cell ? cell.formattedValue : undefined,
+      formattedValue: cell ? cell.formattedValue : undefined,
+      state: cell ? cell.state : undefined,
       position: {
         rowKey: this.rows.has(rowKey) ? rowKey : undefined,
         columnKey: this.columns.has(colKey) ? colKey : undefined,
@@ -74,13 +95,24 @@ export default class Sheet {
     };
   }
 
-  public getCellValueAt(colPos: number, rowPos: number): string | null {
+  public getCellInfoAt(colPos: number, rowPos: number): CellInfo | null {
     const colKey = this.columnPositions.get(colPos);
     const rowKey = this.rowPositions.get(rowPos);
     if (!colKey || !rowKey) return null;
 
-    const cell = this.getCell(colKey, rowKey);
-    return cell ? cell.value : null;
+    const cell = this.getCell(colKey, rowKey)!;
+    return cell
+      ? {
+          rawValue: cell.rawValue,
+          resolvedValue: cell.resolvedValue,
+          formattedValue: cell.formattedValue,
+          state: cell.state,
+          position: {
+            columnKey: colKey,
+            rowKey: rowKey,
+          },
+        }
+      : null;
   }
 
   moveColumn(from: number, to: number): boolean {
@@ -222,13 +254,29 @@ export default class Sheet {
     return true;
   }
 
-  deleteCell(colKey: ColumnKey, rowKey: RowKey): boolean {
+  private deleteCell(colKey: ColumnKey, rowKey: RowKey): boolean {
     const col = this.columns.get(colKey);
     const row = this.rows.get(rowKey);
     if (!col || !row) return false;
 
     if (!col.cellIndex.has(row.key)) return false;
     const cellKey = col.cellIndex.get(row.key)!;
+
+    // Remove references to this cell from other cells' referencesOut.
+    const cell = this.cellData.get(cellKey)!;
+    cell.referencesIn.forEach((_, refCell) => {
+      const referredCell = this.cellData.get(refCell)!;
+      referredCell.referencesOut.delete(cellKey);
+
+      // Invalidate cells that reference this cell.
+      referredCell.setState(CellState.INVALID_REFERENCE);
+    });
+
+    // Remove this cell from other cells' referencesIn.
+    cell.referencesOut.forEach((_, refCell) => {
+      const referredCell = this.cellData.get(refCell)!;
+      referredCell.referencesIn.delete(cellKey);
+    });
 
     // Delete cell data and all references to it in its column and row.
     this.cellData.delete(cellKey);
@@ -248,8 +296,6 @@ export default class Sheet {
       this.rows.delete(rowKey);
       this.rowPositions.delete(row.position);
     }
-
-    // TODO References should also be checked here.
 
     return true;
   }
@@ -287,10 +333,17 @@ export default class Sheet {
     if (style == null) {
       return this.clearCellStyle(colKey, rowKey);
     }
+
+    // TODO Style could be non-null but empty; should we allow this?
     style = new CellStyle().clone(style);
 
     col.cellFormatting.set(row.key, style);
     row.cellFormatting.set(col.key, style);
+
+    if (style.formatter) {
+      this.applyCellFormatter(this.getCell(colKey, rowKey)!, colKey, rowKey);
+    }
+
     return true;
   }
 
@@ -316,9 +369,10 @@ export default class Sheet {
     style: CellStyle | null,
   ) {
     style = style ? new CellStyle().clone(style) : null;
+    const formatterChanged = style?.formatter != group.defaultStyle?.formatter;
     group.defaultStyle = style;
 
-    // Iterate through cells in this column and clear any styling properties set by the new style.
+    // Iterate through formatted cells in this group and clear any styling properties set by the new style.
     for (const [opposingKey, cellStyle] of group.cellFormatting) {
       const shouldClear = cellStyle.clearStylingSetBy(style);
       if (!shouldClear) continue;
@@ -330,6 +384,22 @@ export default class Sheet {
       }
       this.clearCellStyle(opposingKey as ColumnKey, group.key as RowKey);
     }
+
+    if (!formatterChanged) return;
+
+    // Apply new formatter to all cells in this group.
+    for (const [opposingKey] of group.cellIndex) {
+      const cell = this.cellData.get(group.cellIndex.get(opposingKey)!)!;
+      if (group instanceof Column) {
+        this.applyCellFormatter(cell, group.key, opposingKey as RowKey);
+        continue;
+      }
+      this.applyCellFormatter(
+        cell,
+        opposingKey as ColumnKey,
+        group.key as RowKey,
+      );
+    }
   }
 
   private clearCellStyle(colKey: ColumnKey, rowKey: RowKey): boolean {
@@ -337,8 +407,16 @@ export default class Sheet {
     const row = this.rows.get(rowKey);
     if (!col || !row) return false;
 
+    const style = col.cellFormatting.get(row.key);
+    if (style?.formatter) {
+      this.applyCellFormatter(this.getCell(colKey, rowKey)!, colKey, rowKey);
+    }
+
     col.cellFormatting.delete(row.key);
     row.cellFormatting.delete(col.key);
+
+    // Clearing a cell's style may leave it completely empty - delete if needed.
+    this.deleteCellIfUnused(colKey, rowKey);
 
     return true;
   }
@@ -355,7 +433,7 @@ export default class Sheet {
       for (const [colKey, cellKey] of row.cellIndex) {
         const cell = this.cellData.get(cellKey)!;
         const column = this.columns.get(colKey)!;
-        rowData.set(column.position, cell.value);
+        rowData.set(column.position, cell.formattedValue);
       }
 
       data.set(rowPos, rowData);
@@ -380,9 +458,9 @@ export default class Sheet {
     }
 
     const cell = new Cell();
-    cell.formula = value;
+    cell.rawValue = value;
     this.cellData.set(cell.key, cell);
-    this.resolveCell(cell);
+    this.resolveCell(cell, colKey, rowKey);
 
     col.cellIndex.set(row.key, cell.key);
     row.cellIndex.set(col.key, cell.key);
@@ -401,18 +479,167 @@ export default class Sheet {
     return this.cellData.get(cellKey)!;
   }
 
-  private resolveCell(cell: Cell): boolean {
-    const value = this.expressionHandler.evaluate(cell.formula);
-    if (value == null) {
-      cell.state = CellState.INVALID_EXPRESSION;
-      return false;
+  private resolveCell(cell: Cell, colKey: ColumnKey, rowKey: RowKey): boolean {
+    const valueChanged = this.resolveCellFormula(cell, colKey, rowKey);
+    if (valueChanged && cell.state == CellState.OK) {
+      this.applyCellFormatter(cell, colKey, rowKey);
     }
 
-    // TODO Resolve restrictions from cell formatting here (CellState.INVALID_FORMAT).
+    return valueChanged;
+  }
 
-    cell.state = CellState.OK;
-    cell.value = value;
-    return cell.formula != cell.value;
+  private resolveCellFormula(
+    cell: Cell,
+    colKey: ColumnKey,
+    rowKey: RowKey,
+  ): boolean {
+    const expressionHandler = new ExpressionHandler(this, cell.rawValue);
+    const evalResult = expressionHandler.evaluate();
+    const prevState = cell.state;
+    if (!evalResult) {
+      cell.setState(CellState.INVALID_EXPRESSION);
+      return prevState == CellState.OK; // Consider the cell's value changed if its state changes from OK to invalid.
+    }
+
+    cell.setState(CellState.OK);
+
+    const valueChanged = cell.resolvedValue != evalResult.value;
+    cell.resolvedValue = evalResult.value;
+    this.processEvaluationReferences(cell, colKey, rowKey, evalResult);
+
+    // If the value of the cell hasn't changed, there's no need to update cells that reference this cell.
+    if (!valueChanged && cell.state == CellState.OK) return valueChanged;
+
+    // Update cells that reference this cell.
+    for (const [ref, pos] of cell.referencesIn) {
+      const referredCell = this.cellData.get(ref)!;
+      const refUpdated = this.resolveCell(
+        referredCell,
+        pos.columnKey!,
+        pos.rowKey!,
+      );
+
+      // Emit event if the referred cell's value has changed.
+      if (refUpdated) {
+        this.emitSetCellEvent(
+          pos.columnKey!,
+          pos.rowKey!,
+          this.getColumnIndex(pos.columnKey!)!,
+          this.getRowIndex(pos.rowKey!)!,
+          referredCell,
+        );
+      }
+    }
+
+    return valueChanged;
+  }
+
+  private applyCellFormatter(
+    cell: Cell,
+    colKey: ColumnKey,
+    rowKey: RowKey,
+  ): boolean {
+    const style = this.getCellStyle(colKey, rowKey);
+    let formattedValue: string | null = cell.resolvedValue;
+    if (style?.formatter) {
+      formattedValue = style.formatter.format(formattedValue);
+      if (formattedValue == null) {
+        cell.setState(CellState.INVALID_FORMAT);
+        return false;
+      }
+    }
+
+    cell.formattedValue = formattedValue;
+    return true;
+  }
+
+  /**
+   * Delete a cell if it's empty, has no formatting and is not referenced by any other cell.
+   */
+  private deleteCellIfUnused(colKey: ColumnKey, rowKey: RowKey): boolean {
+    const cell = this.getCell(colKey, rowKey)!;
+    if (cell.rawValue != "") return false;
+
+    // Check if this cell is referenced by anything.
+    if (cell.referencesIn.size > 0) return false;
+
+    // Check if cell-specific formatting is set.
+    const cellCol = this.columns.get(colKey)!;
+    if (cellCol.cellFormatting.has(rowKey)) return false;
+
+    return this.deleteCell(colKey, rowKey);
+  }
+
+  /**
+   * Update reference collections of cells for all cells whose values are affected.
+   */
+  private processEvaluationReferences(
+    cell: Cell,
+    columnKey: ColumnKey,
+    rowKey: RowKey,
+    evalResult: EvaluationResult,
+  ) {
+    // Update referencesOut of this cell and referencesIn of newly referenced cells.
+    const oldOut = new Map<CellKey, PositionInfo>(cell.referencesOut);
+    cell.referencesOut.clear();
+    evalResult.references.forEach((ref) => {
+      // Initialize the referred cell if it doesn't exist yet.
+      const position = this.initializePosition(ref.columnIndex, ref.rowIndex);
+      if (!this.getCellInfoAt(ref.columnIndex, ref.rowIndex)) {
+        this.createCell(position.columnKey!, position.rowKey!, "");
+      }
+
+      const referredCell = this.getCell(position.columnKey!, position.rowKey!)!;
+      // Add referred cells to this cell's referencesOut.
+      cell.referencesOut.set(referredCell.key, {
+        columnKey: position.columnKey!,
+        rowKey: position.rowKey!,
+      });
+
+      // Add this cell to the referred cell's referencesIn.
+      referredCell.referencesIn.set(cell.key, {
+        columnKey: columnKey,
+        rowKey: rowKey,
+      });
+    });
+
+    // Resolve (oldOut - newOut) to get references that were removed from the formula.
+    const removedReferences = new Map<CellKey, PositionInfo>(
+      [...oldOut].filter(([cellKey]) => !cell.referencesOut.has(cellKey)),
+    );
+
+    // Clean up the referencesIn sets of cells that are no longer referenced by the formula.
+    for (const [cellKey, position] of removedReferences) {
+      const referredCell = this.cellData.get(cellKey)!;
+      referredCell.referencesIn.delete(cell.key);
+
+      // This may result in the cell being empty and unused - delete if necessary.
+      this.deleteCellIfUnused(position.columnKey!, position.rowKey!);
+    }
+
+    // After references are updated, check for circular references.
+    if (evalResult.references.length && this.hasCircularReference(cell)) {
+      cell.setState(CellState.CIRCULAR_REFERENCE);
+    }
+  }
+
+  private hasCircularReference(cell: Cell): boolean {
+    const stack = [cell.key];
+    let initial = true;
+
+    // Depth-first search.
+    while (stack.length > 0) {
+      const current = stack.pop()!;
+      if (current === cell.key && !initial) return true;
+      initial = false;
+
+      const currentCell = this.cellData.get(current)!;
+      currentCell.referencesOut.forEach((_, ref) => {
+        stack.push(ref);
+      });
+    }
+
+    return false;
   }
 
   private initializePosition(colPos: number, rowPos: number): PositionInfo {
@@ -442,5 +669,58 @@ export default class Sheet {
     }
 
     return { rowKey: rowKey, columnKey: colKey };
+  }
+
+  private emitSetCellEvent(
+    colKey: ColumnKey,
+    rowKey: RowKey,
+    colPos: number,
+    rowPos: number,
+    cell: Cell | null,
+  ) {
+    const payload: CoreSetCellPayload = {
+      position: {
+        rowKey: rowKey,
+        columnKey: colKey,
+      },
+      indexPosition: {
+        columnIndex: colPos,
+        rowIndex: rowPos,
+      },
+      rawValue: cell ? cell.rawValue : "",
+      formattedValue: cell ? cell.formattedValue : "",
+      clearCell: cell == null,
+      clearRow: this.rows.get(rowKey) == null,
+    };
+
+    this.events.emit(new LightsheetEvent(EventType.CORE_SET_CELL, payload));
+  }
+
+  private registerEvents() {
+    this.events.on(EventType.UI_SET_CELL, (event) =>
+      this.handleUISetCell(event),
+    );
+  }
+
+  private handleUISetCell(event: LightsheetEvent) {
+    const payload = event.payload as UISetCellPayload;
+    // Use either setCellAt or setCell depending on what information is provided.
+    if (payload.keyPosition) {
+      this.setCell(
+        payload.keyPosition.columnKey!,
+        payload.keyPosition.rowKey!,
+        payload.rawValue,
+      );
+    } else if (payload.indexPosition) {
+      this.setCellAt(
+        payload.indexPosition.columnIndex,
+        payload.indexPosition.rowIndex,
+        payload.rawValue,
+      );
+    } else {
+      throw new Error(
+        "Invalid event payload for UI_SET_CELL: no position info provided.",
+      );
+    }
   }
 }
