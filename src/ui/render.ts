@@ -226,6 +226,7 @@ export default class UI {
     });
 
     inputDom.onfocus = () => {
+      inputDom.value = inputDom.getAttribute("rawValue") ?? "";
       this.removeGroupSelection();
 
       cellDom.classList.add("lightsheet_table_selected_cell");
@@ -259,6 +260,7 @@ export default class UI {
     };
 
     inputDom.onblur = () => {
+      inputDom.value = inputDom.getAttribute("resolvedValue") ?? "";
       cellDom.classList.remove("lightsheet_table_selected_cell");
     };
 
@@ -315,6 +317,7 @@ export default class UI {
     // Update input element with values from the core.
     const inputEl = elInfo.cellDom.firstChild! as HTMLInputElement;
     inputEl.setAttribute("rawValue", payload.rawValue);
+    inputEl.setAttribute("resolvedValue", payload.formattedValue);
     inputEl.value = payload.formattedValue;
   }
 
