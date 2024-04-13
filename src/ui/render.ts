@@ -93,10 +93,8 @@ export default class UI {
   }
 
   setFormulaBar() {
-    // Listen for input changes in the formula bar
     this.formulaInput.addEventListener("input", () => {
       const newValue = this.formulaInput.value;
-      // Get the column and row indices from the latest selected cell
       if (this.selectedCell) {
         const colIndex = this.selectedCell.columnPosition;
         const rowIndex = this.selectedCell.rowPosition;
@@ -233,6 +231,15 @@ export default class UI {
       inputDom.value = inputDom.getAttribute("rawValue") ?? "";
       this.removeGroupSelection();
 
+      const previouslySelectedInput = document.querySelector(
+        ".lightsheet_table_selected_cell",
+      );
+      if (previouslySelectedInput) {
+        previouslySelectedInput.classList.remove(
+          "lightsheet_table_selected_cell",
+        );
+      }
+
       cellDom.classList.add("lightsheet_table_selected_cell");
 
       let columnIndex: number | undefined;
@@ -259,13 +266,12 @@ export default class UI {
         rowPosition: Number(rowIndex),
       };
 
-      //connect with formula bar
+      // Connect with formula bar
       this.formulaInput.value = inputDom.getAttribute("rawValue")!;
     };
 
     inputDom.onblur = () => {
       inputDom.value = inputDom.getAttribute("resolvedValue") ?? "";
-      cellDom.classList.remove("lightsheet_table_selected_cell");
     };
 
     return cellDom;
