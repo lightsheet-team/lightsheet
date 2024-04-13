@@ -220,10 +220,14 @@ export default class UI {
     inputDom.addEventListener("input", (e: Event) => {
       const newValue = (e.target as HTMLInputElement).value;
       this.formulaInput.value = newValue;
-      if (newValue == "=") this.formulaInput.focus();
-
-      this.onUICellValueChange(newValue, colIndex, rowIndex);
     });
+
+    inputDom.onchange = (e: Event) =>
+      this.onUICellValueChange(
+        (e.target as HTMLInputElement).value,
+        colIndex,
+        rowIndex,
+      );
 
     inputDom.onfocus = () => {
       inputDom.value = inputDom.getAttribute("rawValue") ?? "";
