@@ -194,8 +194,6 @@ export default class UI {
     rowDom: Element,
     colIndex: number,
     rowIndex: number,
-    rawValue: any,
-    columnKey?: string,
   ): HTMLElement {
     const cellDom = document.createElement("td");
     cellDom.classList.add(
@@ -209,13 +207,6 @@ export default class UI {
     inputDom.classList.add("lightsheet_table_cell_input");
     inputDom.readOnly = this.isReadOnly;
     cellDom.appendChild(inputDom);
-
-    if (rawValue) {
-      cellDom.id = `${columnKey}_${rowDom.id}`;
-    }
-
-    if (this.lightSheet.isReady)
-      this.onUICellValueChange(rawValue, colIndex, rowIndex);
 
     inputDom.addEventListener("input", (e: Event) => {
       const newValue = (e.target as HTMLInputElement).value;
@@ -317,9 +308,7 @@ export default class UI {
       elInfo.cellDom = this.addCell(
         elInfo.rowDom!,
         payload.indexPosition.columnIndex,
-        payload.indexPosition.rowIndex,
-        payload.formattedValue,
-        payload.position.columnKey?.toString(),
+        payload.indexPosition.rowIndex
       );
     }
 
