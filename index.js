@@ -10,5 +10,4 @@ new Lightsheet(document.getElementById("lightsheet"), {
   onCellChange: (colIndex, rowIndex, newValue) => {
     console.log(colIndex, rowIndex, newValue);
   },
-  isReadOnly: false,
 });

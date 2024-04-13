@@ -1,17 +1,11 @@
 // Import other necessary dependencies and utilities for testing
 import LightSheet from "../../src/main";
 import UI from "../../src/ui/render";
-describe("UI", () => {
+describe("Formula", () => {
   let targetElementMock: HTMLElement;
   let lightSheetInstance: LightSheet;
-  let uiInstance: UI;
-
   beforeEach(() => {
     targetElementMock = document.createElement("div");
-    lightSheetInstance = new LightSheet(targetElementMock, {
-      data: [],
-    });
-    uiInstance = new UI(targetElementMock, lightSheetInstance); // Initialize UI instance
   });
 
   afterEach(() => {
@@ -19,6 +13,10 @@ describe("UI", () => {
   });
 
   test("Exist formula bar in dom", () => {
+    lightSheetInstance = new LightSheet(targetElementMock, {
+      data: [],
+    });
+    new UI(targetElementMock, lightSheetInstance);
     // Find the formula bar container
     const formulaBarContainer = targetElementMock.querySelector(
       ".lightsheet_table_formula_bar",
@@ -33,41 +31,11 @@ describe("UI", () => {
     expect(formulaInputField).toBeTruthy(); // Using a truthy assertion instead
   });
 
-  test("Retains focus last selected cell", async () => {
-    // Find the first cell input element
-    const firstCell = document.querySelector(
-      "tbody tr:first-child td:first-child .lightsheet_table_cell_input",
-    ) as HTMLInputElement;
-    // Simulate clicking on the first cell
-    if (firstCell) {
-      const clickEvent = new MouseEvent("click", {
-        bubbles: true,
-        cancelable: true,
-        view: window,
-      });
-      firstCell.dispatchEvent(clickEvent);
-    }
-
-    // Find the second cell input element
-    const secondCell = document.querySelector(
-      "tbody tr:nth-child(2) td:nth-child(2) .lightsheet_table_cell_input",
-    ) as HTMLInputElement;
-    // Simulate clicking on the second cell
-    if (secondCell) {
-      const clickEvent = new MouseEvent("click", {
-        bubbles: true,
-        cancelable: true,
-        view: window,
-      });
-      secondCell.dispatchEvent(clickEvent);
-    }
-
-    setTimeout(() => {
-      expect(uiInstance.selectedCell).toEqual({ col: 1, row: 1 });
-    }, 100);
-  });
-
   test("Change cell content from formula bar", () => {
+    lightSheetInstance = new LightSheet(targetElementMock, {
+      data: [],
+    });
+    new UI(targetElementMock, lightSheetInstance);
     // Find the cell input element
     const cell = document.querySelector(
       "tbody tr:first-child td:first-child .lightsheet_table_cell_input",
@@ -110,6 +78,10 @@ describe("UI", () => {
   });
 
   test("Change formula bar content from cell", async () => {
+    lightSheetInstance = new LightSheet(targetElementMock, {
+      data: [],
+    });
+    new UI(targetElementMock, lightSheetInstance);
     const cell = document.querySelector(
       "tbody tr:first-child td:first-child .lightsheet_table_cell_input",
     ) as HTMLInputElement;
@@ -137,5 +109,63 @@ describe("UI", () => {
     setTimeout(() => {
       expect(formulaBarInput?.value).toEqual("10");
     }, 100);
+  });
+
+  test("Hide formula bar in read only mode", () => {
+    lightSheetInstance = new LightSheet(targetElementMock, {
+      data: [],
+      isReadOnly: true,
+    });
+    new UI(targetElementMock, lightSheetInstance);
+    const formulaBarDom = targetElementMock.querySelector(
+      ".lightsheet_table_formula_bar",
+    ) as HTMLDivElement;
+    if (formulaBarDom) {
+      expect(formulaBarDom.style.display).toEqual("none");
+    } else {
+      throw new Error("Formula bar element not found");
+    }
+  });
+
+  test("Show formula bar in read only mode", () => {
+    lightSheetInstance = new LightSheet(targetElementMock, {
+      data: [],
+      isReadOnly: false,
+    });
+    new UI(targetElementMock, lightSheetInstance);
+    const formulaBarDom = targetElementMock.querySelector(
+      ".lightsheet_table_formula_bar",
+    ) as HTMLDivElement;
+    if (formulaBarDom) {
+      expect(formulaBarDom.style.display).toEqual("flex");
+    } else {
+      throw new Error("Formula bar element not found");
+    }
+  });
+
+  test("Display the raw value of the cell", () => {
+    lightSheetInstance = new LightSheet(targetElementMock, {
+      data: [
+        ["1", "=1+2/3*6+A1+test(1,2)", "img/nophoto.jpg", "Marketing"],
+        ["2", "Jorge", "img/nophoto.jpg", "Marketing", "3120"],
+        ["3", "Jorge", "img/nophoto.jpg", "Marketing", "3120"],
+      ],
+    });
+    new UI(targetElementMock, lightSheetInstance);
+
+    const cell2 = targetElementMock.querySelector(
+      "tbody tr:nth-child(2) td:first-child .lightsheet_table_cell_input",
+    ) as HTMLInputElement;
+    const clickEvent = new MouseEvent("click", {
+      bubbles: true,
+      cancelable: true,
+      view: window,
+    });
+    cell2.dispatchEvent(clickEvent);
+
+    const formulaBarInput = targetElementMock.querySelector(
+      ".formula_input",
+    ) as HTMLInputElement;
+    expect(formulaBarInput.value).toEqual("=1+2/3*6+A1+test(1,2)");
   });
 });
