@@ -29,12 +29,17 @@ export default class LightSheet {
     this.onTableReady();
   }
 
+  onTableReady() {
+    this.isReady = true;
+    if (this.options.onReady) this.options.onReady();
+  }
+
   setReadOnly(isReadOnly: boolean) {
     this.#ui.setReadOnly(isReadOnly);
   }
 
   showToolbar(isShown: boolean) {
-    this.#ui.showToolBar(isShown);
+    this.#ui.showToolbar(isShown);
   }
 
   #initializeTable() {
@@ -76,11 +81,6 @@ export default class LightSheet {
         }
       }
     }
-  }
-
-  onTableReady() {
-    this.isReady = true;
-    if (this.options.onReady) this.options.onReady();
   }
 
   setCellAt(columnKey: number, rowKey: number, value: any): CellInfo {

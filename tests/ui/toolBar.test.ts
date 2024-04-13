@@ -20,7 +20,7 @@ describe("Tool bar", () => {
     // Expect that the toolbar element exists
     expect(toolBarElement).toBeTruthy();
     // Expect that the toolbar element has 13 children
-    expect(toolBarElement!.children.length).toBe(13);
+    expect(toolBarElement!.children.length).toBe(ToolbarItems.length);
     // Expect that the toolbar element is initially hidden
     expect((toolBarElement! as HTMLElement).style.display).toBe("none");
   });
@@ -119,7 +119,7 @@ describe("Tool bar", () => {
       ".lightsheet_table_toolbar",
     );
 
-    expect((toolBarElement! as HTMLElement).style.display).toBe("none");
+    expect(toolBarElement).toBeFalsy();
   });
 
   test("should hide toolbar when there is no show toolbar option", () => {
@@ -131,6 +131,6 @@ describe("Tool bar", () => {
       ".lightsheet_table_toolbar",
     );
 
-    expect((toolBarElement! as HTMLElement).style.display).toBe("none");
+    expect(toolBarElement).toBeFalsy();
   });
 });

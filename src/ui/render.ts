@@ -16,7 +16,7 @@ import { ToolbarOptions } from "../main.types";
 
 export default class UI {
   tableEl: Element;
-  toolBarDom: HTMLElement;
+  toolbarDom: HTMLElement | undefined;
   tableHeadDom: Element;
   tableBodyDom: Element;
   lightSheet: LightSheet;
@@ -51,10 +51,8 @@ export default class UI {
     this.tableEl.classList.add("lightsheet_table_container");
 
     /*toolbar*/
-    this.toolBarDom = document.createElement("div");
-    this.toolBarDom.classList.add("lightsheet_table_toolbar");
-    this.toolBarDom.style.display = "none";
-    this.createToolBar();
+
+    this.createToolbar();
 
     /*content*/
     const lightSheetContainerDom = document.createElement("div");
@@ -76,34 +74,41 @@ export default class UI {
     tableContainerDom.appendChild(this.tableBodyDom);
   }
 
-  createToolBar() {
-    if (this.toolbarOptions) {
-      //Element
-      if (this.toolbarOptions.element != null) {
-        this.toolbarOptions.element.appendChild(this.toolBarDom);
-      } else {
-        this.tableEl.insertBefore(this.toolBarDom, this.tableEl.firstChild);
-      }
+  createToolbar() {
+    if (
+      !this.toolbarOptions.showToolbar ||
+      this.toolbarOptions.items?.length == 0
+    )
+      return;
+    //Element
+    this.toolbarDom = document.createElement("div");
+    this.toolbarDom.classList.add("lightsheet_table_toolbar");
 
-      const toolbarContent = this.toolbarOptions.items!;
-      for (let i = 0; i < toolbarContent.length; i++) {
-        const toolbarItem = document.createElement("i");
-        toolbarItem.classList.add("lightSheet_toolbar_item");
-        toolbarItem.classList.add("material-symbols-outlined");
-        toolbarItem.textContent = toolbarContent[i];
-        this.toolBarDom.appendChild(toolbarItem);
-      }
+    if (this.toolbarOptions.element != null) {
+      this.toolbarOptions.element.appendChild(this.toolbarDom);
+    } else {
+      this.tableEl.insertBefore(this.toolbarDom, this.tableEl.firstChild);
+    }
 
-      //showToolBar
-      this.showToolBar(this.toolbarOptions.showToolbar!);
+    for (let i = 0; i < this.toolbarOptions.items!.length; i++) {
+      const toolbarItem = document.createElement("i");
+      toolbarItem.classList.add("lightSheet_toolbar_item");
+      toolbarItem.classList.add("material-symbols-outlined");
+      toolbarItem.textContent = this.toolbarOptions.items![i];
+      this.toolbarDom.appendChild(toolbarItem);
     }
   }
 
-  showToolBar(isShown: boolean) {
+  removeToolbar() {
+    if (this.toolbarDom) this.toolbarDom.remove();
+  }
+
+  showToolbar(isShown: boolean) {
+    this.toolbarOptions.showToolbar = isShown;
     if (isShown) {
-      this.toolBarDom.style.display = "flex";
+      this.createToolbar();
     } else {
-      this.toolBarDom.style.display = "none";
+      this.removeToolbar();
     }
   }
 
