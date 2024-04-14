@@ -8,4 +8,11 @@ export type LightSheetOptions = {
   defaultRowCount?: number;
   defaultColCount?: number;
   isReadOnly?: boolean;
+  toolbarOptions?: ToolbarOptions;
+};
+
+export type ToolbarOptions = {
+  showToolbar?: boolean;
+  items?: string[];
+  element?: HTMLElement;
 };

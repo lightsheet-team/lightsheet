@@ -23,7 +23,7 @@ export default class LightSheet {
     this.events = new Events();
     this.style = options.style;
     this.sheet = new Sheet(this.events);
-    this.#ui = new UI(targetElement, this);
+    this.#ui = new UI(targetElement, this, this.options.toolbarOptions);
     this.#initializeTable();
     if (options.onCellChange) {
       this.onCellChange = options.onCellChange;
@@ -33,10 +33,18 @@ export default class LightSheet {
     this.onTableReady();
   }
 
+  onTableReady() {
+    this.isReady = true;
+    if (this.options.onReady) this.options.onReady();
+  }
+
   setReadOnly(isReadOnly: boolean) {
     this.#ui.setReadOnly(isReadOnly);
   }
 
+  showToolbar(isShown: boolean) {
+    this.#ui.showToolbar(isShown);
+    }
   initializeStyle() {
     for (const [key, value] of Object.entries(this.style)) {
       const { row, col } = getRowColFromCellRef(key)
@@ -92,11 +100,6 @@ export default class LightSheet {
         }
       }
     }
-  }
-
-  onTableReady() {
-    this.isReady = true;
-    if (this.options.onReady) this.options.onReady();
   }
 
   setCellAt(columnKey: number, rowKey: number, value: any): CellInfo {
