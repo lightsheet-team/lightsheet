@@ -1,3 +1,4 @@
+import { ToolbarItems } from "../../utils/constants";
 import LightSheet from "../main";
 import {
   generateColumnKey,
@@ -11,9 +12,11 @@ import {
 } from "../core/event/events.types.ts";
 import EventType from "../core/event/eventType.ts";
 import LightSheetHelper from "../../utils/helpers.ts";
+import { ToolbarOptions } from "../main.types";
 
 export default class UI {
   tableEl: Element;
+  toolbarDom: HTMLElement | undefined;
   tableHeadDom: Element;
   tableBodyDom: Element;
   lightSheet: LightSheet;
@@ -21,9 +24,14 @@ export default class UI {
   selectedRowNumberCell: HTMLElement | null = null;
   selectedHeaderCell: HTMLElement | null = null;
   selectedCellsContainer: SelectionContainer;
+  toolbarOptions: ToolbarOptions;
   isReadOnly: boolean;
 
-  constructor(el: Element, lightSheet: LightSheet) {
+  constructor(
+    el: Element,
+    lightSheet: LightSheet,
+    toolbarOptions?: ToolbarOptions,
+  ) {
     this.tableEl = el;
     this.lightSheet = lightSheet;
     this.selectedCell = [];
@@ -32,12 +40,22 @@ export default class UI {
       selectionEnd: null,
     };
     this.registerEvents();
+    this.toolbarOptions = {
+      showToolbar: false,
+      element: undefined,
+      items: ToolbarItems,
+      ...toolbarOptions,
+    };
     this.isReadOnly = lightSheet.options.isReadOnly || false;
 
     this.tableEl.classList.add("lightsheet_table_container");
 
+    /*toolbar*/
+
+    this.createToolbar();
+
+    /*content*/
     const lightSheetContainerDom = document.createElement("div");
-    lightSheetContainerDom.classList.add("lightsheet_table_content");
     this.tableEl.appendChild(lightSheetContainerDom);
 
     const tableContainerDom = document.createElement("table");
@@ -54,6 +72,44 @@ export default class UI {
     //tbody
     this.tableBodyDom = document.createElement("tbody");
     tableContainerDom.appendChild(this.tableBodyDom);
+  }
+
+  createToolbar() {
+    if (
+      !this.toolbarOptions.showToolbar ||
+      this.toolbarOptions.items?.length == 0
+    )
+      return;
+    //Element
+    this.toolbarDom = document.createElement("div");
+    this.toolbarDom.classList.add("lightsheet_table_toolbar");
+
+    if (this.toolbarOptions.element != null) {
+      this.toolbarOptions.element.appendChild(this.toolbarDom);
+    } else {
+      this.tableEl.insertBefore(this.toolbarDom, this.tableEl.firstChild);
+    }
+
+    for (let i = 0; i < this.toolbarOptions.items!.length; i++) {
+      const toolbarItem = document.createElement("i");
+      toolbarItem.classList.add("lightSheet_toolbar_item");
+      toolbarItem.classList.add("material-symbols-outlined");
+      toolbarItem.textContent = this.toolbarOptions.items![i];
+      this.toolbarDom.appendChild(toolbarItem);
+    }
+  }
+
+  removeToolbar() {
+    if (this.toolbarDom) this.toolbarDom.remove();
+  }
+
+  showToolbar(isShown: boolean) {
+    this.toolbarOptions.showToolbar = isShown;
+    if (isShown) {
+      this.createToolbar();
+    } else {
+      this.removeToolbar();
+    }
   }
 
   addHeader(headerData: string[]) {
@@ -81,7 +137,6 @@ export default class UI {
               "lightsheet_table_selected_row_number_header_cell",
             );
             this.selectedHeaderCell = selectedColumn;
-
             Array.from(this.tableBodyDom.children).forEach((childElement) => {
               // Code inside the forEach loop
               childElement.children[i].classList.add(
