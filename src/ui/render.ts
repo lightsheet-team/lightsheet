@@ -148,12 +148,14 @@ export default class UI {
   }
 
   setFormulaBar() {
-    this.formulaInput.addEventListener("input", () => {
-      const newValue = this.formulaInput.value;
-      if (this.selectedCell) {
-        const colIndex = this.selectedCell.columnPosition;
-        const rowIndex = this.selectedCell.rowPosition;
-        this.onUICellValueChange(newValue, colIndex, rowIndex);
+    this.formulaInput.addEventListener("keyup", (event) => {
+      if (event.key === "Enter") {
+        const newValue = this.formulaInput.value;
+        if (this.selectedCell) {
+          const colIndex = this.selectedCell.columnPosition;
+          const rowIndex = this.selectedCell.rowPosition;
+          this.onUICellValueChange(newValue, colIndex, rowIndex);
+        }
       }
     });
   }
