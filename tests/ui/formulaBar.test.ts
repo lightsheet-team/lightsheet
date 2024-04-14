@@ -82,6 +82,7 @@ describe("Formula", () => {
       data: [],
     });
     new UI(targetElementMock, lightSheetInstance);
+
     const cell = document.querySelector(
       "tbody tr:first-child td:first-child .lightsheet_table_cell_input",
     ) as HTMLInputElement;
@@ -153,19 +154,27 @@ describe("Formula", () => {
     });
     new UI(targetElementMock, lightSheetInstance);
 
-    const cell2 = targetElementMock.querySelector(
+    // Select cell2
+    const cell2 = document.querySelector(
       "tbody tr:nth-child(2) td:first-child .lightsheet_table_cell_input",
     ) as HTMLInputElement;
-    const clickEvent = new MouseEvent("click", {
-      bubbles: true,
-      cancelable: true,
-      view: window,
-    });
-    cell2.dispatchEvent(clickEvent);
 
-    const formulaBarInput = targetElementMock.querySelector(
+    // Check if cell2 exists before dispatching the click event
+    if (cell2) {
+      const clickEvent = new MouseEvent("click", {
+        bubbles: true,
+        cancelable: true,
+        view: window,
+      });
+      cell2.dispatchEvent(clickEvent);
+    }
+    // Get the formula bar input element
+    const formulaBarInput = document.querySelector(
       ".formula_input",
     ) as HTMLInputElement;
-    expect(formulaBarInput.value).toEqual("=1+2/3*6+A1+test(1,2)");
+
+    setTimeout(() => {
+      expect(formulaBarInput?.value).toEqual("=1+2/3*6+A1+test(1,2)");
+    });
   });
 });

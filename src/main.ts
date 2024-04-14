@@ -67,7 +67,7 @@ export default class LightSheet {
           if (!rowDom) {
             rowDom = this.#ui.addRow(i);
           }
-          this.#ui.addCell(rowDom, j, i, "");
+          this.#ui.addCell(rowDom, j, i);
         }
       }
     }

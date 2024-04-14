@@ -190,11 +190,7 @@ export default class UI {
     return document.getElementById(rowKey);
   }
 
-  addCell(
-    rowDom: Element,
-    colIndex: number,
-    rowIndex: number,
-  ): HTMLElement {
+  addCell(rowDom: Element, colIndex: number, rowIndex: number): HTMLElement {
     const cellDom = document.createElement("td");
     cellDom.classList.add(
       "lightsheet_table_cell",
@@ -308,7 +304,7 @@ export default class UI {
       elInfo.cellDom = this.addCell(
         elInfo.rowDom!,
         payload.indexPosition.columnIndex,
-        payload.indexPosition.rowIndex
+        payload.indexPosition.rowIndex,
       );
     }
 
