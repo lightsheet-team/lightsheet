@@ -28,7 +28,7 @@ export default class LightSheet {
     if (options.onCellChange) {
       this.onCellChange = options.onCellChange;
     }
-    this.initializeStyle()
+    this.initializeStyle();
     if (options.onReady) options.onReady = this.options.onReady;
     this.onTableReady();
   }
@@ -44,21 +44,18 @@ export default class LightSheet {
 
   showToolbar(isShown: boolean) {
     this.#ui.showToolbar(isShown);
-    }
+  }
   initializeStyle() {
     for (const [key, value] of Object.entries(this.style)) {
-      const { row, col } = getRowColFromCellRef(key)
+      const { row, col } = getRowColFromCellRef(key);
       if (row == null && col == null) {
         continue;
       } else if (row != null && col != null) {
         // this.sheet.setCellStyle(row, col, value as string);
       } else if (row != null) {
-
       } else if (col != null) {
-
       }
     }
-
   }
 
   #initializeTable() {
