@@ -5,9 +5,15 @@ var data = [
   ["3", "Jorge", "img/nophoto.jpg", "Marketing", "3120"],
 ];
 
+const toolbar = ["undo", "redo", "save"];
+
 new Lightsheet(document.getElementById("lightsheet"), {
   data,
   onCellChange: (colIndex, rowIndex, newValue) => {
     console.log(colIndex, rowIndex, newValue);
+  },
+  toolbarOptions: {
+    showToolbar: true,
+    items: toolbar,
   },
 });
