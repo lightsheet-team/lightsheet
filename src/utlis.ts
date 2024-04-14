@@ -20,7 +20,7 @@ export const getRowColFromCellRef = (
     const rowStr = matches[2] || ""; // If row number is not provided, default to empty string
 
     // Convert column string to index
-    let colIndex = -1;
+    let colIndex = 0;
     if (colStr !== "") {
       for (let i = 0; i < colStr.length; i++) {
         colIndex = colIndex * 26 + (colStr.charCodeAt(i) - 64);

@@ -108,15 +108,15 @@ describe("Cell references", () => {
   it("should create an empty cell with styling", () => {
     const b2 = sheet.getCellInfoAt(1, 1)!;
     sheet.setCellStyle(
-      b2.position!.columnKey!,
-      b2.position!.rowKey!,
-      new CellStyle(new Map([["width", "50px"]])),
+      1,
+      1,
+      'width:50px;'
     );
 
     sheet.setCellAt(1, 1, "");
 
     // Clearing the style should result in the cell being deleted.
-    sheet.setCellStyle(b2!.position.columnKey!, b2!.position.rowKey!, null);
+    sheet.setCellStyle(1, 1, "");
     expect(sheet.getCellInfoAt(1, 1)).toBeNull();
   });
 

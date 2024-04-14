@@ -1,3 +1,4 @@
+import CellStyle from "../structure/cellStyle.ts";
 import { PositionInfo } from "../structure/sheet.types.ts";
 
 export type IndexPosition = {
@@ -20,3 +21,8 @@ export type CoreSetCellPayload = {
   clearCell: boolean;
   clearRow: boolean;
 };
+
+export type CoreSetStylePayload = {
+  position: PositionInfo;
+  value: Map<string, string>
+}

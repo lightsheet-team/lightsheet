@@ -8,10 +8,11 @@ import CellStyle from "./cellStyle.ts";
 import CellGroup from "./group/cellGroup.ts";
 import Events from "../event/events.ts";
 import LightsheetEvent from "../event/event.ts";
-import { CoreSetCellPayload, UISetCellPayload } from "../event/events.types.ts";
+import { CoreSetCellPayload, CoreSetStylePayload, UISetCellPayload } from "../event/events.types.ts";
 import EventType from "../event/eventType.ts";
 import { CellState } from "./cell/cellState.ts";
 import { EvaluationResult } from "../evaluation/expressionHandler.types.ts";
+import LightSheetHelper from "../../../utils/helpers.ts";
 
 export default class Sheet {
   defaultStyle: any;
@@ -103,15 +104,15 @@ export default class Sheet {
     const cell = this.getCell(colKey, rowKey)!;
     return cell
       ? {
-          rawValue: cell.rawValue,
-          resolvedValue: cell.resolvedValue,
-          formattedValue: cell.formattedValue,
-          state: cell.state,
-          position: {
-            columnKey: colKey,
-            rowKey: rowKey,
-          },
-        }
+        rawValue: cell.rawValue,
+        resolvedValue: cell.resolvedValue,
+        formattedValue: cell.formattedValue,
+        state: cell.state,
+        position: {
+          columnKey: colKey,
+          rowKey: rowKey,
+        },
+      }
       : null;
   }
 
@@ -320,46 +321,68 @@ export default class Sheet {
   setCellStyle(
     colPos: number,
     rowPos: number,
-    style: CellStyle | null,
-  ): boolean {
+    style: string,
+  ): void {
+
+    const mappedStyle: Map<string, string> = LightSheetHelper.GenerateStyleMapFromString(style)
     const colKey = this.columnPositions.get(colPos);
     const rowKey = this.rowPositions.get(rowPos);
-    if (!colKey || !rowKey) return false;
+    if (!colKey || !rowKey) return
     const col = this.columns.get(colKey);
     const row = this.rows.get(rowKey);
-    if (!col || !row) return false;
+    if (!col || !row) return;
 
-    if (style == null) {
-      return this.clearCellStyle(colKey, rowKey);
+    if (mappedStyle.size == 0) {
+      this.clearCellStyle(colKey, rowKey);
+      return;
     }
 
     // TODO Style could be non-null but empty; should we allow this?
-    style = new CellStyle().clone(style);
+    const cellStyle = new CellStyle(mappedStyle);
 
-    col.cellFormatting.set(row.key, style);
-    row.cellFormatting.set(col.key, style);
+    col.cellFormatting.set(row.key, cellStyle);
+    row.cellFormatting.set(col.key, cellStyle);
 
-    if (style.formatter) {
+    if (cellStyle.formatter) {
       this.applyCellFormatter(this.getCell(colKey, rowKey)!, colKey, rowKey);
     }
 
-    return true;
+    const payload: CoreSetStylePayload = {
+      position: {
+        rowKey,
+        columnKey: colKey,
+      },
+      value: mappedStyle
+    }
+
+    this.events.emit(new LightsheetEvent(EventType.VIEW_SET_STYLE, payload));
+
+    return;
   }
 
-  setColumnStyle(colKey: ColumnKey, style: CellStyle | null): boolean {
-    const col = this.columns.get(colKey);
-    if (!col) return false;
+  setColumnStyle(colPos: number, style: string): void {
+    if (!style) return;
+    const colKey = this.rowPositions.get(colPos);
+    if (!colKey) return
 
-    this.setCellGroupStyle(col, style);
-    return true;
+    const col = this.rows.get(colKey);
+    if (!col) return;
+    const mappedStyle: Map<string, string> = LightSheetHelper.GenerateStyleMapFromString(style)
+
+    this.setCellGroupStyle(col, new CellStyle(mappedStyle));
   }
 
-  setRowStyle(rowKey: RowKey, style: CellStyle | null): boolean {
+  setRowStyle(rowPos: number, style: string): void {
+    if (!style) return;
+    const rowKey = this.rowPositions.get(rowPos);
+    if (!rowKey) return
+
     const row = this.rows.get(rowKey);
-    if (!row) return false;
+    if (!row) return;
 
-    this.setCellGroupStyle(row, style);
-    return true;
+    const mappedStyle: Map<string, string> = LightSheetHelper.GenerateStyleMapFromString(style)
+
+    this.setCellGroupStyle(row, new CellStyle(mappedStyle));
   }
 
   private setCellGroupStyle(

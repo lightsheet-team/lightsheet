@@ -17,4 +17,5 @@ new Lightsheet(document.getElementById("lightsheet"), {
     items: toolbar,
     element: document.getElementById("toolbar-dom-id"),
   },
+  style: { A2: "font-weight: bold;", B2: "background-color: yellow;" },
 });

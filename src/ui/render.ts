@@ -8,11 +8,13 @@ import { CellIdInfo, SelectionContainer } from "./render.types.ts";
 import LightsheetEvent from "../core/event/event.ts";
 import {
   CoreSetCellPayload,
+  CoreSetStylePayload,
   UISetCellPayload,
 } from "../core/event/events.types.ts";
 import EventType from "../core/event/eventType.ts";
 import LightSheetHelper from "../../utils/helpers.ts";
 import { ToolbarOptions } from "../main.types";
+import CellStyle from "../core/structure/cellStyle.ts";
 
 export default class UI {
   tableEl: Element;
@@ -287,12 +289,25 @@ export default class UI {
     this.lightSheet.events.on(EventType.CORE_SET_CELL, (event) => {
       if (this.lightSheet.isReady) this.onCoreSetCell(event);
     });
+    this.lightSheet.events.on(EventType.VIEW_SET_STYLE, (event) => {
+      this.onCoreSetStyle(event.payload);
+    });
+  }
+
+  private onCoreSetStyle(event: CoreSetStylePayload) {
+    const { position, value } = event;
+    const cellDomKey =
+      `${position.columnKey!.toString()}_${position.rowKey!.toString()}`;
+    // Get the cell by either column and row key or position.
+    // TODO Index-based ID may not be unique if there are multiple sheets.
+    const cellDom: HTMLElement = document.getElementById(cellDomKey)!;
+    cellDom.children[0].setAttribute("style", LightSheetHelper.GenerateStyleStringFromMap(value));
   }
 
   private onCoreSetCell(event: LightsheetEvent) {
     const payload = event.payload as CoreSetCellPayload;
     // Get HTML elements and (new) IDs for the payload's cell and row.
-    const elInfo = LightSheetHelper.getElementInfoForSetCell(payload);
+    const elInfo = LightSheetHelper.GetElementInfoForSetCell(payload);
 
     if (!elInfo.rowDom) {
       const row = this.addRow(payload.indexPosition.rowIndex);

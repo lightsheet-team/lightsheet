@@ -5,14 +5,14 @@ import { CellInfo } from "./core/structure/sheet.types.ts";
 import Events from "./core/event/events.ts";
 import LightSheetHelper from "../utils/helpers.ts";
 import { DefaultRowCount, DefaultColCount } from "../utils/constants.ts";
-import { generateRowLabel, getRowColFromCellRef } from "./utlis.ts";
+import { getRowColFromCellRef } from "./utlis.ts";
 
 export default class LightSheet {
-  #ui: UI;
+  private ui: UI;
   options: LightSheetOptions;
   sheet: Sheet;
   events: Events;
-  style: any = null;
+  style?: any = null;
   onCellChange?;
   isReady: boolean = false;
 
@@ -23,8 +23,8 @@ export default class LightSheet {
     this.events = new Events();
     this.style = options.style;
     this.sheet = new Sheet(this.events);
-    this.#ui = new UI(targetElement, this, this.options.toolbarOptions);
-    this.#initializeTable();
+    this.ui = new UI(targetElement, this, this.options.toolbarOptions);
+    this.initializeTable();
     if (options.onCellChange) {
       this.onCellChange = options.onCellChange;
     }
@@ -39,26 +39,29 @@ export default class LightSheet {
   }
 
   setReadOnly(isReadOnly: boolean) {
-    this.#ui.setReadOnly(isReadOnly);
+    this.ui.setReadOnly(isReadOnly);
   }
 
   showToolbar(isShown: boolean) {
-    this.#ui.showToolbar(isShown);
+    this.ui.showToolbar(isShown);
   }
-  initializeStyle() {
+
+  private initializeStyle() {
     for (const [key, value] of Object.entries(this.style)) {
       const { row, col } = getRowColFromCellRef(key);
       if (row == null && col == null) {
         continue;
       } else if (row != null && col != null) {
-        // this.sheet.setCellStyle(row, col, value as string);
+        this.sheet.setCellStyle(col, row, value as string);
       } else if (row != null) {
+        this.sheet.setRowStyle(row, value as string);
       } else if (col != null) {
+        this.sheet.setColumnStyle(col, value as string);
       }
     }
   }
 
-  #initializeTable() {
+  private initializeTable() {
     // Create header row and add headers
     const rowLength = this.options.data?.length
       ? this.options.data?.length
@@ -74,11 +77,11 @@ export default class LightSheet {
       (_, i) => (i === 0 ? "" : LightSheetHelper.GenerateRowLabel(i)), // Generating row labels
     );
 
-    this.#ui.addHeader(headerData);
+    this.ui.addHeader(headerData);
 
     for (let i = 0; i < rowLength!; i++) {
       //create new row
-      const rowDom = this.#ui.addRow(i);
+      const rowDom = this.ui.addRow(i);
       for (let j = 0; j < colLength; j++) {
         const data =
           this.options.data[i] && this.options.data[i].length - 1 >= j
@@ -91,9 +94,9 @@ export default class LightSheet {
           const columnKeyStr = cell.position.columnKey!.toString();
 
           if (!rowDom.id) rowDom.id = rowKeyStr;
-          this.#ui.addCell(rowDom, j, i, cell.resolvedValue, columnKeyStr);
+          this.ui.addCell(rowDom, j, i, cell.resolvedValue, columnKeyStr);
         } else {
-          this.#ui.addCell(rowDom, j, i, "");
+          this.ui.addCell(rowDom, j, i, "");
         }
       }
     }

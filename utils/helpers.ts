@@ -12,7 +12,7 @@ export default class LightSheetHelper {
     return label || "A"; // Return "A" if index is 0
   };
 
-  static getElementInfoForSetCell = (payload: CoreSetCellPayload) => {
+  static GetElementInfoForSetCell = (payload: CoreSetCellPayload) => {
     const colKey = payload.position.columnKey?.toString();
     const rowKey = payload.position.rowKey?.toString();
 
@@ -45,4 +45,22 @@ export default class LightSheetHelper {
       rowDomId: newRowDomId,
     };
   };
+
+  static GenerateStyleMapFromString(style: string): Map<string, string> {
+    const mappedStyle = new Map<string, string>();
+    style.split(';').forEach((item: string) => {
+      const [key, value] = item.split(':');
+      if (!key || !value) return;
+      mappedStyle.set(key, value);
+    })
+    return mappedStyle;
+  }
+
+  static GenerateStyleStringFromMap(style: Map<string, string>) {
+    let result = '';
+    for (let [key, value] of style) {
+      result += `${key}:${value};`
+    }
+    return result;
+  }
 }
