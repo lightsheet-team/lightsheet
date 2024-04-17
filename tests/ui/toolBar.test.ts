@@ -2,6 +2,10 @@ import LightSheet from "../../src/main";
 import { ToolbarItems } from "../../src/utils/constants.ts";
 
 describe("Tool bar", () => {
+  beforeEach(() => {
+    window.sheetHolder?.clear();
+  });
+
   afterEach(() => {
     jest.clearAllMocks();
   });

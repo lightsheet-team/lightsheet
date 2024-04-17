@@ -13,7 +13,6 @@ describe("LightSheet", () => {
     window.sheetHolder?.clear();
     lightSheet = new LightSheet(
       {
-        data: [],
         sheetName: "Sheet",
         onReady: onReady,
       },
@@ -30,7 +29,6 @@ describe("LightSheet", () => {
   test("initializeData method creates header with the correct number of children in UI", () => {
     // Get the number of children of tableHeadDom
     const tbodyElement = targetElementMock.querySelector("tbody");
-
     // Get the number of children of tableBodyDom
     const rowCount = tbodyElement?.children.length;
     const colCount = tbodyElement?.children[0].children.length;
