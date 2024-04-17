@@ -5,13 +5,17 @@ var data = [
   ["3", "Jorge", "img/nophoto.jpg", "Marketing", "3120"],
 ];
 
-new Lightsheet(
-  {
-    data: data,
-    sheetName: "Sheet1",
-    onCellChange: (colIndex, rowIndex, newValue) => {
-      console.log(colIndex, rowIndex, newValue);
-    },
+const toolbar = ["undo", "redo", "save"];
+
+new Lightsheet(document.getElementById("lightsheet"), {
+  data,
+  sheetName: "Sheet1",
+  onCellChange: (colIndex, rowIndex, newValue) => {
+    console.log(colIndex, rowIndex, newValue);
   },
-  document.getElementById("lightsheet"),
-);
+  toolbarOptions: {
+    showToolbar: false,
+    items: toolbar,
+    element: document.getElementById("toolbar-dom-id"),
+  },
+});
