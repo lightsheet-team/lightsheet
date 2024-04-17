@@ -317,6 +317,15 @@ export default class Sheet {
 
       const expr = new ExpressionHandler(refSheet, refCell.rawValue);
       refCell.rawValue = expr.updatePositionalReferences(from, to);
+
+      // Emit event for the rawValue change.
+      refSheet.emitSetCellEvent(
+        refInfo.column,
+        refInfo.row,
+        refSheet.getColumnIndex(refInfo.column)!,
+        refSheet.getRowIndex(refInfo.row)!,
+        refCell,
+      );
     }
   }
 
