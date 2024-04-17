@@ -27,9 +27,8 @@ export default class LightSheet {
       ...options,
     };
     this.events = new Events();
-    this.sheetHolder = this.getSheetHolder();
-    this.sheet = new Sheet(this.events);
-    this.sheetHolder.addSheet(this);
+    this.sheetHolder = SheetHolder.getInstance();
+    this.sheet = new Sheet(options.sheetName, this.events);
 
     if (targetElement) {
       this.#ui = new UI(targetElement, this);
@@ -94,13 +93,6 @@ export default class LightSheet {
   onTableReady() {
     this.isReady = true;
     if (this.options.onReady) this.options.onReady();
-  }
-
-  getSheetHolder(): SheetHolder {
-    if (!window.sheetHolder) {
-      new SheetHolder();
-    }
-    return window.sheetHolder;
   }
 
   getKey() {

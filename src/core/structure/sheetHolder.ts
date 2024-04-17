@@ -1,21 +1,23 @@
-import LightSheet from "../../main.ts";
 import { CellKey, SheetKey } from "./key/keyTypes.ts";
 import Cell from "./cell/cell.ts";
+import Sheet from "./sheet.ts";
 
 export default class SheetHolder {
-  sheets: Map<SheetKey, LightSheet>;
+  sheets: Map<SheetKey, Sheet>;
   sheetNames: Map<string, SheetKey>;
   cellData: Map<CellKey, Cell>;
 
-  constructor() {
+  private constructor() {
     this.sheets = new Map();
     this.sheetNames = new Map();
     this.cellData = new Map();
+  }
 
-    if (window.sheetHolder) {
-      return window.sheetHolder;
+  static getInstance(): SheetHolder {
+    if (!window.sheetHolder) {
+      window.sheetHolder = new SheetHolder();
     }
-    window.sheetHolder = this;
+    return window.sheetHolder;
   }
 
   clear() {
@@ -24,26 +26,26 @@ export default class SheetHolder {
     this.cellData.clear();
   }
 
-  addSheet(sheet: LightSheet) {
-    if (this.sheets.has(sheet.getKey())) {
-      throw new Error(`Sheet with key ${sheet.getKey()} already exists.`);
+  addSheet(sheet: Sheet) {
+    if (this.sheets.has(sheet.key)) {
+      throw new Error(`Sheet with key ${sheet.key} already exists.`);
     }
 
-    if (this.sheetNames.has(sheet.getName())) {
-      throw new Error(`Sheet with name ${sheet.getName()} already exists.`);
+    if (this.sheetNames.has(sheet.name)) {
+      throw new Error(`Sheet with name ${sheet.key} already exists.`);
     }
 
-    this.sheets.set(sheet.getKey(), sheet);
-    this.sheetNames.set(sheet.getName(), sheet.getKey());
+    this.sheets.set(sheet.key, sheet);
+    this.sheetNames.set(sheet.name, sheet.key);
   }
 
-  getSheetByName(sheetName: string): LightSheet | null {
+  getSheetByName(sheetName: string): Sheet | null {
     const sheetKey = this.sheetNames.get(sheetName);
     if (!sheetKey) return null;
     return this.sheets.get(sheetKey) ?? null;
   }
 
-  getSheet(sheetKey: SheetKey): LightSheet | null {
+  getSheet(sheetKey: SheetKey): Sheet | null {
     return this.sheets.get(sheetKey) ?? null;
   }
 }

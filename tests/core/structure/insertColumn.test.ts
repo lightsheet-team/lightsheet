@@ -1,12 +1,11 @@
 import Sheet from "../../../src/core/structure/sheet.ts";
-import LightSheet from "../../../src/main.ts";
 
 describe("Insert column test", () => {
   let sheet: Sheet;
 
   beforeEach(() => {
     window.sheetHolder?.clear();
-    sheet = new LightSheet({ sheetName: "Sheet" }).sheet;
+    sheet = new Sheet("Sheet");
     sheet.setCellAt(0, 0, "1x1");
     sheet.setCellAt(1, 0, "2x1");
     sheet.setCellAt(2, 0, "3x1");

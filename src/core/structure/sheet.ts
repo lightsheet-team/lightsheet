@@ -23,6 +23,7 @@ import { CellReference } from "./cell/types.cell.ts";
 
 export default class Sheet {
   key: SheetKey;
+  name: string;
   sheetHolder: SheetHolder;
 
   defaultStyle: any;
@@ -37,15 +38,12 @@ export default class Sheet {
 
   private events: Events;
 
-  constructor(events: Events) {
+  constructor(name: string, events: Events | null = null) {
     this.key = generateSheetKey();
+    this.name = name;
 
-    if (!window.sheetHolder) {
-      throw new Error(
-        "SheetHolder is not initialized. Only instantiate Sheet using a Lightsheet instance.",
-      );
-    }
-    this.sheetHolder = window.sheetHolder;
+    this.sheetHolder = SheetHolder.getInstance();
+    this.sheetHolder.addSheet(this);
 
     this.defaultStyle = new CellStyle(); // TODO This should be configurable.
     this.settings = null;
@@ -58,7 +56,7 @@ export default class Sheet {
     this.defaultWidth = 40;
     this.defaultHeight = 20;
 
-    this.events = events;
+    this.events = events ?? new Events();
     this.registerEvents();
   }
 
@@ -523,7 +521,7 @@ export default class Sheet {
     // Update cells that reference this cell.
     for (const [refKey, refInfo] of cell.referencesIn) {
       const referringCell = this.sheetHolder.cellData.get(refKey)!;
-      const referringSheet = this.sheetHolder.getSheet(refInfo.sheetKey)!.sheet;
+      const referringSheet = this.sheetHolder.getSheet(refInfo.sheetKey)!;
       const refUpdated = referringSheet.resolveCell(
         referringCell,
         refInfo.column,
@@ -594,7 +592,7 @@ export default class Sheet {
     const oldOut = new Map<CellKey, CellReference>(cell.referencesOut);
     cell.referencesOut.clear();
     evalResult.references.forEach((ref) => {
-      const refSheet = this.sheetHolder.getSheet(ref.sheetKey)!.sheet;
+      const refSheet = this.sheetHolder.getSheet(ref.sheetKey)!;
 
       // Initialize the referred cell if it doesn't exist yet.
       const position = refSheet.initializePosition(
@@ -636,7 +634,7 @@ export default class Sheet {
       referredCell.referencesIn.delete(cell.key);
 
       // This may result in the cell being unused - delete if necessary.
-      const referredSheet = this.sheetHolder.getSheet(refInfo.sheetKey)!.sheet;
+      const referredSheet = this.sheetHolder.getSheet(refInfo.sheetKey)!;
       referredSheet.deleteCellIfUnused(refInfo.column, refInfo.row);
     }
 
