@@ -7,7 +7,8 @@ describe("Formatter test", () => {
   let sheet: Sheet;
 
   beforeEach(() => {
-    sheet = new Sheet();
+    window.sheetHolder?.clear();
+    sheet = new Sheet("Sheet");
     sheet.setCellAt(0, 0, "ABC"); // A1
     sheet.setCellAt(0, 1, "12.3"); // A2
     sheet.setCellAt(1, 0, "3,14"); // B1

@@ -7,14 +7,18 @@ var data = [
 
 const toolbar = ["undo", "redo", "save"];
 
-new Lightsheet(document.getElementById("lightsheet"), {
-  data,
-  onCellChange: (colIndex, rowIndex, newValue) => {
-    console.log(colIndex, rowIndex, newValue);
+new Lightsheet(
+  {
+    sheetName: "Sheet1",
+    data,
+    onCellChange: (colIndex, rowIndex, newValue) => {
+      console.log(colIndex, rowIndex, newValue);
+    },
+    toolbarOptions: {
+      showToolbar: false,
+      items: toolbar,
+      element: document.getElementById("toolbar-dom-id"),
+    },
   },
-  toolbarOptions: {
-    showToolbar: false,
-    items: toolbar,
-    element: document.getElementById("toolbar-dom-id"),
-  },
-});
+  document.getElementById("lightsheet"),
+);

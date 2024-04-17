@@ -10,10 +10,14 @@ describe("LightSheet", () => {
     targetElementMock = document.createElement("div");
 
     // Creating instance of LightSheet with mocked dependencies
-    lightSheet = new LightSheet(targetElementMock, {
-      data: [],
-      onReady: onReady,
-    });
+    window.sheetHolder?.clear();
+    lightSheet = new LightSheet(
+      {
+        sheetName: "Sheet",
+        onReady: onReady,
+      },
+      targetElementMock,
+    );
 
     expect(onReady).toHaveBeenCalledWith();
   });
@@ -25,7 +29,6 @@ describe("LightSheet", () => {
   test("initializeData method creates header with the correct number of children in UI", () => {
     // Get the number of children of tableHeadDom
     const tbodyElement = targetElementMock.querySelector("tbody");
-
     // Get the number of children of tableBodyDom
     const rowCount = tbodyElement?.children.length;
     const colCount = tbodyElement?.children[0].children.length;

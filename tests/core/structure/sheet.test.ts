@@ -5,7 +5,8 @@ describe("Sheet", () => {
   let sheet: Sheet;
 
   beforeEach(() => {
-    sheet = new Sheet();
+    window.sheetHolder?.clear();
+    sheet = new Sheet("Sheet");
   });
 
   it("should set a cell value at a specified position", () => {
