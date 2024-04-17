@@ -19,6 +19,7 @@ import {
 
 import { CellState } from "../structure/cell/cellState.ts";
 import LightSheetHelper from "../../utils/helpers.ts";
+import { Coordinate } from "../../utils/common.types.ts";
 
 const math = create({
   parseDependencies,
@@ -72,43 +73,39 @@ export default class ExpressionHandler {
     }
   }
 
-  updateReferenceSymbols(
-    oldPos: number,
-    newPos: number,
-    columnChanged: boolean,
-  ): string {
+  updatePositionalReferences(from: Coordinate, to: Coordinate) {
     if (!this.rawValue.startsWith("=")) return this.rawValue;
 
     const expression = this.rawValue.substring(1);
     const parseResult = math.parse(expression);
 
+    const fromSymbol =
+      LightSheetHelper.generateColumnLabel(from.column + 1) + (from.row + 1);
+    const toSymbol =
+      LightSheetHelper.generateColumnLabel(to.column + 1) + (to.row + 1);
+
     // Update each symbol in the expression.
     const transform = parseResult.transform((node) =>
-      this.updateReferenceSymbol(node, oldPos, newPos, columnChanged),
+      this.updateReferenceSymbol(node, fromSymbol, toSymbol),
     );
     return `=${transform.toString()}`;
   }
 
   private updateReferenceSymbol(
     node: MathNode,
-    oldPosition: number,
-    newPosition: number,
-    columnChanged: boolean,
-  ): MathNode {
+    targetSymbol: string,
+    newSymbol: string,
+  ) {
     if (!(node instanceof math.SymbolNode)) {
       return node;
     }
     const symbolNode = node as math.SymbolNode;
 
-    // Replace either the column label or row index in the symbol to reflect the new position.
-    const oldIndex = columnChanged
-      ? LightSheetHelper.generateColumnLabel(oldPosition + 1)
-      : oldPosition.toString();
-    const newIndex = columnChanged
-      ? LightSheetHelper.generateColumnLabel(newPosition + 1)
-      : newPosition.toString();
+    if (symbolNode.name !== targetSymbol) {
+      return symbolNode;
+    }
 
-    symbolNode.name = symbolNode.name.replace(oldIndex, newIndex);
+    symbolNode.name = newSymbol;
     return symbolNode;
   }
 

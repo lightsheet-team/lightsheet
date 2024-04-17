@@ -20,6 +20,7 @@ import { CellState } from "./cell/cellState.ts";
 import { EvaluationResult } from "../evaluation/expressionHandler.types.ts";
 import SheetHolder from "./sheetHolder.ts";
 import { CellReference } from "./cell/types.cell.ts";
+import { Coordinate } from "../../utils/common.types.ts";
 
 export default class Sheet {
   key: SheetKey;
@@ -216,7 +217,7 @@ export default class Sheet {
         );
       }
       group.position = to;
-      this.updateGroupCellReferenceSymbols(group, from, to);
+      this.updateReferenceSymbolsForGroup(group, from, to);
     }
 
     // We have to update all the positions to keep it consistent.
@@ -255,7 +256,7 @@ export default class Sheet {
       } else {
         targetPositions.set(currentPos, previousValue);
         const group = target.get(previousValue)!;
-        this.updateGroupCellReferenceSymbols(group, group.position, currentPos);
+        this.updateReferenceSymbolsForGroup(group, group.position, currentPos);
         group.position = currentPos;
       }
 
@@ -274,25 +275,48 @@ export default class Sheet {
     return true;
   }
 
-  private updateGroupCellReferenceSymbols(
+  private updateReferenceSymbolsForGroup(
     group: CellGroup<ColumnKey | RowKey>,
     from: number,
     to: number,
   ) {
-    // Update formulas referring to cells in this group to reflect the new position.
-    for (const [, cellKey] of group!.cellIndex) {
+    for (const [oppositeKey, cellKey] of group!.cellIndex) {
       const cell = this.cellData.get(cellKey)!;
-      for (const [refCellKey, refInfo] of cell.referencesIn) {
-        const refSheet = this.sheetHolder.getSheet(refInfo.sheetKey)!;
-        const refCell = refSheet.cellData.get(refCellKey)!;
+      if (!cell.referencesIn) continue; // Only cells with incoming references are affected.
 
-        const expr = new ExpressionHandler(refSheet, refCell.rawValue);
-        refCell.rawValue = expr.updateReferenceSymbols(
-          from,
-          to,
-          group instanceof Column,
-        );
-      }
+      // Convert the information on how the group is shifted into coordinates.
+      // from and to can refer to either a column or row position depending on the group type.
+      const oppositeGroupPos =
+        group instanceof Column
+          ? this.rows.get(oppositeKey as RowKey)!.position
+          : this.columns.get(oppositeKey as ColumnKey)!.position;
+
+      const fromCoord: Coordinate = {
+        column: group instanceof Column ? from : oppositeGroupPos!,
+        row: group instanceof Row ? from : oppositeGroupPos!,
+      };
+
+      const toCoord: Coordinate = {
+        column: group instanceof Column ? to : oppositeGroupPos!,
+        row: group instanceof Row ? to : oppositeGroupPos!,
+      };
+
+      this.updateCellReferenceSymbols(cell, fromCoord, toCoord);
+    }
+  }
+
+  private updateCellReferenceSymbols(
+    cell: Cell,
+    from: Coordinate,
+    to: Coordinate,
+  ) {
+    // Update reference symbols for all cell formulas that refer to the cell being moved.
+    for (const [refCellKey, refInfo] of cell.referencesIn) {
+      const refSheet = this.sheetHolder.getSheet(refInfo.sheetKey)!;
+      const refCell = refSheet.cellData.get(refCellKey)!;
+
+      const expr = new ExpressionHandler(refSheet, refCell.rawValue);
+      refCell.rawValue = expr.updatePositionalReferences(from, to);
     }
   }
 
