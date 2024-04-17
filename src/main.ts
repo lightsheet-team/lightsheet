@@ -35,7 +35,6 @@ export default class LightSheet {
       this.#initializeTable();
     }
 
-    this.#initializeTable();
     if (options.onCellChange) {
       this.onCellChange = options.onCellChange;
     }
