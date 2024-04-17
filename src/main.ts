@@ -1,11 +1,13 @@
 import UI from "./ui/render.ts";
 import { LightSheetOptions } from "./main.types.ts";
 import Sheet from "./core/structure/sheet.ts";
-import { CellInfo } from "./core/structure/sheet.types.ts";
+import { CellInfo, StyleInfo } from "./core/structure/sheet.types.ts";
 import Events from "./core/event/events.ts";
 import LightSheetHelper from "../utils/helpers.ts";
 import { DefaultRowCount, DefaultColCount } from "../utils/constants.ts";
 import { getRowColFromCellRef } from "./utlis.ts";
+import CellStyle from "./core/structure/cellStyle.ts";
+import Formatter from "./core/evaluation/formatter.ts";
 
 export default class LightSheet {
   private ui: UI;
@@ -24,6 +26,7 @@ export default class LightSheet {
     this.style = options.style;
     this.sheet = new Sheet(this.events);
     this.ui = new UI(targetElement, this, this.options.toolbarOptions);
+    // new all formatter
     this.initializeTable();
     if (options.onCellChange) {
       this.onCellChange = options.onCellChange;
@@ -47,16 +50,18 @@ export default class LightSheet {
   }
 
   private initializeStyle() {
-    for (const [key, value] of Object.entries(this.style)) {
+    for (const [key, item] of Object.entries(this.style)) {
       const { row, col } = getRowColFromCellRef(key);
+      const cellStyle = new CellStyle(LightSheetHelper.GenerateStyleMapFromString((item as StyleInfo).css!))
+      debugger
       if (row == null && col == null) {
         continue;
       } else if (row != null && col != null) {
-        this.sheet.setCellStyle(col, row, value as string);
+        this.sheet.setCellStyle(col, row, cellStyle);
       } else if (row != null) {
-        this.sheet.setRowStyle(row, value as string);
+        this.sheet.setRowStyle(row, cellStyle);
       } else if (col != null) {
-        this.sheet.setColumnStyle(col, value as string);
+        this.sheet.setColumnStyle(col, cellStyle);
       }
     }
   }

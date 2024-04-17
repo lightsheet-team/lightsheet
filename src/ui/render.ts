@@ -301,7 +301,8 @@ export default class UI {
     // Get the cell by either column and row key or position.
     // TODO Index-based ID may not be unique if there are multiple sheets.
     const cellDom: HTMLElement = document.getElementById(cellDomKey)!;
-    cellDom.children[0].setAttribute("style", LightSheetHelper.GenerateStyleStringFromMap(value));
+    const inputElement = cellDom.children[0] as HTMLInputElement
+    inputElement.setAttribute("style", value);
   }
 
   private onCoreSetCell(event: LightsheetEvent) {

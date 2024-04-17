@@ -1,5 +1,5 @@
 import CellStyle from "../structure/cellStyle.ts";
-import { PositionInfo } from "../structure/sheet.types.ts";
+import { PositionInfo, StyleInfo } from "../structure/sheet.types.ts";
 
 export type IndexPosition = {
   columnIndex: number;
@@ -24,5 +24,5 @@ export type CoreSetCellPayload = {
 
 export type CoreSetStylePayload = {
   position: PositionInfo;
-  value: Map<string, string>
+  value: string;
 }

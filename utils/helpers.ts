@@ -1,3 +1,4 @@
+import Formatter from "../src/core/evaluation/formatter";
 import { CoreSetCellPayload } from "../src/core/event/events.types";
 
 export default class LightSheetHelper {
@@ -51,7 +52,7 @@ export default class LightSheetHelper {
     style.split(';').forEach((item: string) => {
       const [key, value] = item.split(':');
       if (!key || !value) return;
-      mappedStyle.set(key, value);
+      mappedStyle.set(key.trim(), value.trim());
     })
     return mappedStyle;
   }
@@ -63,4 +64,5 @@ export default class LightSheetHelper {
     }
     return result;
   }
+
 }

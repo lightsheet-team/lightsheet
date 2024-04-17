@@ -30,7 +30,7 @@ export const getRowColFromCellRef = (
     // Convert row string to index
     const rowIndex = rowStr ? parseInt(rowStr, 10) : null;
 
-    return { row: rowIndex, col: colIndex == -1 ? null : colIndex };
+    return { row: rowIndex ? rowIndex - 1 : null, col: colIndex - 1 };
   } else {
     // Invalid cell reference
     return { row: null, col: null };

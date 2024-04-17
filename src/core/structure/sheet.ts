@@ -2,7 +2,7 @@ import { CellKey, ColumnKey, RowKey } from "./key/keyTypes.ts";
 import Cell from "./cell/cell.ts";
 import Column from "./group/column.ts";
 import Row from "./group/row.ts";
-import { CellInfo, PositionInfo, ShiftDirection } from "./sheet.types.ts";
+import { CellInfo, PositionInfo, ShiftDirection, StyleInfo } from "./sheet.types.ts";
 import ExpressionHandler from "../evaluation/expressionHandler.ts";
 import CellStyle from "./cellStyle.ts";
 import CellGroup from "./group/cellGroup.ts";
@@ -13,6 +13,8 @@ import EventType from "../event/eventType.ts";
 import { CellState } from "./cell/cellState.ts";
 import { EvaluationResult } from "../evaluation/expressionHandler.types.ts";
 import LightSheetHelper from "../../../utils/helpers.ts";
+import Formatter from "../evaluation/formatter.ts";
+import NumberFormatter from "../evaluation/numberFormatter.ts";
 
 export default class Sheet {
   defaultStyle: any;
@@ -301,7 +303,7 @@ export default class Sheet {
     return true;
   }
 
-  getCellStyle(colKey?: ColumnKey, rowKey?: RowKey): CellStyle {
+  getCellStyle(colKey?: ColumnKey | null, rowKey?: RowKey | null): CellStyle {
     const col = colKey ? this.columns.get(colKey) : null;
     const row = rowKey ? this.rows.get(rowKey) : null;
     if (!col && !row) return this.defaultStyle;
@@ -321,10 +323,9 @@ export default class Sheet {
   setCellStyle(
     colPos: number,
     rowPos: number,
-    style: string,
+    cellStyle: CellStyle,
   ): void {
 
-    const mappedStyle: Map<string, string> = LightSheetHelper.GenerateStyleMapFromString(style)
     const colKey = this.columnPositions.get(colPos);
     const rowKey = this.rowPositions.get(rowPos);
     if (!colKey || !rowKey) return
@@ -332,13 +333,11 @@ export default class Sheet {
     const row = this.rows.get(rowKey);
     if (!col || !row) return;
 
-    if (mappedStyle.size == 0) {
+    if (cellStyle.styling.size == 0) {
       this.clearCellStyle(colKey, rowKey);
       return;
     }
-
     // TODO Style could be non-null but empty; should we allow this?
-    const cellStyle = new CellStyle(mappedStyle);
 
     col.cellFormatting.set(row.key, cellStyle);
     row.cellFormatting.set(col.key, cellStyle);
@@ -352,7 +351,7 @@ export default class Sheet {
         rowKey,
         columnKey: colKey,
       },
-      value: mappedStyle
+      value: LightSheetHelper.GenerateStyleStringFromMap(this.getCellStyle(colKey, rowKey).styling)
     }
 
     this.events.emit(new LightsheetEvent(EventType.VIEW_SET_STYLE, payload));
@@ -360,29 +359,31 @@ export default class Sheet {
     return;
   }
 
-  setColumnStyle(colPos: number, style: string): void {
-    if (!style) return;
-    const colKey = this.rowPositions.get(colPos);
+  setColumnStyle(colPos: number, cellStyle: CellStyle,): void {
+
+    const colKey = this.columnPositions.get(colPos);
     if (!colKey) return
 
-    const col = this.rows.get(colKey);
+    const col = this.columns.get(colKey);
     if (!col) return;
-    const mappedStyle: Map<string, string> = LightSheetHelper.GenerateStyleMapFromString(style)
 
-    this.setCellGroupStyle(col, new CellStyle(mappedStyle));
+    this.setCellGroupStyle(col, cellStyle);
+
+    this.events.emit(new LightsheetEvent(EventType.VIEW_SET_STYLE, this.getCellStyle(colKey).styling));
+
   }
 
-  setRowStyle(rowPos: number, style: string): void {
-    if (!style) return;
+  setRowStyle(rowPos: number, cellStyle: CellStyle): void {
     const rowKey = this.rowPositions.get(rowPos);
     if (!rowKey) return
 
     const row = this.rows.get(rowKey);
     if (!row) return;
 
-    const mappedStyle: Map<string, string> = LightSheetHelper.GenerateStyleMapFromString(style)
 
-    this.setCellGroupStyle(row, new CellStyle(mappedStyle));
+    this.setCellGroupStyle(row, cellStyle);
+    this.events.emit(new LightsheetEvent(EventType.VIEW_SET_STYLE, this.getCellStyle(null, rowKey).styling));
+
   }
 
   private setCellGroupStyle(
