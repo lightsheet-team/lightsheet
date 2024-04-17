@@ -49,12 +49,13 @@ describe("Multiple sheets test", () => {
     const outCellKey = sheet1
       .columns!.get(outInfo!.position.columnKey!)!
       .cellIndex.get(outInfo!.position.rowKey!)!;
-    const outCell = window.sheetHolder.cellData.get(outCellKey)!;
+    const outCell = sheet1.cellData.get(outCellKey)!;
 
     // Check referencesIn and referencesOut
     expect(outCell.referencesOut.size).toBe(refSize.col * refSize.row);
-    outCell.referencesOut.forEach((_, ref) => {
-      expect(window.sheetHolder.cellData.get(ref)!.referencesIn.size).toBe(1);
+    outCell.referencesOut.forEach((ref, refCellKey) => {
+      const refSheet = window.sheetHolder.getSheet(ref.sheetKey)!;
+      expect(refSheet.cellData.get(refCellKey)!.referencesIn.size).toBe(1);
     });
 
     // Clear referencing formula.

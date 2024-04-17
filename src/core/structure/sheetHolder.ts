@@ -1,16 +1,13 @@
-import { CellKey, SheetKey } from "./key/keyTypes.ts";
-import Cell from "./cell/cell.ts";
+import { SheetKey } from "./key/keyTypes.ts";
 import Sheet from "./sheet.ts";
 
 export default class SheetHolder {
   sheets: Map<SheetKey, Sheet>;
   sheetNames: Map<string, SheetKey>;
-  cellData: Map<CellKey, Cell>;
 
   private constructor() {
     this.sheets = new Map();
     this.sheetNames = new Map();
-    this.cellData = new Map();
   }
 
   static getInstance(): SheetHolder {
@@ -23,7 +20,6 @@ export default class SheetHolder {
   clear() {
     this.sheets.clear();
     this.sheetNames.clear();
-    this.cellData.clear();
   }
 
   addSheet(sheet: Sheet) {
