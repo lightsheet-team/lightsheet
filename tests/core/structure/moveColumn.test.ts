@@ -56,4 +56,14 @@ describe("move column test", () => {
     expect(sheet.getCellInfoAt(2, 1)!.resolvedValue).toBe("3x2");
     expect(sheet.getCellInfoAt(1, 1)!.resolvedValue).toBe("1x2");
   });
+
+  it("should swap two columns and referring formulas", () => {
+    sheet.setCellAt(2, 0, "=A1");
+    sheet.setCellAt(2, 1, "=B1");
+    console.log(sheet.exportData());
+    sheet.moveColumn(1, 0);
+    console.log(sheet.exportData());
+    expect(sheet.getCellInfoAt(2, 0)!.rawValue).toBe("=B1");
+    expect(sheet.getCellInfoAt(2, 1)!.rawValue).toBe("=A1");
+  });
 });
