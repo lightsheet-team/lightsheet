@@ -18,3 +18,5 @@ export enum ShiftDirection {
   forward = "forward",
   backward = "backward",
 }
+
+export type StyleInfo = { css?: string, format?: { type: string, options?: any } }

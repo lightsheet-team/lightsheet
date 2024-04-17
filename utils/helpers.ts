@@ -1,3 +1,4 @@
+import Formatter from "../src/core/evaluation/formatter";
 import { CoreSetCellPayload } from "../src/core/event/events.types";
 
 export default class LightSheetHelper {
@@ -62,5 +63,20 @@ export default class LightSheetHelper {
       result += `${key}:${value};`
     }
     return result;
+  }
+
+  static getFormatter(type: string): Formatter {
+
+    if (type === "fulltime") {
+      employee = new FullTime();
+    } else if (type === "parttime") {
+      employee = new PartTime();
+    } else if (type === "temporary") {
+      employee = new Temporary();
+    } else if (type === "contractor") {
+      employee = new Contractor();
+    } else {
+      return CustomFormatter(type)
+    }
   }
 }

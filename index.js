@@ -6,7 +6,7 @@ var data = [
 ];
 
 const toolbar = ["undo", "redo", "save"];
-
+//
 new Lightsheet(document.getElementById("lightsheet"), {
   data,
   onCellChange: (colIndex, rowIndex, newValue) => {
@@ -17,5 +17,14 @@ new Lightsheet(document.getElementById("lightsheet"), {
     items: toolbar,
     element: document.getElementById("toolbar-dom-id"),
   },
-  style: { A2: "font-weight: bold;", B2: "background-color: yellow;" },
+  style: {
+    A2: {
+      css: "font-weight: bold;",
+      format: new NumberFormatter(2),
+    },
+    B2: {
+      css: "background-color: yellow;",
+      format: { type: "customCurrency", option: { name: "EUR", decimal: 2 } },
+    },
+  },
 });

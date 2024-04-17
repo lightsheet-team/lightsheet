@@ -301,7 +301,15 @@ export default class UI {
     // Get the cell by either column and row key or position.
     // TODO Index-based ID may not be unique if there are multiple sheets.
     const cellDom: HTMLElement = document.getElementById(cellDomKey)!;
-    cellDom.children[0].setAttribute("style", LightSheetHelper.GenerateStyleStringFromMap(value));
+    const inputElement = cellDom.children[0] as HTMLInputElement
+    inputElement.setAttribute("style", value.css);
+
+    if (value.format.type == 'number') {
+      if (value.format.options.decimal || value.format.options.decimal === 0) {
+        inputElement.value = parseFloat(inputElement.value).toFixed(value.format.options.decimal)
+      }
+    }
+
   }
 
   private onCoreSetCell(event: LightsheetEvent) {
