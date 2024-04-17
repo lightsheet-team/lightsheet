@@ -57,7 +57,7 @@ describe("move column test", () => {
     expect(sheet.getCellInfoAt(1, 1)!.resolvedValue).toBe("1x2");
   });
 
-  it("should swap two columns and referring formulas", () => {
+  it("should move a column without invalidating cell references", () => {
     sheet.setCellAt(2, 0, "=A1");
     sheet.setCellAt(2, 1, "=B1");
     console.log(sheet.exportData());
