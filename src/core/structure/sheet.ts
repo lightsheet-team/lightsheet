@@ -446,10 +446,9 @@ export default class Sheet {
         rowData.set(column.position, cell.formattedValue);
       }
 
-      data.set(rowPos, rowData);
+      data.set(rowPos, new Map([...rowData.entries()].sort()));
     }
-
-    return data;
+    return new Map([...data.entries()].sort());
   }
 
   private createCell(colKey: ColumnKey, rowKey: RowKey, value: string): Cell {
