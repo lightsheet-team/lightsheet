@@ -8,6 +8,7 @@ import {
   SymbolNodeDependencies,
   FunctionNodeDependencies,
   sumDependencies,
+  MathNode,
 } from "mathjs/number";
 
 import Sheet from "../structure/sheet.ts";
@@ -17,6 +18,7 @@ import {
 } from "./expressionHandler.types.ts";
 
 import { CellState } from "../structure/cell/cellState.ts";
+import LightSheetHelper from "../../utils/helpers.ts";
 
 const math = create({
   parseDependencies,
@@ -68,6 +70,46 @@ export default class ExpressionHandler {
     } catch (e) {
       return null;
     }
+  }
+
+  updateReferenceSymbols(
+    oldPos: number,
+    newPos: number,
+    columnChanged: boolean,
+  ): string {
+    if (!this.rawValue.startsWith("=")) return this.rawValue;
+
+    const expression = this.rawValue.substring(1);
+    const parseResult = math.parse(expression);
+
+    // Update each symbol in the expression.
+    const transform = parseResult.transform((node) =>
+      this.updateReferenceSymbol(node, oldPos, newPos, columnChanged),
+    );
+    return `=${transform.toString()}`;
+  }
+
+  private updateReferenceSymbol(
+    node: MathNode,
+    oldPosition: number,
+    newPosition: number,
+    columnChanged: boolean,
+  ): MathNode {
+    if (!(node instanceof math.SymbolNode)) {
+      return node;
+    }
+    const symbolNode = node as math.SymbolNode;
+
+    // Replace either the column label or row index in the symbol to reflect the new position.
+    const oldIndex = columnChanged
+      ? LightSheetHelper.generateColumnLabel(oldPosition + 1)
+      : oldPosition.toString();
+    const newIndex = columnChanged
+      ? LightSheetHelper.generateColumnLabel(newPosition + 1)
+      : newPosition.toString();
+
+    symbolNode.name = symbolNode.name.replace(oldIndex, newIndex);
+    return symbolNode;
   }
 
   private resolveFunction(name: string): any {

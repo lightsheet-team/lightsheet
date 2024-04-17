@@ -216,6 +216,7 @@ export default class Sheet {
         );
       }
       group.position = to;
+      this.updateGroupCellReferenceSymbols(group, from, to);
     }
 
     // We have to update all the positions to keep it consistent.
@@ -253,8 +254,9 @@ export default class Sheet {
         targetPositions.delete(currentPos);
       } else {
         targetPositions.set(currentPos, previousValue);
-        const group = target.get(previousValue);
-        group!.position = currentPos;
+        const group = target.get(previousValue)!;
+        this.updateGroupCellReferenceSymbols(group, group.position, currentPos);
+        group.position = currentPos;
       }
 
       previousValue = tempCurrent;
@@ -270,6 +272,28 @@ export default class Sheet {
     } while (tempCurrent !== undefined && previousValue !== undefined);
 
     return true;
+  }
+
+  private updateGroupCellReferenceSymbols(
+    group: CellGroup<ColumnKey | RowKey>,
+    from: number,
+    to: number,
+  ) {
+    // Update formulas referring to cells in this group to reflect the new position.
+    for (const [, cellKey] of group!.cellIndex) {
+      const cell = this.cellData.get(cellKey)!;
+      for (const [refCellKey, refInfo] of cell.referencesIn) {
+        const refSheet = this.sheetHolder.getSheet(refInfo.sheetKey)!;
+        const refCell = refSheet.cellData.get(refCellKey)!;
+
+        const expr = new ExpressionHandler(refSheet, refCell.rawValue);
+        refCell.rawValue = expr.updateReferenceSymbols(
+          from,
+          to,
+          group instanceof Column,
+        );
+      }
+    }
   }
 
   private deleteCell(colKey: ColumnKey, rowKey: RowKey): boolean {
