@@ -1,4 +1,3 @@
-import { ToolbarItems } from "../../utils/constants";
 import LightSheet from "../main";
 import {
   generateColumnKey,
@@ -13,6 +12,7 @@ import {
 import EventType from "../core/event/eventType.ts";
 import { ToolbarOptions } from "../main.types";
 import LightSheetHelper from "../utils/helpers.ts";
+import { ToolbarItems } from "../utils/constants.ts";
 
 export default class UI {
   tableEl: Element;

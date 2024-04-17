@@ -1,5 +1,5 @@
 import LightSheet from "../../src/main";
-import { ToolbarItems } from "../../utils/constants";
+import { ToolbarItems } from "../../src/utils/constants.ts";
 
 describe("Tool bar", () => {
   afterEach(() => {
@@ -10,10 +10,13 @@ describe("Tool bar", () => {
     const targetElementMock: HTMLElement = document.createElement("div");
 
     // Get the toolbar element
-    new LightSheet(targetElementMock, {
-      data: [],
-      toolbarOptions: { showToolbar: true },
-    });
+    new LightSheet(
+      {
+        sheetName: "Sheet",
+        toolbarOptions: { showToolbar: true },
+      },
+      targetElementMock,
+    );
 
     const toolBarElement = targetElementMock.querySelector(
       ".lightsheet_table_toolbar",
@@ -27,10 +30,13 @@ describe("Tool bar", () => {
   test("should create items in toolbar from the constant file in the table container if no items provided", () => {
     const targetElementMock: HTMLElement = document.createElement("div");
 
-    new LightSheet(targetElementMock, {
-      data: [],
-      toolbarOptions: { showToolbar: true },
-    });
+    new LightSheet(
+      {
+        sheetName: "Sheet",
+        toolbarOptions: { showToolbar: true },
+      },
+      targetElementMock,
+    );
     // Get the toolbar element
     const toolBarElement = targetElementMock.querySelector(
       ".lightsheet_table_toolbar",
@@ -44,13 +50,16 @@ describe("Tool bar", () => {
     const toolbarItems = ["undo", "redo", "save"];
     const targetElementMock: HTMLElement = document.createElement("div");
 
-    new LightSheet(targetElementMock, {
-      data: [],
-      toolbarOptions: {
-        showToolbar: true,
-        items: toolbarItems,
+    new LightSheet(
+      {
+        sheetName: "Sheet",
+        toolbarOptions: {
+          showToolbar: true,
+          items: toolbarItems,
+        },
       },
-    });
+      targetElementMock,
+    );
     // Get the toolbar element
     const toolBarElement = targetElementMock.querySelector(
       ".lightsheet_table_toolbar",
@@ -62,12 +71,15 @@ describe("Tool bar", () => {
   test("should show toolbar when showToolbar option is true", () => {
     const targetElementMock: HTMLElement = document.createElement("div");
 
-    new LightSheet(targetElementMock, {
-      data: [],
-      toolbarOptions: {
-        showToolbar: true,
+    new LightSheet(
+      {
+        sheetName: "Sheet",
+        toolbarOptions: {
+          showToolbar: true,
+        },
       },
-    });
+      targetElementMock,
+    );
 
     // Get the toolbar element
     const toolBarElement = targetElementMock.querySelector(
@@ -80,12 +92,15 @@ describe("Tool bar", () => {
   test("should hide toolbar when showToolbar option is false", () => {
     const targetElementMock: HTMLElement = document.createElement("div");
 
-    new LightSheet(targetElementMock, {
-      data: [],
-      toolbarOptions: {
-        showToolbar: false,
+    new LightSheet(
+      {
+        sheetName: "Sheet",
+        toolbarOptions: {
+          showToolbar: false,
+        },
       },
-    });
+      targetElementMock,
+    );
     // Get the toolbar element
     const toolBarElement = targetElementMock.querySelector(
       ".lightsheet_table_toolbar",
@@ -97,9 +112,7 @@ describe("Tool bar", () => {
   test("should hide toolbar when there is no show toolbar option", () => {
     const targetElementMock: HTMLElement = document.createElement("div");
 
-    new LightSheet(targetElementMock, {
-      data: [],
-    });
+    new LightSheet({ sheetName: "Sheet" }, targetElementMock);
     // Get the toolbar element
     const toolBarElement = targetElementMock.querySelector(
       ".lightsheet_table_toolbar",
