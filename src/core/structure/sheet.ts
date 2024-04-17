@@ -316,7 +316,11 @@ export default class Sheet {
       const refCell = refSheet.cellData.get(refCellKey)!;
 
       const expr = new ExpressionHandler(refSheet, refCell.rawValue);
-      refCell.rawValue = expr.updatePositionalReferences(from, to);
+      const newValue = expr.updatePositionalReferences(from, to);
+
+      // The formula may not change if the cell is being referenced indirectly through a range.
+      if (refCell.rawValue === newValue) continue;
+      refCell.rawValue = newValue;
 
       // Emit event for the rawValue change.
       refSheet.emitSetCellEvent(
