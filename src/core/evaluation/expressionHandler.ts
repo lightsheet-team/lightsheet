@@ -101,11 +101,30 @@ export default class ExpressionHandler {
     }
     const symbolNode = node as math.SymbolNode;
 
-    if (symbolNode.name !== targetSymbol) {
+    let prefix = "";
+    let symbol = symbolNode.name;
+    if (symbol.includes("!")) {
+      const parts = symbol.split("!");
+      prefix = parts[0] + "!";
+      symbol = parts[1];
+    }
+
+    if (symbol.includes(":")) {
+      const parts = symbol.split(":");
+      if (parts.length != 2) {
+        return symbolNode;
+      }
+      const newStart = parts[0] === targetSymbol ? newSymbol : parts[0];
+      const newEnd = parts[1] === targetSymbol ? newSymbol : parts[1];
+      symbolNode.name = prefix + newStart + ":" + newEnd;
       return symbolNode;
     }
 
-    symbolNode.name = newSymbol;
+    if (symbol !== targetSymbol) {
+      return symbolNode;
+    }
+
+    symbolNode.name = prefix + newSymbol;
     return symbolNode;
   }
 
