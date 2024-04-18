@@ -311,15 +311,6 @@ export default class UI {
       payload.formattedValue;
   }
 
-  private checkCellId(cellDom: Element): CellIdInfo | undefined {
-    const keyParts = cellDom.id.split("_");
-    if (keyParts.length != 2) return;
-
-    const isIndex = keyParts[0].match("^[0-9]+$") !== null;
-
-    return { keyParts: keyParts, isIndex: isIndex };
-  }
-
   removeGroupSelection() {
     this.removeColumnSelection();
     this.removeRowSelection();
