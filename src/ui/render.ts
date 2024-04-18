@@ -396,9 +396,10 @@ export default class UI {
     this.removeCellRangeSelection();
     const cells = Array.from(document.querySelectorAll("td"));
     cells.forEach((cell) => {
+      if(cell.classList.contains("lightsheet_table_header") || cell.classList.contains("lightsheet_table_row_number")) return;
+
       if (
-        this.cellInRange(cell) &&
-        !cell.classList.contains("lightsheet_table_selected_cell")
+        this.cellInRange(cell)
       ) {
         cell.classList.add("lightsheet_table_selected_cell_range");
       }
@@ -419,23 +420,23 @@ export default class UI {
   }
 
   handleMouseOver(e: MouseEvent, colIndex: number, rowIndex: number) {
-    if (e.button === 0) {
-      this.selectedCellsContainer.selectionEnd =
-        (colIndex != null || undefined) &&
-        (rowIndex != null || undefined)
-          ? {
-              row: rowIndex,
-              column: colIndex,
-            }
-          : null;
-      if (
-        this.selectedCellsContainer.selectionStart &&
-        this.selectedCellsContainer.selectionEnd &&
-        this.selectedCellsContainer.selectionStart !==
-          this.selectedCellsContainer.selectionEnd
-      ) {
-        this.updateSelection();
-      }
+    if(e.button !==0 ) return;
+
+    this.selectedCellsContainer.selectionEnd =
+      (colIndex != null || undefined) &&
+      (rowIndex != null || undefined)
+        ? {
+            row: rowIndex,
+            column: colIndex,
+          }
+        : null;
+    if (
+      this.selectedCellsContainer.selectionStart &&
+      this.selectedCellsContainer.selectionEnd &&
+      this.selectedCellsContainer.selectionStart !==
+        this.selectedCellsContainer.selectionEnd
+    ) {
+      this.updateSelection();
     }
   }
 }
