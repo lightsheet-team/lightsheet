@@ -11,7 +11,10 @@ import {
 } from "mathjs/number";
 
 import Sheet from "../structure/sheet.ts";
-import { CellPosition, EvaluationResult } from "./expressionHandler.types.ts";
+import {
+  CellSheetPosition,
+  EvaluationResult,
+} from "./expressionHandler.types.ts";
 
 import { CellState } from "../structure/cell/cellState.ts";
 
@@ -27,13 +30,13 @@ const math = create({
 });
 
 export default class ExpressionHandler {
-  sheet: Sheet;
+  private sheet: Sheet;
 
-  private cellRefHolder: Array<CellPosition>;
+  private cellRefHolder: Array<CellSheetPosition>;
   private rawValue: string;
 
-  constructor(sheet: Sheet, rawValue: string) {
-    this.sheet = sheet; // TODO The scope of this class should be all sheets, not just one.
+  constructor(targetSheet: Sheet, rawValue: string) {
+    this.sheet = targetSheet;
 
     this.rawValue = rawValue;
     this.cellRefHolder = [];
@@ -44,7 +47,7 @@ export default class ExpressionHandler {
     //Configure mathjs to allow colons in symbols.
     const isAlphaOriginal = math.parse.isAlpha;
     math.parse.isAlpha = (c: string, cPrev: string, cNext: string): boolean => {
-      return isAlphaOriginal(c, cPrev, cNext) || c == ":";
+      return isAlphaOriginal(c, cPrev, cNext) || c == ":" || c == "!";
     };
 
     math.SymbolNode.onUndefinedSymbol = (name: string) =>
@@ -77,6 +80,19 @@ export default class ExpressionHandler {
   }
 
   private resolveSymbol(symbol: string): any {
+    let targetSheet = this.sheet;
+    if (symbol.includes("!")) {
+      const parts = symbol.split("!").filter((s) => s !== "");
+      if (parts.length != 2)
+        throw new Error("Invalid sheet reference: " + symbol);
+
+      const sheetName = parts[0];
+      const refSheet = this.sheet.sheetHolder.getSheetByName(sheetName);
+      if (!refSheet) throw new Error("Invalid sheet reference: " + symbol);
+      targetSheet = refSheet;
+      symbol = parts[1];
+    }
+
     // TODO only handling references within one sheet for now.
     if (symbol.includes(":")) {
       const rangeParts = symbol.split(":").filter((s) => s !== "");
@@ -88,11 +104,14 @@ export default class ExpressionHandler {
       const values: string[] = [];
       for (let i = start.rowIndex; i <= end.rowIndex; i++) {
         for (let j = start.colIndex; j <= end.colIndex; j++) {
-          const cellInfo = this.sheet.getCellInfoAt(j, i);
+          const cellInfo = targetSheet.getCellInfoAt(j, i);
           if (cellInfo && cellInfo.state != CellState.OK)
             throw new Error("Invalid cell reference: " + symbol);
 
-          this.cellRefHolder.push({ columnIndex: j, rowIndex: i });
+          this.cellRefHolder.push({
+            sheetKey: targetSheet.key,
+            position: { column: j, row: i },
+          });
           values.push(cellInfo?.resolvedValue ?? "");
         }
       }
@@ -102,11 +121,17 @@ export default class ExpressionHandler {
     const { colIndex, rowIndex } =
       ExpressionHandler.parseSymbolToPosition(symbol);
 
-    const cellInfo = this.sheet.getCellInfoAt(colIndex, rowIndex);
+    const cellInfo = targetSheet.getCellInfoAt(colIndex, rowIndex);
     if (cellInfo && cellInfo.state != CellState.OK)
       throw new Error("Invalid cell reference: " + symbol);
 
-    this.cellRefHolder.push({ columnIndex: colIndex, rowIndex: rowIndex });
+    this.cellRefHolder.push({
+      sheetKey: targetSheet.key,
+      position: {
+        column: colIndex,
+        row: rowIndex,
+      },
+    });
     return cellInfo?.resolvedValue ?? "";
   }
 

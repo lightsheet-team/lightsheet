@@ -1,12 +1,17 @@
 import { v4 as uuidv4 } from "uuid";
 export type Tagged<Type, Tag> = Type & { readonly __tag__: Tag };
 
+export type SheetKey = Tagged<string, "SheetKey">;
 export type CellKey = Tagged<string, "CellKey">;
 export type ColumnKey = Tagged<string, "ColumnKey">;
 export type RowKey = Tagged<string, "RowKey">;
 
 export function tag<Tag>(value: string): Tagged<string, Tag> {
   return value as Tagged<string, Tag>;
+}
+
+export function generateSheetKey(key: string = ""): SheetKey {
+  return tag<"SheetKey">(key == "" ? uuidv4() : key);
 }
 
 export function generateCellKey(key: string = ""): CellKey {

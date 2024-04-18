@@ -1,4 +1,10 @@
-import { CellKey, ColumnKey, RowKey } from "./key/keyTypes.ts";
+import {
+  CellKey,
+  ColumnKey,
+  generateSheetKey,
+  RowKey,
+  SheetKey,
+} from "./key/keyTypes.ts";
 import Cell from "./cell/cell.ts";
 import Column from "./group/column.ts";
 import Row from "./group/row.ts";
@@ -12,11 +18,18 @@ import { CoreSetCellPayload, UISetCellPayload } from "../event/events.types.ts";
 import EventType from "../event/eventType.ts";
 import { CellState } from "./cell/cellState.ts";
 import { EvaluationResult } from "../evaluation/expressionHandler.types.ts";
+import SheetHolder from "./sheetHolder.ts";
+import { CellReference } from "./cell/types.cell.ts";
 
 export default class Sheet {
+  key: SheetKey;
+  name: string;
+  sheetHolder: SheetHolder;
+
+  cellData: Map<CellKey, Cell>;
+
   defaultStyle: any;
   settings: any;
-  cellData: Map<CellKey, Cell>;
   rows: Map<RowKey, Row>;
   columns: Map<ColumnKey, Column>;
   rowPositions: Map<number, RowKey>;
@@ -27,11 +40,16 @@ export default class Sheet {
 
   private events: Events;
 
-  constructor(events: Events | null = null) {
-    this.defaultStyle = new CellStyle(); // TODO This should be configurable.
-
-    this.settings = null;
+  constructor(name: string, events: Events | null = null) {
+    this.key = generateSheetKey();
+    this.name = name;
     this.cellData = new Map<CellKey, Cell>();
+
+    this.sheetHolder = SheetHolder.getInstance();
+    this.sheetHolder.addSheet(this);
+
+    this.defaultStyle = new CellStyle(); // TODO This should be configurable.
+    this.settings = null;
     this.rows = new Map<RowKey, Row>();
     this.columns = new Map<ColumnKey, Column>();
 
@@ -261,21 +279,18 @@ export default class Sheet {
 
     if (!col.cellIndex.has(row.key)) return false;
     const cellKey = col.cellIndex.get(row.key)!;
-
-    // Remove references to this cell from other cells' referencesOut.
     const cell = this.cellData.get(cellKey)!;
-    cell.referencesIn.forEach((_, refCell) => {
-      const referredCell = this.cellData.get(refCell)!;
+
+    // Clear the cell's formula to clean up any references it may have.
+    cell.rawValue = "";
+    this.resolveCellFormula(cell, colKey, rowKey);
+
+    // If other cells are referring to this cell, remove the reference and invalidate them.
+    cell.referencesIn.forEach((cellRef, refCellKey) => {
+      const refSheet = this.sheetHolder.getSheet(cellRef.sheetKey)!;
+      const referredCell = refSheet.cellData.get(refCellKey)!;
       referredCell.referencesOut.delete(cellKey);
-
-      // Invalidate cells that reference this cell.
       referredCell.setState(CellState.INVALID_REFERENCE);
-    });
-
-    // Remove this cell from other cells' referencesIn.
-    cell.referencesOut.forEach((_, refCell) => {
-      const referredCell = this.cellData.get(refCell)!;
-      referredCell.referencesIn.delete(cellKey);
     });
 
     // Delete cell data and all references to it in its column and row.
@@ -506,22 +521,23 @@ export default class Sheet {
     if (!valueChanged && cell.state == CellState.OK) return valueChanged;
 
     // Update cells that reference this cell.
-    for (const [ref, pos] of cell.referencesIn) {
-      const referredCell = this.cellData.get(ref)!;
-      const refUpdated = this.resolveCell(
-        referredCell,
-        pos.columnKey!,
-        pos.rowKey!,
+    for (const [refKey, refInfo] of cell.referencesIn) {
+      const referringSheet = this.sheetHolder.getSheet(refInfo.sheetKey)!;
+      const referringCell = referringSheet.cellData.get(refKey)!;
+      const refUpdated = referringSheet.resolveCell(
+        referringCell,
+        refInfo.column,
+        refInfo.row,
       );
 
-      // Emit event if the referred cell's value has changed.
+      // Emit event if the referred cell's value has changed (for the referring sheet's events).
       if (refUpdated) {
-        this.emitSetCellEvent(
-          pos.columnKey!,
-          pos.rowKey!,
-          this.getColumnIndex(pos.columnKey!)!,
-          this.getRowIndex(pos.rowKey!)!,
-          referredCell,
+        referringSheet.emitSetCellEvent(
+          refInfo.column,
+          refInfo.row,
+          referringSheet.getColumnIndex(refInfo.column)!,
+          referringSheet.getRowIndex(refInfo.row)!,
+          referringCell,
         );
       }
     }
@@ -575,41 +591,53 @@ export default class Sheet {
     evalResult: EvaluationResult,
   ) {
     // Update referencesOut of this cell and referencesIn of newly referenced cells.
-    const oldOut = new Map<CellKey, PositionInfo>(cell.referencesOut);
+    const oldOut = new Map<CellKey, CellReference>(cell.referencesOut);
     cell.referencesOut.clear();
     evalResult.references.forEach((ref) => {
+      const refSheet = this.sheetHolder.getSheet(ref.sheetKey)!;
+
       // Initialize the referred cell if it doesn't exist yet.
-      const position = this.initializePosition(ref.columnIndex, ref.rowIndex);
-      if (!this.getCellInfoAt(ref.columnIndex, ref.rowIndex)) {
-        this.createCell(position.columnKey!, position.rowKey!, "");
+      const position = refSheet.initializePosition(
+        ref.position.column,
+        ref.position.row,
+      );
+      if (!refSheet.getCellInfoAt(ref.position.column, ref.position.row)) {
+        refSheet.createCell(position.columnKey!, position.rowKey!, "");
       }
 
-      const referredCell = this.getCell(position.columnKey!, position.rowKey!)!;
+      const referredCell = refSheet.getCell(
+        position.columnKey!,
+        position.rowKey!,
+      )!;
+
       // Add referred cells to this cell's referencesOut.
       cell.referencesOut.set(referredCell.key, {
-        columnKey: position.columnKey!,
-        rowKey: position.rowKey!,
+        sheetKey: refSheet.key,
+        column: position.columnKey!,
+        row: position.rowKey!,
       });
 
       // Add this cell to the referred cell's referencesIn.
       referredCell.referencesIn.set(cell.key, {
-        columnKey: columnKey,
-        rowKey: rowKey,
+        sheetKey: this.key,
+        column: columnKey,
+        row: rowKey,
       });
     });
 
     // Resolve (oldOut - newOut) to get references that were removed from the formula.
-    const removedReferences = new Map<CellKey, PositionInfo>(
+    const removedReferences = new Map<CellKey, CellReference>(
       [...oldOut].filter(([cellKey]) => !cell.referencesOut.has(cellKey)),
     );
 
     // Clean up the referencesIn sets of cells that are no longer referenced by the formula.
-    for (const [cellKey, position] of removedReferences) {
-      const referredCell = this.cellData.get(cellKey)!;
+    for (const [cellKey, refInfo] of removedReferences) {
+      const referredSheet = this.sheetHolder.getSheet(refInfo.sheetKey)!;
+      const referredCell = referredSheet.cellData.get(cellKey)!;
       referredCell.referencesIn.delete(cell.key);
 
-      // This may result in the cell being empty and unused - delete if necessary.
-      this.deleteCellIfUnused(position.columnKey!, position.rowKey!);
+      // This may result in the cell being unused - delete if necessary.
+      referredSheet.deleteCellIfUnused(refInfo.column, refInfo.row);
     }
 
     // After references are updated, check for circular references.
@@ -619,18 +647,20 @@ export default class Sheet {
   }
 
   private hasCircularReference(cell: Cell): boolean {
-    const stack = [cell.key];
+    const refStack: [CellKey, SheetKey][] = [[cell.key, this.key]];
     let initial = true;
 
     // Depth-first search.
-    while (stack.length > 0) {
-      const current = stack.pop()!;
-      if (current === cell.key && !initial) return true;
+    while (refStack.length > 0) {
+      const current = refStack.pop()!;
+      const currCellKey = current[0];
+      if (currCellKey === cell.key && !initial) return true;
       initial = false;
 
-      const currentCell = this.cellData.get(current)!;
-      currentCell.referencesOut.forEach((_, ref) => {
-        stack.push(ref);
+      const currSheet = this.sheetHolder.getSheet(current[1])!;
+      const currentCell = currSheet.cellData.get(currCellKey)!;
+      currentCell.referencesOut.forEach((cellRef, refCellKey) => {
+        refStack.push([refCellKey, cellRef.sheetKey]);
       });
     }
 
@@ -674,13 +704,13 @@ export default class Sheet {
     cell: Cell | null,
   ) {
     const payload: CoreSetCellPayload = {
-      position: {
+      keyPosition: {
         rowKey: rowKey,
         columnKey: colKey,
       },
       indexPosition: {
-        columnIndex: colPos,
-        rowIndex: rowPos,
+        column: colPos,
+        row: rowPos,
       },
       rawValue: cell ? cell.rawValue : "",
       formattedValue: cell ? cell.formattedValue : "",
@@ -708,8 +738,8 @@ export default class Sheet {
       );
     } else if (payload.indexPosition) {
       this.setCellAt(
-        payload.indexPosition.columnIndex,
-        payload.indexPosition.rowIndex,
+        payload.indexPosition.column,
+        payload.indexPosition.row,
         payload.rawValue,
       );
     } else {
