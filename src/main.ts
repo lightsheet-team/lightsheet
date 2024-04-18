@@ -6,8 +6,6 @@ import Events from "./core/event/events.ts";
 import SheetHolder from "./core/structure/sheetHolder.ts";
 import { DefaultColCount, DefaultRowCount } from "./utils/constants.ts";
 import LightSheetHelper from "./utils/helpers.ts";
-import ExpressionHandler from "./core/evaluation/expressionHandler.ts";
-import { CellReference } from "./core/structure/cell/types.cell.ts";
 
 export default class LightSheet {
   #ui: UI | undefined;
@@ -43,13 +41,6 @@ export default class LightSheet {
 
     if (options.onReady) options.onReady = this.options.onReady;
     this.onTableReady();
-  }
-
-  static registerFunction(
-    name: string,
-    func: (pos: CellReference, ...args: any[]) => string,
-  ) {
-    ExpressionHandler.registerFunction(name, func);
   }
 
   onTableReady() {

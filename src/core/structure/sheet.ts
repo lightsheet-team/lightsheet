@@ -356,7 +356,7 @@ export default class Sheet {
       const refSheet = this.sheetHolder.getSheet(refInfo.sheetKey)!;
       const refCell = refSheet.cellData.get(refCellKey)!;
 
-      const expr = new ExpressionHandler(refSheet, refInfo, refCell.rawValue);
+      const expr = new ExpressionHandler(refSheet, refCell.rawValue);
       const newValue = expr.updatePositionalReferences(from, to);
 
       // The formula may not change if the cell is being referenced indirectly through a range.
@@ -604,11 +604,7 @@ export default class Sheet {
     colKey: ColumnKey,
     rowKey: RowKey,
   ): boolean {
-    const expressionHandler = new ExpressionHandler(
-      this,
-      { sheetKey: this.key, column: colKey, row: rowKey },
-      cell.rawValue,
-    );
+    const expressionHandler = new ExpressionHandler(this, cell.rawValue);
     const evalResult = expressionHandler.evaluate();
     const prevState = cell.state;
     if (!evalResult) {
