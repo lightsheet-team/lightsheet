@@ -159,6 +159,9 @@ export default class UI {
     );
     rowDom.appendChild(cellDom);
     cellDom.id = `${colIndex}_${rowIndex}`;
+    cellDom.setAttribute("column-index", `${colIndex}` || "");
+    cellDom.setAttribute("row-index", `${rowIndex}` || "");
+    
     const inputDom = document.createElement("input");
     inputDom.classList.add("lightsheet_table_cell_input");
     inputDom.value = "";
@@ -181,9 +184,8 @@ export default class UI {
       this.removeGroupSelection();
       this.removeCellRangeSelection();
       cellDom.classList.add("lightsheet_table_selected_cell");
-      const { columnIndex, rowIndex } = this.getColumnAndRowIndex(cellDom);
-      if (columnIndex !== undefined && rowIndex !== undefined) {
-        this.selectedCell.push(columnIndex, rowIndex);
+      if (colIndex !== undefined && rowIndex !== undefined) {
+        this.selectedCell.push(colIndex, rowIndex);
       }
     };
 
@@ -193,11 +195,11 @@ export default class UI {
     };
 
     inputDom.onmousedown = (e: MouseEvent) => {
-      this.handleMouseDown(e, cellDom);
+      this.handleMouseDown(e, colIndex, rowIndex);
     };
 
     inputDom.onmouseup = (e: MouseEvent) => {
-      this.handleMouseUp(e, cellDom);
+      this.handleMouseUp(e, colIndex, rowIndex);
     };
 
     return cellDom;
@@ -265,32 +267,6 @@ export default class UI {
     return { keyParts: keyParts, isIndex: isIndex };
   }
 
-  private getColumnAndRowIndex(cellDom: Element): {
-    columnIndex?: number;
-    rowIndex?: number;
-  } {
-    let columnIndex: number | undefined;
-    let rowIndex: number | undefined;
-
-    const cellIdInfo = this.checkCellId(cellDom);
-    if (!cellIdInfo) return {};
-    const { keyParts, isIndex } = cellIdInfo;
-    if (isIndex) {
-      columnIndex = Number(keyParts[0]);
-      rowIndex = Number(keyParts[1]);
-    } else {
-      const columnKey = cellDom.id.split("_")[0];
-      const rowKey = cellDom.parentElement?.id;
-
-      columnIndex = this.lightSheet.sheet.getColumnIndex(
-        generateColumnKey(columnKey!),
-      );
-      rowIndex = this.lightSheet.sheet.getRowIndex(generateRowKey(rowKey!));
-    }
-
-    return { columnIndex, rowIndex };
-  }
-
   removeGroupSelection() {
     this.removeColumnSelection();
     this.removeRowSelection();
@@ -343,8 +319,8 @@ export default class UI {
       return false;
     }
 
-    const { columnIndex: cellColumnIndex, rowIndex: cellRowIndex } =
-      this.getColumnAndRowIndex(cell);
+    const cellColumnIndex = Number(cell.getAttribute("column-index"));
+    const cellRowIndex = Number(cell.getAttribute("row-index"));
 
     if (cellColumnIndex === undefined || cellRowIndex === undefined)
       return false;
@@ -376,31 +352,27 @@ export default class UI {
     });
   }
 
-  handleMouseDown(e: MouseEvent, cellDom: Element) {
+  handleMouseDown(e: MouseEvent, colIndex: number, rowIndex: number) {
     if (e.button === 0) {
-      const { columnIndex: cellColumnIndex, rowIndex: cellRowIndex } =
-        this.getColumnAndRowIndex(cellDom);
       this.selectedCellsContainer.selectionStart =
-        (cellColumnIndex != null || undefined) &&
-        (cellRowIndex != null || undefined)
+        (colIndex != null || undefined) &&
+        (rowIndex != null || undefined)
           ? {
-              rowPosition: Number(cellRowIndex),
-              columnPosition: Number(cellColumnIndex),
+              rowPosition: rowIndex,
+              columnPosition: colIndex,
             }
           : null;
     }
   }
 
-  handleMouseUp(e: MouseEvent, cellDom: Element) {
+  handleMouseUp(e: MouseEvent, colIndex: number, rowIndex: number) {
     if (e.button === 0) {
-      const { columnIndex: cellColumnIndex, rowIndex: cellRowIndex } =
-        this.getColumnAndRowIndex(cellDom);
       this.selectedCellsContainer.selectionEnd =
-        (cellColumnIndex != null || undefined) &&
-        (cellRowIndex != null || undefined)
+        (colIndex != null || undefined) &&
+        (rowIndex != null || undefined)
           ? {
-              rowPosition: Number(cellRowIndex),
-              columnPosition: Number(cellColumnIndex),
+              rowPosition: rowIndex,
+              columnPosition: colIndex,
             }
           : null;
       if (
