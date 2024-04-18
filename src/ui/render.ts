@@ -277,7 +277,7 @@ export default class UI {
 
   onUICellValueChange(newValue: string, colIndex: number, rowIndex: number) {
     const payload: UISetCellPayload = {
-      indexPosition: { columnIndex: colIndex, rowIndex: rowIndex },
+      indexInfo: { columnIndex: colIndex, rowIndex: rowIndex },
       rawValue: newValue,
     };
     this.lightSheet.events.emit(
@@ -295,14 +295,22 @@ export default class UI {
   }
 
   private onCoreSetStyle(event: CoreSetStylePayload) {
+    debugger
     const { position, value } = event;
-    const cellDomKey =
-      `${position.columnKey!.toString()}_${position.rowKey!.toString()}`;
-    // Get the cell by either column and row key or position.
-    // TODO Index-based ID may not be unique if there are multiple sheets.
-    const cellDom: HTMLElement = document.getElementById(cellDomKey)!;
-    const inputElement = cellDom.children[0] as HTMLInputElement
-    inputElement.setAttribute("style", value);
+    if (position.columnKey && position.rowKey) {
+      const cellDom = LightSheetHelper.GetElementInfo({ keyInfo: position });
+      // Get the cell by either column and row key or position.
+      // TODO Index-based ID may not be unique if there are multiple sheets.
+      const inputElement = cellDom!.children[0] as HTMLInputElement
+      inputElement.setAttribute("style", value);
+    } else if (position.columnKey) {
+      const cellGroup = this.tableBodyDom.querySelectorAll(`[id^=${position.columnKey}]`);
+      cellGroup.forEach((item) => {
+        (item.children[0] as HTMLInputElement).setAttribute("style", value)
+      })
+    } else {
+
+    }
   }
 
   private onCoreSetCell(event: LightsheetEvent) {

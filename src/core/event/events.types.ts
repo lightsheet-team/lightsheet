@@ -1,20 +1,20 @@
 import CellStyle from "../structure/cellStyle.ts";
-import { PositionInfo, StyleInfo } from "../structure/sheet.types.ts";
+import { KeyInfo, StyleInfo } from "../structure/sheet.types.ts";
 
-export type IndexPosition = {
+export type IndexInfo = {
   columnIndex: number;
   rowIndex: number;
 };
 
 export type UISetCellPayload = {
-  keyPosition?: PositionInfo;
-  indexPosition?: IndexPosition;
+  keyInfo?: KeyInfo;
+  indexInfo?: IndexInfo;
   rawValue: string;
 };
 
 export type CoreSetCellPayload = {
-  position: PositionInfo;
-  indexPosition: IndexPosition;
+  position: KeyInfo;
+  indexPosition: IndexInfo;
   rawValue: string;
   formattedValue: string;
 
@@ -23,6 +23,6 @@ export type CoreSetCellPayload = {
 };
 
 export type CoreSetStylePayload = {
-  position: PositionInfo;
+  position: KeyInfo;
   value: string;
 }

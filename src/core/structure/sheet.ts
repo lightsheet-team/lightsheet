@@ -2,7 +2,7 @@ import { CellKey, ColumnKey, RowKey } from "./key/keyTypes.ts";
 import Cell from "./cell/cell.ts";
 import Column from "./group/column.ts";
 import Row from "./group/row.ts";
-import { CellInfo, PositionInfo, ShiftDirection, StyleInfo } from "./sheet.types.ts";
+import { CellInfo, KeyInfo, ShiftDirection } from "./sheet.types.ts";
 import ExpressionHandler from "../evaluation/expressionHandler.ts";
 import CellStyle from "./cellStyle.ts";
 import CellGroup from "./group/cellGroup.ts";
@@ -320,31 +320,36 @@ export default class Sheet {
     return cellStyle;
   }
 
-  setCellStyle(
+
+
+  setCellCss(
     colPos: number,
     rowPos: number,
-    cellStyle: CellStyle,
+    css: Map<string, string>,
   ): void {
 
-    const colKey = this.columnPositions.get(colPos);
-    const rowKey = this.rowPositions.get(rowPos);
-    if (!colKey || !rowKey) return
-    const col = this.columns.get(colKey);
-    const row = this.rows.get(rowKey);
+    let colKey = this.columnPositions.get(colPos);
+    let rowKey = this.rowPositions.get(rowPos);
+
+    if (!colKey || !rowKey) {
+      const newCellElement = this.initializePosition(colPos, rowPos);
+      this.createCell(newCellElement.columnKey!, newCellElement.rowKey!, "");
+      colKey = newCellElement.columnKey
+      rowKey = newCellElement.rowKey
+    }
+
+    const col = this.columns.get(colKey!);
+    const row = this.rows.get(rowKey!);
     if (!col || !row) return;
 
-    if (cellStyle.styling.size == 0) {
-      this.clearCellStyle(colKey, rowKey);
+    if (css.size == 0) {
+      col.cellFormatting.set(row.key, new CellStyle(null, col.cellFormatting.get(rowKey!)?.formatter));
+      row.cellFormatting.set(col.key, new CellStyle(null, row.cellFormatting.get(colKey!)?.formatter));
       return;
     }
     // TODO Style could be non-null but empty; should we allow this?
-
-    col.cellFormatting.set(row.key, cellStyle);
-    row.cellFormatting.set(col.key, cellStyle);
-
-    if (cellStyle.formatter) {
-      this.applyCellFormatter(this.getCell(colKey, rowKey)!, colKey, rowKey);
-    }
+    col.cellFormatting.set(row.key, new CellStyle(css, col.cellFormatting.get(rowKey!)?.formatter));
+    row.cellFormatting.set(col.key, new CellStyle(css, row.cellFormatting.get(colKey!)?.formatter));
 
     const payload: CoreSetStylePayload = {
       position: {
@@ -359,7 +364,7 @@ export default class Sheet {
     return;
   }
 
-  setColumnStyle(colPos: number, cellStyle: CellStyle,): void {
+  setColumnCss(colPos: number, css: Map<string, string>,): void {
 
     const colKey = this.columnPositions.get(colPos);
     if (!colKey) return
@@ -367,10 +372,17 @@ export default class Sheet {
     const col = this.columns.get(colKey);
     if (!col) return;
 
-    this.setCellGroupStyle(col, cellStyle);
+    col.defaultStyle = new CellStyle(css, col.defaultStyle?.formatter)
 
-    this.events.emit(new LightsheetEvent(EventType.VIEW_SET_STYLE, this.getCellStyle(colKey).styling));
+    const payload: CoreSetStylePayload = {
+      position: {
+        columnKey: colKey,
+      },
+      value: LightSheetHelper.GenerateStyleStringFromMap(this.getCellStyle(colKey).styling)
+    }
+    debugger
 
+    this.events.emit(new LightsheetEvent(EventType.VIEW_SET_STYLE, payload));
   }
 
   setRowStyle(rowPos: number, cellStyle: CellStyle): void {
@@ -382,8 +394,15 @@ export default class Sheet {
 
 
     this.setCellGroupStyle(row, cellStyle);
-    this.events.emit(new LightsheetEvent(EventType.VIEW_SET_STYLE, this.getCellStyle(null, rowKey).styling));
 
+    const payload: CoreSetStylePayload = {
+      position: {
+        rowKey: rowKey,
+      },
+      value: LightSheetHelper.GenerateStyleStringFromMap(this.getCellStyle(null, rowKey).styling)
+    }
+
+    this.events.emit(new LightsheetEvent(EventType.VIEW_SET_STYLE, payload));
   }
 
   private setCellGroupStyle(
@@ -602,7 +621,7 @@ export default class Sheet {
     evalResult: EvaluationResult,
   ) {
     // Update referencesOut of this cell and referencesIn of newly referenced cells.
-    const oldOut = new Map<CellKey, PositionInfo>(cell.referencesOut);
+    const oldOut = new Map<CellKey, KeyInfo>(cell.referencesOut);
     cell.referencesOut.clear();
     evalResult.references.forEach((ref) => {
       // Initialize the referred cell if it doesn't exist yet.
@@ -626,7 +645,7 @@ export default class Sheet {
     });
 
     // Resolve (oldOut - newOut) to get references that were removed from the formula.
-    const removedReferences = new Map<CellKey, PositionInfo>(
+    const removedReferences = new Map<CellKey, KeyInfo>(
       [...oldOut].filter(([cellKey]) => !cell.referencesOut.has(cellKey)),
     );
 
@@ -664,7 +683,7 @@ export default class Sheet {
     return false;
   }
 
-  private initializePosition(colPos: number, rowPos: number): PositionInfo {
+  private initializePosition(colPos: number, rowPos: number): KeyInfo {
     let rowKey;
     let colKey;
 
@@ -727,16 +746,16 @@ export default class Sheet {
   private handleUISetCell(event: LightsheetEvent) {
     const payload = event.payload as UISetCellPayload;
     // Use either setCellAt or setCell depending on what information is provided.
-    if (payload.keyPosition) {
+    if (payload.keyInfo) {
       this.setCell(
-        payload.keyPosition.columnKey!,
-        payload.keyPosition.rowKey!,
+        payload.keyInfo.columnKey!,
+        payload.keyInfo.rowKey!,
         payload.rawValue,
       );
-    } else if (payload.indexPosition) {
+    } else if (payload.indexInfo) {
       this.setCellAt(
-        payload.indexPosition.columnIndex,
-        payload.indexPosition.rowIndex,
+        payload.indexInfo.columnIndex,
+        payload.indexInfo.rowIndex,
         payload.rawValue,
       );
     } else {

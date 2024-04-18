@@ -7,7 +7,6 @@ import LightSheetHelper from "../utils/helpers.ts";
 import { DefaultRowCount, DefaultColCount } from "../utils/constants.ts";
 import { getRowColFromCellRef } from "./utlis.ts";
 import CellStyle from "./core/structure/cellStyle.ts";
-import Formatter from "./core/evaluation/formatter.ts";
 
 export default class LightSheet {
   private ui: UI;
@@ -53,15 +52,15 @@ export default class LightSheet {
     for (const [key, item] of Object.entries(this.style)) {
       const { row, col } = getRowColFromCellRef(key);
       const cellStyle = new CellStyle(LightSheetHelper.GenerateStyleMapFromString((item as StyleInfo).css!))
-      debugger
+
       if (row == null && col == null) {
         continue;
       } else if (row != null && col != null) {
-        this.sheet.setCellStyle(col, row, cellStyle);
+        this.sheet.setCellCss(col, row, LightSheetHelper.GenerateStyleMapFromString((item as StyleInfo).css!));
       } else if (row != null) {
         this.sheet.setRowStyle(row, cellStyle);
       } else if (col != null) {
-        this.sheet.setColumnStyle(col, cellStyle);
+        this.sheet.setColumnCss(col, LightSheetHelper.GenerateStyleMapFromString((item as StyleInfo).css!));
       }
     }
   }

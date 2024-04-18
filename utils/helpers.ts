@@ -1,5 +1,6 @@
 import Formatter from "../src/core/evaluation/formatter";
 import { CoreSetCellPayload } from "../src/core/event/events.types";
+import { ElementInfo } from "../src/core/structure/sheet.types";
 
 export default class LightSheetHelper {
   static GenerateRowLabel = (rowIndex: number) => {
@@ -12,6 +13,23 @@ export default class LightSheetHelper {
     }
     return label || "A"; // Return "A" if index is 0
   };
+
+  static GetElementInfo = (elementInfo: ElementInfo) => {
+    const { keyInfo, indexInfo } = elementInfo
+    const colKey = keyInfo?.columnKey?.toString();
+    const rowKey = keyInfo?.rowKey?.toString();
+
+    const columnIndex = indexInfo?.columnIndex;
+    const rowIndex = indexInfo?.rowIndex;
+
+    const cellDomKey =
+      colKey && rowKey ? `${colKey!.toString()}_${rowKey!.toString()}` : null;
+    const cellDom =
+      (cellDomKey && document.getElementById(cellDomKey)) ||
+      document.getElementById(`${columnIndex}_${rowIndex}`);
+
+    return cellDom;
+  }
 
   static GetElementInfoForSetCell = (payload: CoreSetCellPayload) => {
     const colKey = payload.position.columnKey?.toString();
