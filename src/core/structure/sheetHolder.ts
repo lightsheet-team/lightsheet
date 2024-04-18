@@ -28,7 +28,7 @@ export default class SheetHolder {
     }
 
     if (this.sheetNames.has(sheet.name)) {
-      throw new Error(`Sheet with name ${sheet.key} already exists.`);
+      throw new Error(`Sheet with name ${sheet.name} already exists.`);
     }
 
     this.sheets.set(sheet.key, sheet);
