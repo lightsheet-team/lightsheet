@@ -1,6 +1,6 @@
 import Sheet from "../../../src/core/structure/sheet.ts";
 
-describe("move column test", () => {
+describe("Cell reference symbol tests", () => {
   let sheet: Sheet;
 
   beforeEach(() => {
