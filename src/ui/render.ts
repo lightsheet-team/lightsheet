@@ -1,5 +1,5 @@
 import LightSheet from "../main";
-import { CellIdInfo, SelectionContainer } from "./render.types.ts";
+import { SelectionContainer } from "./render.types.ts";
 import LightsheetEvent from "../core/event/event.ts";
 import {
   CoreSetCellPayload,
