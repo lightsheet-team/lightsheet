@@ -12,6 +12,20 @@ export default class LightSheetHelper {
     return label || "A"; // Return "A" if index is 0
   };
 
+  static resolveColumnIndex(column: string): number {
+    let index = 0;
+    for (let i = 0; i < column.length; i++) {
+      if (column[i] < "A" || column[i] > "Z") return -1;
+      let baseIndex = column.charCodeAt(i) - "A".charCodeAt(0);
+      if (i != column.length - 1) baseIndex += 1;
+      // Character index gives us the exponent: for example, 'AAB' is 26^2 * 1 + 26^1 * 1 + 26^0 * 1 + 1
+      const exp = column.length - i - 1;
+      index += baseIndex * Math.pow(26, exp);
+    }
+
+    return index;
+  }
+
   static getElementInfoForSetCell = (payload: CoreSetCellPayload) => {
     const colKey = payload.keyPosition.columnKey?.toString();
     const rowKey = payload.keyPosition.rowKey?.toString();

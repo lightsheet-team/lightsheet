@@ -8,6 +8,7 @@ import LightsheetEvent from "../core/event/event.ts";
 import {
   CoreSetCellPayload,
   UISetCellPayload,
+  UIMoveCellGroupPayload,
 } from "../core/event/events.types.ts";
 import EventType from "../core/event/eventType.ts";
 import { ToolbarOptions } from "../main.types";
@@ -122,6 +123,7 @@ export default class UI {
         "lightsheet_table_header",
         "lightsheet_table_td",
       );
+
       headerCellDom.textContent = headerData[i];
       headerRowDom.appendChild(headerCellDom);
 
@@ -159,6 +161,39 @@ export default class UI {
       "lightsheet_table_td",
     );
     rowDom.appendChild(rowNumberCell);
+
+    rowNumberCell.setAttribute("draggable", "true");
+    rowNumberCell.ondragstart = (e: DragEvent) => {
+      const target = e.target as HTMLElement;
+      e.dataTransfer!.setData("string", `row:${target.innerText}`);
+    };
+    rowNumberCell.ondragover = (e: DragEvent) => {
+      if (e.dataTransfer?.getData("string").includes("row")) {
+        e.preventDefault();
+      }
+    };
+
+    rowNumberCell.ondrop = (e: DragEvent) => {
+      e.preventDefault();
+      const target = e.target as HTMLElement;
+      if (!target) return;
+
+      const draggedRow = e.dataTransfer!.getData("string").split(":")[1];
+      const draggedRowIndex = Number(draggedRow) - 1;
+
+      const targetRowIndex = Number(target.innerHTML) - 1;
+
+      console.log(draggedRowIndex, targetRowIndex);
+      const payload: UIMoveCellGroupPayload = {
+        fromIndex: targetRowIndex,
+        toIndex: targetRowIndex,
+        moveType: "row",
+      };
+      this.lightSheet.events.emit(
+        new LightsheetEvent(EventType.UI_MOVE_CELL_GROUP, payload),
+      );
+    };
+
     rowNumberCell.onclick = (e: MouseEvent) => {
       const selectedRow = e.target as HTMLElement;
       if (!selectedRow) return;

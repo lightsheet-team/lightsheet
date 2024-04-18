@@ -75,6 +75,7 @@ td:first-child {
   background-color: var(--lightsheet-gray-200);
   text-align: center;
   width: 50px;
+  cursor: pointer;
 }
 
 .lightsheet_table_selected_cell {

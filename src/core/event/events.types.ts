@@ -16,3 +16,9 @@ export type CoreSetCellPayload = {
   clearCell: boolean;
   clearRow: boolean;
 };
+
+export type UIMoveCellGroupPayload = {
+  fromIndex: number;
+  toIndex: number;
+  moveType: "row" | "column";
+};
