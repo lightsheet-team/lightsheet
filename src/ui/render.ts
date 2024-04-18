@@ -1,8 +1,4 @@
 import LightSheet from "../main";
-import {
-  generateColumnKey,
-  generateRowKey,
-} from "../core/structure/key/keyTypes";
 import { CellIdInfo, SelectionContainer } from "./render.types.ts";
 import LightsheetEvent from "../core/event/event.ts";
 import {
