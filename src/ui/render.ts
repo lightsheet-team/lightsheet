@@ -249,9 +249,11 @@ export default class UI {
       this.handleMouseDown(e, colIndex, rowIndex);
     };
 
-    inputDom.onmouseup = (e: MouseEvent) => {
-      this.handleMouseUp(e, colIndex, rowIndex);
-    };
+    inputDom.onmouseover = (e: MouseEvent) => {
+      if(e.buttons === 1) {
+        this.handleMouseOver(e, colIndex, rowIndex);
+      }
+    }
 
     return cellDom;
   }
@@ -377,15 +379,15 @@ export default class UI {
       return false;
 
     const withinX =
-      (cellColumnIndex >= selectionStart.columnPosition &&
-        cellColumnIndex <= selectionEnd.columnPosition) ||
-      (cellColumnIndex <= selectionStart.columnPosition &&
-        cellColumnIndex >= selectionEnd.columnPosition);
+      (cellColumnIndex >= selectionStart.column &&
+        cellColumnIndex <= selectionEnd.column) ||
+      (cellColumnIndex <= selectionStart.column &&
+        cellColumnIndex >= selectionEnd.column);
     const withinY =
-      (cellRowIndex >= selectionStart.rowPosition &&
-        cellRowIndex <= selectionEnd.rowPosition) ||
-      (cellRowIndex <= selectionStart.rowPosition &&
-        cellRowIndex >= selectionEnd.rowPosition);
+      (cellRowIndex >= selectionStart.row &&
+        cellRowIndex <= selectionEnd.row) ||
+      (cellRowIndex <= selectionStart.row &&
+        cellRowIndex >= selectionEnd.row);
 
     return withinX && withinY;
   }
@@ -409,21 +411,21 @@ export default class UI {
         (colIndex != null || undefined) &&
         (rowIndex != null || undefined)
           ? {
-              rowPosition: rowIndex,
-              columnPosition: colIndex,
+              row: rowIndex,
+              column: colIndex,
             }
           : null;
     }
   }
 
-  handleMouseUp(e: MouseEvent, colIndex: number, rowIndex: number) {
+  handleMouseOver(e: MouseEvent, colIndex: number, rowIndex: number) {
     if (e.button === 0) {
       this.selectedCellsContainer.selectionEnd =
         (colIndex != null || undefined) &&
         (rowIndex != null || undefined)
           ? {
-              rowPosition: rowIndex,
-              columnPosition: colIndex,
+              row: rowIndex,
+              column: colIndex,
             }
           : null;
       if (
