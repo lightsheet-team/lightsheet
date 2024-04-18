@@ -212,7 +212,7 @@ export default class UI {
     cellDom.id = `${colIndex}_${rowIndex}`;
     cellDom.setAttribute("column-index", `${colIndex}` || "");
     cellDom.setAttribute("row-index", `${rowIndex}` || "");
-    
+
     const inputDom = document.createElement("input");
     inputDom.classList.add("lightsheet_table_cell_input");
     inputDom.value = "";
@@ -250,10 +250,10 @@ export default class UI {
     };
 
     inputDom.onmouseover = (e: MouseEvent) => {
-      if(e.buttons === 1) {
+      if (e.buttons === 1) {
         this.handleMouseOver(e, colIndex, rowIndex);
       }
-    }
+    };
 
     return cellDom;
   }
@@ -386,8 +386,7 @@ export default class UI {
     const withinY =
       (cellRowIndex >= selectionStart.row &&
         cellRowIndex <= selectionEnd.row) ||
-      (cellRowIndex <= selectionStart.row &&
-        cellRowIndex >= selectionEnd.row);
+      (cellRowIndex <= selectionStart.row && cellRowIndex >= selectionEnd.row);
 
     return withinX && withinY;
   }
@@ -396,11 +395,13 @@ export default class UI {
     this.removeCellRangeSelection();
     const cells = Array.from(document.querySelectorAll("td"));
     cells.forEach((cell) => {
-      if(cell.classList.contains("lightsheet_table_header") || cell.classList.contains("lightsheet_table_row_number")) return;
-
       if (
-        this.cellInRange(cell)
-      ) {
+        cell.classList.contains("lightsheet_table_header") ||
+        cell.classList.contains("lightsheet_table_row_number")
+      )
+        return;
+
+      if (this.cellInRange(cell)) {
         cell.classList.add("lightsheet_table_selected_cell_range");
       }
     });
@@ -409,8 +410,7 @@ export default class UI {
   handleMouseDown(e: MouseEvent, colIndex: number, rowIndex: number) {
     if (e.button === 0) {
       this.selectedCellsContainer.selectionStart =
-        (colIndex != null || undefined) &&
-        (rowIndex != null || undefined)
+        (colIndex != null || undefined) && (rowIndex != null || undefined)
           ? {
               row: rowIndex,
               column: colIndex,
@@ -420,11 +420,10 @@ export default class UI {
   }
 
   handleMouseOver(e: MouseEvent, colIndex: number, rowIndex: number) {
-    if(e.button !==0 ) return;
+    if (e.button !== 0) return;
 
     this.selectedCellsContainer.selectionEnd =
-      (colIndex != null || undefined) &&
-      (rowIndex != null || undefined)
+      (colIndex != null || undefined) && (rowIndex != null || undefined)
         ? {
             row: rowIndex,
             column: colIndex,
