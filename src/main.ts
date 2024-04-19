@@ -48,20 +48,25 @@ export default class LightSheet {
     this.ui.showToolbar(isShown);
   }
 
+  setCss(position: string, css: string) {
+    const { row, col } = getRowColFromCellRef(position);
+    const mappedCss = LightSheetHelper.GenerateStyleMapFromString(css);
+
+    if (row == null && col == null) {
+      return;
+    } else if (row != null && col != null) {
+      this.sheet.setCellCss(col, row, mappedCss!);
+    } else if (row != null) {
+      this.sheet.setRowStyle(row, mappedCss);
+    } else if (col != null) {
+      this.sheet.setColumnCss(col, mappedCss!);
+    }
+  }
+
   private initializeStyle() {
     this.style.forEach((item: StyleInfo) => {
-      const { row, col } = getRowColFromCellRef(item.position);
-      const css = LightSheetHelper.GenerateStyleMapFromString(item.css!);
-
-      if (row == null && col == null) {
-        return;
-      } else if (row != null && col != null) {
-        this.sheet.setCellCss(col, row, css!);
-      } else if (row != null) {
-        this.sheet.setRowStyle(row, css);
-      } else if (col != null) {
-        this.sheet.setColumnCss(col, css!);
-      }
+      if (item.css)
+        this.setCss(item.position, item.css)
     });
   }
 
