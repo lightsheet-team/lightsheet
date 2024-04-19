@@ -296,16 +296,27 @@ export default class UI {
   private onCoreSetStyle(event: CoreSetStylePayload) {
     const { indexInfo, value } = event;
     if (indexInfo.columnIndex && indexInfo.rowIndex) {
-      const cellDom = this.tableBodyDom.children[indexInfo.rowIndex].children[indexInfo.columnIndex + 1];
-      const inputElement = cellDom! as HTMLElement
+      const cellDom =
+        this.tableBodyDom.children[indexInfo.rowIndex].children[
+          indexInfo.columnIndex + 1
+        ];
+      const inputElement = cellDom! as HTMLElement;
       inputElement.setAttribute("style", value);
     } else if (indexInfo.columnIndex || indexInfo.columnIndex === 0) {
       for (let i = 0; i < this.tableBodyDom.children.length; i++) {
-        this.tableBodyDom.children[i].children[indexInfo.columnIndex + 1].setAttribute("style", value)
+        this.tableBodyDom.children[i].children[
+          indexInfo.columnIndex + 1
+        ].setAttribute("style", value);
       }
     } else {
-      for (let i = 1; i < this.tableBodyDom.children[indexInfo.rowIndex!].children.length; i++) {
-        this.tableBodyDom.children[indexInfo.rowIndex!].children[i].setAttribute("style", value)
+      for (
+        let i = 1;
+        i < this.tableBodyDom.children[indexInfo.rowIndex!].children.length;
+        i++
+      ) {
+        this.tableBodyDom.children[indexInfo.rowIndex!].children[
+          i
+        ].setAttribute("style", value);
       }
     }
   }

@@ -17,12 +17,16 @@ export type CellInfo = {
 
 export type ElementInfo = {
   keyInfo?: KeyInfo;
-  indexInfo?: IndexInfo
-}
+  indexInfo?: IndexInfo;
+};
 
 export enum ShiftDirection {
   forward = "forward",
   backward = "backward",
 }
 
-export type StyleInfo = { position: string, css?: string, format?: { type: string, options?: any } }
+export type StyleInfo = {
+  position: string;
+  css?: string;
+  format?: { type: string; options?: any };
+};

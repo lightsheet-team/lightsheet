@@ -107,11 +107,7 @@ describe("Cell references", () => {
 
   it("should create an empty cell with styling", () => {
     const b2 = sheet.getCellInfoAt(1, 1)!;
-    sheet.setCellStyle(
-      1,
-      1,
-      'width:50px;'
-    );
+    sheet.setCellStyle(1, 1, "width:50px;");
 
     sheet.setCellAt(1, 1, "");
 

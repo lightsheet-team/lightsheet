@@ -15,7 +15,7 @@ export default class LightSheetHelper {
   };
 
   static GetElementInfo = (elementInfo: ElementInfo) => {
-    const { keyInfo, indexInfo } = elementInfo
+    const { keyInfo, indexInfo } = elementInfo;
     const colKey = keyInfo?.columnKey?.toString();
     const rowKey = keyInfo?.rowKey?.toString();
 
@@ -29,7 +29,7 @@ export default class LightSheetHelper {
       document.getElementById(`${columnIndex}_${rowIndex}`);
 
     return cellDom;
-  }
+  };
 
   static GetElementInfoForSetCell = (payload: CoreSetCellPayload) => {
     const colKey = payload.position.columnKey?.toString();
@@ -67,20 +67,19 @@ export default class LightSheetHelper {
 
   static GenerateStyleMapFromString(style: string): Map<string, string> {
     const mappedStyle = new Map<string, string>();
-    style.split(';').forEach((item: string) => {
-      const [key, value] = item.split(':');
+    style.split(";").forEach((item: string) => {
+      const [key, value] = item.split(":");
       if (!key || !value) return;
       mappedStyle.set(key.trim(), value.trim());
-    })
+    });
     return mappedStyle;
   }
 
   static GenerateStyleStringFromMap(style: Map<string, string>) {
-    let result = '';
-    for (let [key, value] of style) {
-      result += `${key}:${value};`
+    let result = "";
+    for (const [key, value] of style) {
+      result += `${key}:${value};`;
     }
     return result;
   }
-
 }

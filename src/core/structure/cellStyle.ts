@@ -32,7 +32,6 @@ export default class CellStyle extends Cloneable<CellStyle> {
   }
 
   applyCss(css: Map<string, string>): CellStyle {
-
     // If a style is set in other but not in this, apply it to this.
     for (const [key, value] of css) {
       if (!this.styling.has(key)) {

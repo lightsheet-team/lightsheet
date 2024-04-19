@@ -8,7 +8,11 @@ import CellStyle from "./cellStyle.ts";
 import CellGroup from "./group/cellGroup.ts";
 import Events from "../event/events.ts";
 import LightsheetEvent from "../event/event.ts";
-import { CoreSetCellPayload, CoreSetStylePayload, UISetCellPayload } from "../event/events.types.ts";
+import {
+  CoreSetCellPayload,
+  CoreSetStylePayload,
+  UISetCellPayload,
+} from "../event/events.types.ts";
 import EventType from "../event/eventType.ts";
 import { CellState } from "./cell/cellState.ts";
 import { EvaluationResult } from "../evaluation/expressionHandler.types.ts";
@@ -106,15 +110,15 @@ export default class Sheet {
     const cell = this.getCell(colKey, rowKey)!;
     return cell
       ? {
-        rawValue: cell.rawValue,
-        resolvedValue: cell.resolvedValue,
-        formattedValue: cell.formattedValue,
-        state: cell.state,
-        position: {
-          columnKey: colKey,
-          rowKey: rowKey,
-        },
-      }
+          rawValue: cell.rawValue,
+          resolvedValue: cell.resolvedValue,
+          formattedValue: cell.formattedValue,
+          state: cell.state,
+          position: {
+            columnKey: colKey,
+            rowKey: rowKey,
+          },
+        }
       : null;
   }
 
@@ -320,22 +324,19 @@ export default class Sheet {
     return cellStyle;
   }
 
-
-
   setCellCss(
     columnIndex: number,
     rowIndex: number,
     css: Map<string, string>,
   ): void {
-
     let colKey = this.columnPositions.get(columnIndex);
     let rowKey = this.rowPositions.get(rowIndex);
 
     if (!colKey || !rowKey) {
       const newCellElement = this.initializePosition(columnIndex, rowIndex);
       this.createCell(newCellElement.columnKey!, newCellElement.rowKey!, "");
-      colKey = newCellElement.columnKey
-      rowKey = newCellElement.rowKey
+      colKey = newCellElement.columnKey;
+      rowKey = newCellElement.rowKey;
     }
 
     const col = this.columns.get(colKey!);
@@ -343,21 +344,35 @@ export default class Sheet {
     if (!col || !row) return;
 
     if (css.size == 0) {
-      col.cellFormatting.set(row.key, new CellStyle(null, col.cellFormatting.get(rowKey!)?.formatter));
-      row.cellFormatting.set(col.key, new CellStyle(null, row.cellFormatting.get(colKey!)?.formatter));
+      col.cellFormatting.set(
+        row.key,
+        new CellStyle(null, col.cellFormatting.get(rowKey!)?.formatter),
+      );
+      row.cellFormatting.set(
+        col.key,
+        new CellStyle(null, row.cellFormatting.get(colKey!)?.formatter),
+      );
       return;
     }
     // TODO Style could be non-null but empty; should we allow this?
-    col.cellFormatting.set(row.key, new CellStyle(css, col.cellFormatting.get(rowKey!)?.formatter));
-    row.cellFormatting.set(col.key, new CellStyle(css, row.cellFormatting.get(colKey!)?.formatter));
+    col.cellFormatting.set(
+      row.key,
+      new CellStyle(css, col.cellFormatting.get(rowKey!)?.formatter),
+    );
+    row.cellFormatting.set(
+      col.key,
+      new CellStyle(css, row.cellFormatting.get(colKey!)?.formatter),
+    );
 
     const payload: CoreSetStylePayload = {
       indexInfo: {
         rowIndex,
-        columnIndex
+        columnIndex,
       },
-      value: LightSheetHelper.GenerateStyleStringFromMap(this.getCellStyle(colKey, rowKey).styling)
-    }
+      value: LightSheetHelper.GenerateStyleStringFromMap(
+        this.getCellStyle(colKey, rowKey).styling,
+      ),
+    };
 
     this.events.emit(new LightsheetEvent(EventType.VIEW_SET_STYLE, payload));
 
@@ -366,35 +381,38 @@ export default class Sheet {
 
   setColumnCss(columnIndex: number, css: Map<string, string>): void {
     const colKey = this.columnPositions.get(columnIndex);
-    if (!colKey) return
-
+    if (!colKey) return;
 
     const col = this.columns.get(colKey);
     if (!col) return;
 
-    col.defaultStyle = new CellStyle(css, col.defaultStyle?.formatter)
+    col.defaultStyle = new CellStyle(css, col.defaultStyle?.formatter);
 
     const payload: CoreSetStylePayload = {
       indexInfo: { columnIndex },
-      value: LightSheetHelper.GenerateStyleStringFromMap(this.getCellStyle(colKey).styling)
-    }
+      value: LightSheetHelper.GenerateStyleStringFromMap(
+        this.getCellStyle(colKey).styling,
+      ),
+    };
 
     this.events.emit(new LightsheetEvent(EventType.VIEW_SET_STYLE, payload));
   }
 
   setRowStyle(rowIndex: number, css: Map<string, string>): void {
     const rowKey = this.rowPositions.get(rowIndex);
-    if (!rowKey) return
+    if (!rowKey) return;
 
     const row = this.rows.get(rowKey);
     if (!row) return;
 
-    row.defaultStyle = new CellStyle(css, row.defaultStyle?.formatter)
+    row.defaultStyle = new CellStyle(css, row.defaultStyle?.formatter);
 
     const payload: CoreSetStylePayload = {
       indexInfo: { rowIndex },
-      value: LightSheetHelper.GenerateStyleStringFromMap(this.getCellStyle(null, rowKey).styling)
-    }
+      value: LightSheetHelper.GenerateStyleStringFromMap(
+        this.getCellStyle(null, rowKey).styling,
+      ),
+    };
 
     this.events.emit(new LightsheetEvent(EventType.VIEW_SET_STYLE, payload));
   }
@@ -716,11 +734,11 @@ export default class Sheet {
     const payload: CoreSetCellPayload = {
       position: {
         rowKey,
-        columnKey
+        columnKey,
       },
       indexPosition: {
         columnIndex,
-        rowIndex
+        rowIndex,
       },
       rawValue: cell ? cell.rawValue : "",
       formattedValue: cell ? cell.formattedValue : "",

@@ -25,4 +25,4 @@ export type CoreSetCellPayload = {
 export type CoreSetStylePayload = {
   indexInfo: IndexInfo;
   value: string;
-}
+};
