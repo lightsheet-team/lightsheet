@@ -63,7 +63,7 @@ export default class LightSheet {
   }
 
   private initializeStyle() {
-    this.style.forEach((item: StyleInfo) => {
+    this.style?.forEach((item: StyleInfo) => {
       if (item.css) this.setCss(item.position, item.css);
     });
   }
