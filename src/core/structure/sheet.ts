@@ -323,16 +323,16 @@ export default class Sheet {
 
 
   setCellCss(
-    colPos: number,
-    rowPos: number,
+    columnIndex: number,
+    rowIndex: number,
     css: Map<string, string>,
   ): void {
 
-    let colKey = this.columnPositions.get(colPos);
-    let rowKey = this.rowPositions.get(rowPos);
+    let colKey = this.columnPositions.get(columnIndex);
+    let rowKey = this.rowPositions.get(rowIndex);
 
     if (!colKey || !rowKey) {
-      const newCellElement = this.initializePosition(colPos, rowPos);
+      const newCellElement = this.initializePosition(columnIndex, rowIndex);
       this.createCell(newCellElement.columnKey!, newCellElement.rowKey!, "");
       colKey = newCellElement.columnKey
       rowKey = newCellElement.rowKey
@@ -352,9 +352,9 @@ export default class Sheet {
     row.cellFormatting.set(col.key, new CellStyle(css, row.cellFormatting.get(colKey!)?.formatter));
 
     const payload: CoreSetStylePayload = {
-      position: {
-        rowKey,
-        columnKey: colKey,
+      indexInfo: {
+        rowIndex,
+        columnIndex
       },
       value: LightSheetHelper.GenerateStyleStringFromMap(this.getCellStyle(colKey, rowKey).styling)
     }
@@ -364,10 +364,10 @@ export default class Sheet {
     return;
   }
 
-  setColumnCss(colPos: number, css: Map<string, string>,): void {
-
-    const colKey = this.columnPositions.get(colPos);
+  setColumnCss(columnIndex: number, css: Map<string, string>): void {
+    const colKey = this.columnPositions.get(columnIndex);
     if (!colKey) return
+
 
     const col = this.columns.get(colKey);
     if (!col) return;
@@ -375,30 +375,24 @@ export default class Sheet {
     col.defaultStyle = new CellStyle(css, col.defaultStyle?.formatter)
 
     const payload: CoreSetStylePayload = {
-      position: {
-        columnKey: colKey,
-      },
+      indexInfo: { columnIndex },
       value: LightSheetHelper.GenerateStyleStringFromMap(this.getCellStyle(colKey).styling)
     }
-    debugger
 
     this.events.emit(new LightsheetEvent(EventType.VIEW_SET_STYLE, payload));
   }
 
-  setRowStyle(rowPos: number, cellStyle: CellStyle): void {
-    const rowKey = this.rowPositions.get(rowPos);
+  setRowStyle(rowIndex: number, css: Map<string, string>): void {
+    const rowKey = this.rowPositions.get(rowIndex);
     if (!rowKey) return
 
     const row = this.rows.get(rowKey);
     if (!row) return;
 
-
-    this.setCellGroupStyle(row, cellStyle);
+    row.defaultStyle = new CellStyle(css, row.defaultStyle?.formatter)
 
     const payload: CoreSetStylePayload = {
-      position: {
-        rowKey: rowKey,
-      },
+      indexInfo: { rowIndex },
       value: LightSheetHelper.GenerateStyleStringFromMap(this.getCellStyle(null, rowKey).styling)
     }
 
@@ -713,20 +707,20 @@ export default class Sheet {
   }
 
   private emitSetCellEvent(
-    colKey: ColumnKey,
+    columnKey: ColumnKey,
     rowKey: RowKey,
-    colPos: number,
-    rowPos: number,
+    columnIndex: number,
+    rowIndex: number,
     cell: Cell | null,
   ) {
     const payload: CoreSetCellPayload = {
       position: {
-        rowKey: rowKey,
-        columnKey: colKey,
+        rowKey,
+        columnKey
       },
       indexPosition: {
-        columnIndex: colPos,
-        rowIndex: rowPos,
+        columnIndex,
+        rowIndex
       },
       rawValue: cell ? cell.rawValue : "",
       formattedValue: cell ? cell.formattedValue : "",

@@ -17,14 +17,21 @@ new Lightsheet(document.getElementById("lightsheet"), {
     items: toolbar,
     element: document.getElementById("toolbar-dom-id"),
   },
-  style: {
-    A: {
+  style: [
+    {
+      position: "A",
       css: "font-weight: bold;",
       format: { type: "number", option: { decimal: 2 } },
     },
-    B2: {
+    {
+      position: "B2",
       css: "background-color: yellow;",
       format: { type: "currency", option: { name: "EUR", decimal: 2 } },
     },
-  },
+    {
+      position: "3",
+      css: "background-color: blue;",
+      format: { type: "currency", option: { name: "EUR", decimal: 2 } },
+    },
+  ],
 });

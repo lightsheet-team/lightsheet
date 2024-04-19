@@ -49,20 +49,20 @@ export default class LightSheet {
   }
 
   private initializeStyle() {
-    for (const [key, item] of Object.entries(this.style)) {
-      const { row, col } = getRowColFromCellRef(key);
-      const cellStyle = new CellStyle(LightSheetHelper.GenerateStyleMapFromString((item as StyleInfo).css!))
+    this.style.forEach((item: StyleInfo) => {
+      const { row, col } = getRowColFromCellRef(item.position);
+      const css = LightSheetHelper.GenerateStyleMapFromString(item.css!);
 
       if (row == null && col == null) {
-        continue;
+        return;
       } else if (row != null && col != null) {
-        this.sheet.setCellCss(col, row, LightSheetHelper.GenerateStyleMapFromString((item as StyleInfo).css!));
+        this.sheet.setCellCss(col, row, css!);
       } else if (row != null) {
-        this.sheet.setRowStyle(row, cellStyle);
+        this.sheet.setRowStyle(row, css);
       } else if (col != null) {
-        this.sheet.setColumnCss(col, LightSheetHelper.GenerateStyleMapFromString((item as StyleInfo).css!));
+        this.sheet.setColumnCss(col, css!);
       }
-    }
+    });
   }
 
   private initializeTable() {

@@ -2,8 +2,8 @@ import CellStyle from "../structure/cellStyle.ts";
 import { KeyInfo, StyleInfo } from "../structure/sheet.types.ts";
 
 export type IndexInfo = {
-  columnIndex: number;
-  rowIndex: number;
+  columnIndex?: number;
+  rowIndex?: number;
 };
 
 export type UISetCellPayload = {
@@ -23,6 +23,6 @@ export type CoreSetCellPayload = {
 };
 
 export type CoreSetStylePayload = {
-  position: KeyInfo;
+  indexInfo: IndexInfo;
   value: string;
 }

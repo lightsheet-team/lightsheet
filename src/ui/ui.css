@@ -68,6 +68,7 @@ td:first-child {
   margin: 0px;
   padding: 2px;
   background-color: transparent;
+  font-weight: inherit;
 }
 
 .lightsheet_table_row_number {

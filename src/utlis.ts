@@ -14,7 +14,6 @@ export const getRowColFromCellRef = (
 ): { row: number | null; col: number | null } => {
   // Regular expression to extract the column and row indexes
   const matches = cellRef.match(/^([A-Z]+)?(\d+)?$/);
-
   if (matches) {
     const colStr = matches[1] || ""; // If column letter is not provided, default to empty string
     const rowStr = matches[2] || ""; // If row number is not provided, default to empty string
@@ -30,7 +29,10 @@ export const getRowColFromCellRef = (
     // Convert row string to index
     const rowIndex = rowStr ? parseInt(rowStr, 10) : null;
 
-    return { row: rowIndex ? rowIndex - 1 : null, col: colIndex - 1 };
+    return {
+      row: rowIndex ? rowIndex - 1 : null,
+      col: colIndex ? colIndex - 1 : null,
+    };
   } else {
     // Invalid cell reference
     return { row: null, col: null };

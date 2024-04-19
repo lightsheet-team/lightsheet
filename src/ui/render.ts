@@ -14,7 +14,6 @@ import {
 import EventType from "../core/event/eventType.ts";
 import LightSheetHelper from "../../utils/helpers.ts";
 import { ToolbarOptions } from "../main.types";
-import CellStyle from "../core/structure/cellStyle.ts";
 
 export default class UI {
   tableEl: Element;
@@ -295,21 +294,19 @@ export default class UI {
   }
 
   private onCoreSetStyle(event: CoreSetStylePayload) {
-    debugger
-    const { position, value } = event;
-    if (position.columnKey && position.rowKey) {
-      const cellDom = LightSheetHelper.GetElementInfo({ keyInfo: position });
-      // Get the cell by either column and row key or position.
-      // TODO Index-based ID may not be unique if there are multiple sheets.
-      const inputElement = cellDom!.children[0] as HTMLInputElement
+    const { indexInfo, value } = event;
+    if (indexInfo.columnIndex && indexInfo.rowIndex) {
+      const cellDom = this.tableBodyDom.children[indexInfo.rowIndex].children[indexInfo.columnIndex + 1];
+      const inputElement = cellDom! as HTMLElement
       inputElement.setAttribute("style", value);
-    } else if (position.columnKey) {
-      const cellGroup = this.tableBodyDom.querySelectorAll(`[id^=${position.columnKey}]`);
-      cellGroup.forEach((item) => {
-        (item.children[0] as HTMLInputElement).setAttribute("style", value)
-      })
+    } else if (indexInfo.columnIndex || indexInfo.columnIndex === 0) {
+      for (let i = 0; i < this.tableBodyDom.children.length; i++) {
+        this.tableBodyDom.children[i].children[indexInfo.columnIndex + 1].setAttribute("style", value)
+      }
     } else {
-
+      for (let i = 1; i < this.tableBodyDom.children[indexInfo.rowIndex!].children.length; i++) {
+        this.tableBodyDom.children[indexInfo.rowIndex!].children[i].setAttribute("style", value)
+      }
     }
   }
 
@@ -319,15 +316,15 @@ export default class UI {
     const elInfo = LightSheetHelper.GetElementInfoForSetCell(payload);
 
     if (!elInfo.rowDom) {
-      const row = this.addRow(payload.indexPosition.rowIndex);
+      const row = this.addRow(payload.indexPosition.rowIndex!);
       elInfo.rowDom = row;
       row.id = elInfo.rowDomId;
     }
     if (!elInfo.cellDom) {
       elInfo.cellDom = this.addCell(
         elInfo.rowDom!,
-        payload.indexPosition.columnIndex,
-        payload.indexPosition.rowIndex,
+        payload.indexPosition.columnIndex!,
+        payload.indexPosition.rowIndex!,
         payload.formattedValue,
         payload.position.columnKey?.toString(),
       );
