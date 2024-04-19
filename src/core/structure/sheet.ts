@@ -17,8 +17,6 @@ import EventType from "../event/eventType.ts";
 import { CellState } from "./cell/cellState.ts";
 import { EvaluationResult } from "../evaluation/expressionHandler.types.ts";
 import LightSheetHelper from "../../../utils/helpers.ts";
-import Formatter from "../evaluation/formatter.ts";
-import NumberFormatter from "../evaluation/numberFormatter.ts";
 
 export default class Sheet {
   defaultStyle: any;

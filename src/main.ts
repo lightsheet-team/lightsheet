@@ -6,7 +6,6 @@ import Events from "./core/event/events.ts";
 import LightSheetHelper from "../utils/helpers.ts";
 import { DefaultRowCount, DefaultColCount } from "../utils/constants.ts";
 import { getRowColFromCellRef } from "./utlis.ts";
-import CellStyle from "./core/structure/cellStyle.ts";
 
 export default class LightSheet {
   private ui: UI;
@@ -65,8 +64,7 @@ export default class LightSheet {
 
   private initializeStyle() {
     this.style.forEach((item: StyleInfo) => {
-      if (item.css)
-        this.setCss(item.position, item.css)
+      if (item.css) this.setCss(item.position, item.css);
     });
   }
 

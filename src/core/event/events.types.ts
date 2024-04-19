@@ -1,5 +1,4 @@
-import CellStyle from "../structure/cellStyle.ts";
-import { KeyInfo, StyleInfo } from "../structure/sheet.types.ts";
+import { KeyInfo } from "../structure/sheet.types.ts";
 
 export type IndexInfo = {
   columnIndex?: number;

@@ -1,4 +1,3 @@
-import Formatter from "../src/core/evaluation/formatter";
 import { CoreSetCellPayload } from "../src/core/event/events.types";
 import { ElementInfo } from "../src/core/structure/sheet.types";
 
