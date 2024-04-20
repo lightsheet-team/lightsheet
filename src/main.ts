@@ -6,13 +6,19 @@ import Events from "./core/event/events.ts";
 import SheetHolder from "./core/structure/sheetHolder.ts";
 import { DefaultColCount, DefaultRowCount } from "./utils/constants.ts";
 import LightSheetHelper from "./utils/helpers.ts";
+import EventType from "./core/event/eventType.ts";
+import EventState from "./core/event/eventState.ts";
+import { ListenerFunction } from "./core/event/events.ts";
+import { UISetCellPayload } from "./core/event/events.types.ts";
+import LightsheetEvent from "./core/event/event.ts";
+
 
 export default class LightSheet {
   #ui: UI | undefined;
   options: LightSheetOptions;
   sheet: Sheet;
   sheetHolder: SheetHolder;
-  events: Events;
+  #events: Events;
   onCellChange?;
   isReady: boolean = false;
 
@@ -26,9 +32,9 @@ export default class LightSheet {
       defaultRowCount: DefaultRowCount,
       ...options,
     };
-    this.events = new Events();
+    this.#events = new Events();
     this.sheetHolder = SheetHolder.getInstance();
-    this.sheet = new Sheet(options.sheetName, this.events);
+    this.sheet = new Sheet(options.sheetName, this.#events);
 
     if (targetElement) {
       this.#ui = new UI(targetElement, this, this.options.toolbarOptions);
@@ -42,6 +48,37 @@ export default class LightSheet {
     if (options.onReady) options.onReady = this.options.onReady;
     this.onTableReady();
   }
+
+  addEventListener(
+    eventType: EventType,
+    callback: ListenerFunction,
+    eventState: EventState = EventState.POST_EVENT,
+    once: boolean = false,
+  ): void {
+    this.#events.addEventListener(eventType, callback, eventState, once);
+  }
+
+  removeEventListener(
+    eventType: EventType,
+    callback: ListenerFunction,
+    eventState: EventState = EventState.POST_EVENT,
+  ): void {
+    this.#events.removeEventListener(eventType, callback, eventState)
+  }
+
+  // TODO: How should implementing custom UI work? Do we need to create a new interface for that or do we just 
+  // allow emitting UI events here?
+  onUICellValueChange(newValue: string, colIndex: number, rowIndex: number) {
+    const payload: UISetCellPayload = {
+      indexPosition: { column: colIndex, row: rowIndex },
+      rawValue: newValue,
+    };
+    this.#events.emit(
+      new LightsheetEvent(EventType.UI_SET_CELL, payload),
+    );
+    
+  }
+
 
   onTableReady() {
     this.isReady = true;

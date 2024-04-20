@@ -224,7 +224,7 @@ export default class UI {
     }
 
     inputDom.onchange = (e: Event) =>
-      this.onUICellValueChange(
+      this.lightSheet.onUICellValueChange(
         (e.target as HTMLInputElement).value,
         colIndex,
         rowIndex,
@@ -273,18 +273,8 @@ export default class UI {
     this.isReadOnly = readonly;
   }
 
-  onUICellValueChange(newValue: string, colIndex: number, rowIndex: number) {
-    const payload: UISetCellPayload = {
-      indexPosition: { column: colIndex, row: rowIndex },
-      rawValue: newValue,
-    };
-    this.lightSheet.events.emit(
-      new LightsheetEvent(EventType.UI_SET_CELL, payload),
-    );
-  }
-
   private registerEvents() {
-    this.lightSheet.events.on(EventType.CORE_SET_CELL, (event) => {
+    this.lightSheet.addEventListener(EventType.CORE_SET_CELL, (event) => {
       if (this.lightSheet.isReady) this.onCoreSetCell(event);
     });
   }
