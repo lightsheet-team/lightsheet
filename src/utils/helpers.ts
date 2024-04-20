@@ -12,6 +12,19 @@ export default class LightSheetHelper {
     return label || "A"; // Return "A" if index is 0
   };
 
+  static getChildIndex = (node: HTMLElement) => {
+    return Array.prototype.indexOf.call(node.parentNode?.childNodes, node);
+  };
+
+  static getCellIndexFromTd = (cell: HTMLElement) => {
+    const columnIndex = LightSheetHelper.getChildIndex(cell);
+    const rowIndex = LightSheetHelper.getChildIndex(cell.parentElement!);
+    return {
+      columnIndex,
+      rowIndex,
+    };
+  };
+
   static getElementInfoForSetCell = (payload: CoreSetCellPayload) => {
     const colKey = payload.keyPosition.columnKey?.toString();
     const rowKey = payload.keyPosition.rowKey?.toString();
