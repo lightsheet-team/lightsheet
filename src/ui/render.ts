@@ -249,10 +249,10 @@ export default class UI {
         const columnKey = cellDom.id;
         const rowKey = cellDom.parentElement?.id;
 
-        columnIndex = this.lightSheet.sheet.getColumnIndex(
+        columnIndex = this.lightSheet.getColumnIndex(
           generateColumnKey(columnKey!),
         );
-        rowIndex = this.lightSheet.sheet.getRowIndex(generateRowKey(rowKey!));
+        rowIndex = this.lightSheet.getRowIndex(generateRowKey(rowKey!));
       }
       this.selectedCell?.push(Number(columnIndex), Number(rowIndex));
     };
