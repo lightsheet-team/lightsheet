@@ -16,7 +16,6 @@ describe("Formula", () => {
     lightSheetInstance = new LightSheet(targetElementMock, {
       data: [],
     });
-    new UI(targetElementMock, lightSheetInstance);
     // Find the formula bar container
     const formulaBarContainer = targetElementMock.querySelector(
       ".lightsheet_table_formula_bar",
@@ -35,7 +34,6 @@ describe("Formula", () => {
     lightSheetInstance = new LightSheet(targetElementMock, {
       data: [],
     });
-    new UI(targetElementMock, lightSheetInstance);
     // Find the cell input element
     const cell = document.querySelector(
       "tbody tr:first-child td:first-child .lightsheet_table_cell_input",
@@ -81,7 +79,6 @@ describe("Formula", () => {
     lightSheetInstance = new LightSheet(targetElementMock, {
       data: [],
     });
-    new UI(targetElementMock, lightSheetInstance);
 
     const cell = document.querySelector(
       "tbody tr:first-child td:first-child .lightsheet_table_cell_input",
@@ -117,7 +114,6 @@ describe("Formula", () => {
       data: [],
       isReadOnly: true,
     });
-    new UI(targetElementMock, lightSheetInstance);
     const formulaBarDom = targetElementMock.querySelector(
       ".lightsheet_table_formula_bar",
     ) as HTMLDivElement;
@@ -133,7 +129,6 @@ describe("Formula", () => {
       data: [],
       isReadOnly: false,
     });
-    new UI(targetElementMock, lightSheetInstance);
     const formulaBarDom = targetElementMock.querySelector(
       ".lightsheet_table_formula_bar",
     ) as HTMLDivElement;
@@ -152,8 +147,6 @@ describe("Formula", () => {
         ["3", "Jorge", "img/nophoto.jpg", "Marketing", "3120"],
       ],
     });
-    new UI(targetElementMock, lightSheetInstance);
-
     // Select cell2
     const cell2 = document.querySelector(
       "tbody tr:nth-child(2) td:first-child .lightsheet_table_cell_input",
