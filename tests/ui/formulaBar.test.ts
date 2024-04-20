@@ -1,9 +1,9 @@
 // Import other necessary dependencies and utilities for testing
 import LightSheet from "../../src/main";
-import UI from "../../src/ui/render";
+
 describe("Formula", () => {
   let targetElementMock: HTMLElement;
-  let lightSheetInstance: LightSheet;
+
   beforeEach(() => {
     targetElementMock = document.createElement("div");
   });
@@ -13,7 +13,7 @@ describe("Formula", () => {
   });
 
   test("Exist formula bar in dom", () => {
-    lightSheetInstance = new LightSheet(targetElementMock, {
+    new LightSheet(targetElementMock, {
       data: [],
     });
     // Find the formula bar container
@@ -31,7 +31,7 @@ describe("Formula", () => {
   });
 
   test("Change cell content from formula bar", () => {
-    lightSheetInstance = new LightSheet(targetElementMock, {
+    new LightSheet(targetElementMock, {
       data: [],
     });
     // Find the cell input element
@@ -76,7 +76,7 @@ describe("Formula", () => {
   });
 
   test("Change formula bar content from cell", async () => {
-    lightSheetInstance = new LightSheet(targetElementMock, {
+    new LightSheet(targetElementMock, {
       data: [],
     });
 
@@ -110,7 +110,7 @@ describe("Formula", () => {
   });
 
   test("Hide formula bar in read only mode", () => {
-    lightSheetInstance = new LightSheet(targetElementMock, {
+    new LightSheet(targetElementMock, {
       data: [],
       isReadOnly: true,
     });
@@ -125,7 +125,7 @@ describe("Formula", () => {
   });
 
   test("Show formula bar in read only mode", () => {
-    lightSheetInstance = new LightSheet(targetElementMock, {
+    new LightSheet(targetElementMock, {
       data: [],
       isReadOnly: false,
     });
@@ -140,7 +140,7 @@ describe("Formula", () => {
   });
 
   test("Display the raw value of the cell", () => {
-    lightSheetInstance = new LightSheet(targetElementMock, {
+    new LightSheet(targetElementMock, {
       data: [
         ["1", "=1+2/3*6+A1+test(1,2)", "img/nophoto.jpg", "Marketing"],
         ["2", "Jorge", "img/nophoto.jpg", "Marketing", "3120"],
