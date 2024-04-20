@@ -16,3 +16,13 @@ export type CoreSetCellPayload = {
   clearCell: boolean;
   clearRow: boolean;
 };
+
+export type UIDeleteCellGroupPayload = {
+  indexPosition: number;
+  type: "row" | "column";
+};
+
+export type CoreDeleteCellGroupPayload = {
+  indexPosition: number;
+  type: "row" | "column";
+};

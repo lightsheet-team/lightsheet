@@ -12,6 +12,10 @@ export default class LightSheetHelper {
     return label || "A"; // Return "A" if index is 0
   };
 
+  static getChildIndex = (node: HTMLElement) => {
+    return Array.prototype.indexOf.call(node.parentNode?.childNodes, node);
+  };
+
   static getElementInfoForSetCell = (payload: CoreSetCellPayload) => {
     const colKey = payload.keyPosition.columnKey?.toString();
     const rowKey = payload.keyPosition.rowKey?.toString();

@@ -4,6 +4,8 @@ import LightsheetEvent from "../core/event/event.ts";
 import {
   CoreSetCellPayload,
   UISetCellPayload,
+  UIDeleteCellGroupPayload,
+  CoreDeleteCellGroupPayload,
 } from "../core/event/events.types.ts";
 import EventType from "../core/event/eventType.ts";
 import { ToolbarOptions } from "../main.types";
@@ -68,6 +70,13 @@ export default class UI {
     //tbody
     this.tableBodyDom = document.createElement("tbody");
     tableContainerDom.appendChild(this.tableBodyDom);
+
+    // Add event listener for keydown event
+    document.onkeydown = (e: KeyboardEvent) => {
+      if (e.key === "Delete") {
+        this.onDeleteButtonPressed(e);
+      }
+    };
   }
 
   createToolbar() {
@@ -276,9 +285,80 @@ export default class UI {
     );
   }
 
+  private onDeleteButtonPressed(e: KeyboardEvent) {
+    if (this.selectedRowNumberCell) {
+      const indexOfSelectedRow = LightSheetHelper.getChildIndex(
+        this.selectedRowNumberCell.parentElement!,
+      );
+      e.preventDefault();
+      const payload: UIDeleteCellGroupPayload = {
+        indexPosition: indexOfSelectedRow,
+        type: "row",
+      };
+      this.lightSheet.events.emit(
+        new LightsheetEvent(EventType.UI_DELETE_CELL_GROUP, payload),
+      );
+    } else if (this.selectedHeaderCell) {
+      const indexOfSelectedColumn = LightSheetHelper.getChildIndex(
+        this.selectedHeaderCell,
+      );
+      e.preventDefault();
+      const payload: UIDeleteCellGroupPayload = {
+        indexPosition: indexOfSelectedColumn,
+        type: "column",
+      };
+      this.lightSheet.events.emit(
+        new LightsheetEvent(EventType.UI_DELETE_CELL_GROUP, payload),
+      );
+    }
+  }
+
   private registerEvents() {
     this.lightSheet.events.on(EventType.CORE_SET_CELL, (event) => {
       if (this.lightSheet.isReady) this.onCoreSetCell(event);
+    });
+    this.lightSheet.events.on(EventType.CORE_DELETE_CELL_GROUP, (event) => {
+      this.onCoreDeleteCellGroup(event);
+    });
+  }
+
+  private onCoreDeleteCellGroup(event: LightsheetEvent) {
+    const payload = event.payload as CoreDeleteCellGroupPayload;
+    if (payload.type === "row") {
+      this.removeRow(payload.indexPosition);
+    } else {
+      this.removeColumn(payload.indexPosition);
+    }
+  }
+
+  private removeRow(index: number){
+    this.tableBodyDom.children[index].remove();
+    this.updateRowNumberLabels();
+  }
+
+  private updateRowNumberLabels() {
+    const rowNumberCells = this.tableBodyDom.querySelectorAll(
+      ".lightsheet_table_row_number",
+    );
+    rowNumberCells.forEach((cell, index) => {
+      cell.innerHTML = `${index + 1}`;
+    });
+  }
+
+  private removeColumn(index: number) {
+    this.tableBodyDom.querySelectorAll("tr").forEach((row) => {
+      row.children[index].remove();
+    });
+    this.tableHeadDom.children[0].children[index].remove();
+    this.updateColumnNumberLabels();
+  }
+
+  private updateColumnNumberLabels() {
+    const columnNumberCells = this.tableHeadDom.querySelectorAll(
+      ".lightsheet_table_header",
+    );
+    columnNumberCells.forEach((cell, index) => {
+      cell.innerHTML = LightSheetHelper.GenerateRowLabel(index);
     });
   }
 
