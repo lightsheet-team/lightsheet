@@ -145,13 +145,31 @@ export default class UI {
   }
 
   setFormulaBar() {
+    this.formulaInput.addEventListener("input", () => {
+      const newValue = this.formulaInput.value;
+      const selectedCellInput = document.querySelector(
+        ".lightsheet_table_selected_cell input",
+      ) as HTMLInputElement;
+      if (selectedCellInput) {
+        selectedCellInput.value = newValue;
+      }
+    });
     this.formulaInput.addEventListener("keyup", (event) => {
+      const newValue = this.formulaInput.value;
       if (event.key === "Enter") {
-        const newValue = this.formulaInput.value;
         if (this.selectedCell) {
           const colIndex = this.selectedCell.columnPosition;
           const rowIndex = this.selectedCell.rowPosition;
           this.onUICellValueChange(newValue, colIndex, rowIndex);
+        }
+        this.formulaInput.blur();
+        const previouslySelectedCell = document.querySelector(
+          ".lightsheet_table_selected_cell",
+        );
+        if (previouslySelectedCell) {
+          previouslySelectedCell.classList.remove(
+            "lightsheet_table_selected_cell",
+          );
         }
       }
     });
@@ -308,13 +326,19 @@ export default class UI {
         rowPosition: Number(rowIndex),
       };
 
-      // Connect with formula bar
       this.formulaInput.value = inputDom.getAttribute("rawValue")!;
     };
 
     inputDom.onblur = () => {
       inputDom.value = inputDom.getAttribute("resolvedValue") ?? "";
     };
+
+    inputDom.addEventListener("keydown", (event) => {
+      if (event.key === "Enter") {
+        inputDom.blur();
+        cellDom.classList.remove("lightsheet_table_selected_cell");
+      }
+    });
 
     return cellDom;
   }
