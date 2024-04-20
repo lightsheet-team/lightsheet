@@ -54,7 +54,6 @@ export default class UI {
     this.tableEl.classList.add("lightsheet_table_container");
 
     /*toolbar*/
-
     this.createToolbar();
 
     /*content*/
@@ -62,7 +61,6 @@ export default class UI {
     this.tableEl.appendChild(lightSheetContainerDom);
 
     this.createFormulaBar(lightSheetContainerDom);
-    this.setFormulaBar();
 
     const tableContainerDom = document.createElement("table");
     tableContainerDom.classList.add("lightsheet_table");
@@ -119,6 +117,9 @@ export default class UI {
   }
 
   createFormulaBar(lightSheetContainerDom: HTMLDivElement) {
+    if (this.isReadOnly) {
+      return;
+    }
     this.formulaBarDom = document.createElement("div");
     this.formulaBarDom.classList.add("lightsheet_table_formula_bar");
     lightSheetContainerDom.appendChild(this.formulaBarDom);
@@ -138,10 +139,7 @@ export default class UI {
     this.formulaInput = document.createElement("input");
     this.formulaInput.classList.add("lightsheet_formula_input");
     this.formulaBarDom.appendChild(this.formulaInput);
-  }
-
-  removeFormulaBar() {
-    if (this.formulaBarDom) this.formulaBarDom.remove();
+    this.setFormulaBar();
   }
 
   setFormulaBar() {
@@ -326,7 +324,9 @@ export default class UI {
         rowPosition: Number(rowIndex),
       };
 
-      this.formulaInput.value = inputDom.getAttribute("rawValue")!;
+      if (this.formulaBarDom) {
+        this.formulaInput.value = inputDom.getAttribute("rawValue")!;
+      }
     };
 
     inputDom.onblur = () => {

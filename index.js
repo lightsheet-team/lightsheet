@@ -12,6 +12,7 @@ new Lightsheet(document.getElementById("lightsheet"), {
   onCellChange: (colIndex, rowIndex, newValue) => {
     console.log(colIndex, rowIndex, newValue);
   },
+  //isReadOnly: true,
   toolbarOptions: {
     showToolbar: true,
     items: toolbar,
