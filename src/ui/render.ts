@@ -125,26 +125,23 @@ export default class UI {
 
     //selected cell display element
     this.selectedCellDisplay = document.createElement("div");
-    this.selectedCellDisplay.classList.add("selected_cell_display");
+    this.selectedCellDisplay.classList.add("lightsheet_selected_cell_display");
     this.formulaBarDom.appendChild(this.selectedCellDisplay);
 
     //"fx" label element
     const fxLabel = document.createElement("div");
     fxLabel.textContent = "fx";
-    fxLabel.classList.add("fx_label");
+    fxLabel.classList.add("lightsheet_fx_label");
     this.formulaBarDom.appendChild(fxLabel);
 
     //formula input
     this.formulaInput = document.createElement("input");
-    this.formulaInput.classList.add("formula_input");
+    this.formulaInput.classList.add("lightsheet_formula_input");
     this.formulaBarDom.appendChild(this.formulaInput);
+  }
 
-    //this.formulaBarDom.style.display = "none";
-    if (this.isReadOnly) {
-      this.formulaBarDom.style.display = "none";
-    } else {
-      this.formulaBarDom.style.display = "flex";
-    }
+  removeFormulaBar() {
+    if (this.formulaBarDom) this.formulaBarDom.remove();
   }
 
   setFormulaBar() {

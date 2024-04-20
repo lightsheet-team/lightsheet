@@ -16,7 +16,6 @@
   outline: none;
 }
 
-
 /*Formula bar*/
 .lightsheet_table_formula_bar {
   display: flex;
@@ -24,14 +23,14 @@
   border-bottom: 0px 
 }
 
-.selected_cell_display {
+.lightsheet_selected_cell_display {
   width: 75px; 
   height: 25px;
   background-color: var(--lightsheet-white);
   border-right: 1px solid var(--lightsheet-silver-400);
 }
 
-.fx_label {
+.lightsheet_fx_label {
   width: 35px;
   text-align: center;
   font-family: Arial, sans-serif;
@@ -42,7 +41,7 @@
   align-items: center;
 }
 
-.formula_input {
+.lightsheet_formula_input {
   flex: 1; 
   border: var(--lightsheet-silver-400);
   outline: none;
