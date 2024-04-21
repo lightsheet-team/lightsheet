@@ -171,6 +171,14 @@ export default class UI {
         }
       }
     });
+    this.formulaInput.onblur = () => {
+      const newValue = this.formulaInput.value;
+      if (this.selectedCell) {
+        const colIndex = this.selectedCell.columnPosition;
+        const rowIndex = this.selectedCell.rowPosition;
+        this.onUICellValueChange(newValue, colIndex, rowIndex);
+      }
+    };
   }
 
   addHeader(headerData: string[]) {
