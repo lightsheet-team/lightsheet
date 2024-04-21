@@ -312,22 +312,13 @@ export default class UI {
 
     // Get HTML elements and (new) IDs for the payload's cell and row.
     const elInfo = this.getElementInfoForSetCell(payload);
-    if (!elInfo.cellDom) {
-      elInfo.cellDom = this.addCell(
-        elInfo.rowDom!,
-        payload.indexPosition.column,
-        payload.indexPosition.row,
-        payload.formattedValue,
-        payload.keyPosition.columnKey?.toString(),
-      );
-    }
 
-    elInfo.cellDom.id = elInfo.cellDomId;
+    elInfo.cellDom!.id = elInfo.cellDomId;
     elInfo.rowDom!.id = elInfo.rowDomId;
 
     // Set cell value to resolved value from the core.
     // TODO Cell formula should be preserved. (Issue #49)
-    (elInfo.cellDom.firstChild! as HTMLInputElement).value =
+    (elInfo.cellDom!.firstChild! as HTMLInputElement).value =
       payload.formattedValue;
   }
 
