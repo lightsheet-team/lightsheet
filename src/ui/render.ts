@@ -13,6 +13,7 @@ import EventType from "../core/event/eventType.ts";
 import { ToolbarOptions } from "../main.types";
 import LightSheetHelper from "../utils/helpers.ts";
 import { ToolbarItems } from "../utils/constants.ts";
+import Events from "../core/event/events.ts";
 
 export default class UI {
   tableEl: Element;
@@ -27,10 +28,13 @@ export default class UI {
   toolbarOptions: ToolbarOptions;
   isReadOnly: boolean;
 
+  private events: Events;
+
   constructor(
     el: Element,
     lightSheet: LightSheet,
     toolbarOptions?: ToolbarOptions,
+    events: Events | null = null
   ) {
     this.tableEl = el;
     this.lightSheet = lightSheet;
@@ -39,6 +43,7 @@ export default class UI {
       selectionStart: null,
       selectionEnd: null,
     };
+    this.events = events ?? new Events();
     this.registerEvents();
     this.toolbarOptions = {
       showToolbar: false,
@@ -224,7 +229,7 @@ export default class UI {
     }
 
     inputDom.onchange = (e: Event) =>
-      this.lightSheet.onUICellValueChange(
+      this.onUICellValueChange(
         (e.target as HTMLInputElement).value,
         colIndex,
         rowIndex,
@@ -271,6 +276,16 @@ export default class UI {
       (input as HTMLInputElement).readOnly = readonly;
     });
     this.isReadOnly = readonly;
+  }
+
+  onUICellValueChange(newValue: string, colIndex: number, rowIndex: number) {
+    const payload: UISetCellPayload = {
+      indexPosition: { column: colIndex, row: rowIndex },
+      rawValue: newValue,
+    };
+    this.events.emit(
+      new LightsheetEvent(EventType.UI_SET_CELL, payload),
+    );
   }
 
   private registerEvents() {

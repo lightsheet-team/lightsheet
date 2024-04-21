@@ -9,17 +9,15 @@ import LightSheetHelper from "./utils/helpers.ts";
 import EventType from "./core/event/eventType.ts";
 import EventState from "./core/event/eventState.ts";
 import { ListenerFunction } from "./core/event/events.ts";
-import { UISetCellPayload } from "./core/event/events.types.ts";
-import LightsheetEvent from "./core/event/event.ts";
 import { ColumnKey, RowKey } from "./core/structure/key/keyTypes.ts";
 import CellStyle from "./core/structure/cellStyle.ts";
 
 export default class LightSheet {
   #ui: UI | undefined;
   options: LightSheetOptions;
-  #sheet: Sheet;
+  private sheet: Sheet;
   sheetHolder: SheetHolder;
-  #events: Events;
+  private events: Events;
   onCellChange?;
   isReady: boolean = false;
 
@@ -33,9 +31,9 @@ export default class LightSheet {
       defaultRowCount: DefaultRowCount,
       ...options,
     };
-    this.#events = new Events();
+    this.events = new Events();
     this.sheetHolder = SheetHolder.getInstance();
-    this.#sheet = new Sheet(options.sheetName, this.#events);
+    this.sheet = new Sheet(options.sheetName, this.events);
 
     if (targetElement) {
       this.#ui = new UI(targetElement, this, this.options.toolbarOptions);
@@ -56,7 +54,7 @@ export default class LightSheet {
     eventState: EventState = EventState.POST_EVENT,
     once: boolean = false,
   ): void {
-    this.#events.addEventListener(eventType, callback, eventState, once);
+    this.events.addEventListener(eventType, callback, eventState, once);
   }
 
   public removeEventListener(
@@ -64,22 +62,8 @@ export default class LightSheet {
     callback: ListenerFunction,
     eventState: EventState = EventState.POST_EVENT,
   ): void {
-    this.#events.removeEventListener(eventType, callback, eventState)
+    this.events.removeEventListener(eventType, callback, eventState)
   }
-
-  // TODO: How should implementing custom UI work? Do we need to create a new interface for that or do we just 
-  // allow emitting UI events here?
-  public onUICellValueChange(newValue: string, colIndex: number, rowIndex: number) {
-    const payload: UISetCellPayload = {
-      indexPosition: { column: colIndex, row: rowIndex },
-      rawValue: newValue,
-    };
-    this.#events.emit(
-      new LightsheetEvent(EventType.UI_SET_CELL, payload),
-    );
-    
-  }
-
 
   onTableReady() {
     this.isReady = true;
@@ -124,7 +108,7 @@ export default class LightSheet {
             : null;
         //if data is not empty add cell to core and render ui, otherwise render only ui
         if (data) {
-          const cell = this.#sheet.setCellAt(j, i, data);
+          const cell = this.sheet.setCellAt(j, i, data);
           const rowKeyStr = cell.position.rowKey!.toString();
           const columnKeyStr = cell.position.columnKey!.toString();
 
@@ -138,7 +122,7 @@ export default class LightSheet {
   }
 
   getKey() {
-    return this.#sheet.key;
+    return this.sheet.key;
   }
 
   getName() {
@@ -146,22 +130,22 @@ export default class LightSheet {
   }
 
   setCellAt(columnKey: number, rowKey: number, value: any): CellInfo {
-    return this.#sheet.setCellAt(columnKey, rowKey, value.toString());
+    return this.sheet.setCellAt(columnKey, rowKey, value.toString());
   }
 
   getCellInfoAt(colPos: number, rowPos: number): CellInfo | null {
-    return this.#sheet.getCellInfoAt(colPos, rowPos);
+    return this.sheet.getCellInfoAt(colPos, rowPos);
   }
 
   getRowIndex(rowKey: RowKey): number | undefined {
-    return this.#sheet.getRowIndex(rowKey);
+    return this.sheet.getRowIndex(rowKey);
   }
 
   getColumnIndex(colKey: ColumnKey): number | undefined {
-    return this.#sheet.getColumnIndex(colKey);
+    return this.sheet.getColumnIndex(colKey);
   }
 
   getCellStyle(colKey?: ColumnKey, rowKey?: RowKey): CellStyle {
-    return this.#sheet.getCellStyle(colKey, rowKey);
+    return this.sheet.getCellStyle(colKey, rowKey);
   }
 }
