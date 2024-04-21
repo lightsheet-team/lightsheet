@@ -121,6 +121,10 @@ export default class UI {
       headerCellDom.textContent = headerData[i];
       headerRowDom.appendChild(headerCellDom);
 
+      headerRowDom.oncontextmenu = (e: MouseEvent) => {
+        e.preventDefault();
+      };
+
       if (i > 0) {
         headerCellDom.onclick = (e: MouseEvent) => {
           const selectedColumn = e.target as HTMLElement;
@@ -181,6 +185,10 @@ export default class UI {
           }
         }
       }
+    };
+
+    rowNumberCell.oncontextmenu = (e: MouseEvent) => {
+      e.preventDefault();
     };
     return rowDom;
   }
@@ -253,6 +261,10 @@ export default class UI {
       if (e.buttons === 1) {
         this.handleMouseOver(e, colIndex, rowIndex);
       }
+    };
+
+    inputDom.oncontextmenu = (e: MouseEvent) => {
+      e.preventDefault();
     };
 
     return cellDom;
@@ -398,6 +410,10 @@ export default class UI {
     });
   }
 
+  showMenu() {
+    console.log("TODO: Render menu here");
+  }
+
   handleMouseDown(e: MouseEvent, colIndex: number, rowIndex: number) {
     if (e.button === 0) {
       this.selectedCellsContainer.selectionStart =
@@ -407,6 +423,9 @@ export default class UI {
               column: colIndex,
             }
           : null;
+    } else if (e.button === 2) {
+      console.log("Right click /n TODO: Show menu");
+      this.showMenu();
     }
   }
 
