@@ -12,6 +12,7 @@ describe("Tool bar", () => {
 
   test("should create toolbar as the first child in the table container if no element is provided", () => {
     const targetElementMock: HTMLElement = document.createElement("div");
+    document.body.appendChild(targetElementMock);
 
     // Get the toolbar element
     new LightSheet(

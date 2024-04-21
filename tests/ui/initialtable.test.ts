@@ -19,6 +19,7 @@ describe("LightSheet", () => {
       targetElementMock,
     );
 
+    document.body.appendChild(targetElementMock);
     expect(onReady).toHaveBeenCalledWith();
   });
 

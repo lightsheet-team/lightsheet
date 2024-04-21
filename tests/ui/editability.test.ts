@@ -6,6 +6,7 @@ describe("LightSheet", () => {
   beforeEach(() => {
     window.sheetHolder?.clear();
     targetElementMock = document.createElement("div");
+    document.body.appendChild(targetElementMock);
   });
 
   afterEach(() => {
