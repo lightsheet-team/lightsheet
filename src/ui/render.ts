@@ -300,20 +300,14 @@ export default class UI {
   private onCoreSetCell(event: LightsheetEvent) {
     const payload = event.payload as CoreSetCellPayload;
     // Create new columns if the column index is greater than the current column count.
-    const columnCount = this.getColumnCount();
-    if (payload.indexPosition.column > columnCount - 1) {
-      const diff = payload.indexPosition.column + 1 - columnCount;
-      for (let i = 0; i < diff; i++) {
-        this.addColumn();
-      }
+    const newColumns = payload.indexPosition.column - this.getColumnCount() + 1;
+    for (let i = 0; i < newColumns; i++) {
+      this.addColumn();
     }
 
-    const rowCount = this.getRowCount();
-    if (payload.indexPosition.row > rowCount - 1) {
-      const diff = payload.indexPosition.row + 1 - rowCount;
-      for (let i = 0; i < diff; i++) {
-        this.addRow();
-      }
+    const newRows = payload.indexPosition.row - this.getRowCount() + 1;
+    for (let i = 0; i < newRows; i++) {
+      this.addRow();
     }
 
     // Get HTML elements and (new) IDs for the payload's cell and row.
