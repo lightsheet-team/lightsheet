@@ -354,7 +354,9 @@ export default class UI {
     const newRowDomId = payload.clearRow ? `row_${rowIndex}` : rowKey!;
 
     let rowDom: HTMLElement | null = null;
-    rowDom = document.getElementById(rowKey!);
+    if (rowKey) {
+      rowDom = document.getElementById(rowKey);
+    }
     if (!rowDom) {
       const rowId = `row_${rowIndex}`;
       rowDom = document.getElementById(rowId);
