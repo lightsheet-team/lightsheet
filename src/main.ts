@@ -41,14 +41,11 @@ export default class LightSheet {
       }
 
       if (this.options.data) {
-        let rowIndex = 0;
-        for (const rowArray of this.options.data) {
-          let columnIndex = 0;
-          for (const cellValue of rowArray) {
-            this.sheet.setCellAt(columnIndex, rowIndex, cellValue);
-            columnIndex++;
+        for (let rowI = 0; rowI < this.options.data.length; rowI++) {
+          const rowData = this.options.data[rowI];
+          for (let colI = 0; colI < rowData.length; colI++) {
+            this.sheet.setCellAt(colI, rowI, rowData[colI]);
           }
-          rowIndex++;
         }
       }
     }
