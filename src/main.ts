@@ -71,7 +71,7 @@ export default class LightSheet {
 
     const headerData = Array.from(
       { length: colLength + 1 }, // Adding 1 for the row number column
-      (_, i) => (i === 0 ? "" : LightSheetHelper.GenerateRowLabel(i)), // Generating row labels
+      (_, i) => (i === 0 ? "" : LightSheetHelper.generateColumnLabel(i)), // Generating column labels
     );
 
     this.#ui.addHeader(headerData);
