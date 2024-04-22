@@ -48,7 +48,7 @@ export default class LightSheet {
     this.onTableReady();
   }
 
-  public addEventListener(
+  addEventListener(
     eventType: EventType,
     callback: ListenerFunction,
     eventState: EventState = EventState.POST_EVENT,
@@ -57,7 +57,7 @@ export default class LightSheet {
     this.events.addEventListener(eventType, callback, eventState, once);
   }
 
-  public removeEventListener(
+  removeEventListener(
     eventType: EventType,
     callback: ListenerFunction,
     eventState: EventState = EventState.POST_EVENT,
@@ -133,6 +133,7 @@ export default class LightSheet {
     return this.sheet.setCellAt(columnKey, rowKey, value.toString());
   }
 
+
   getCellInfoAt(colPos: number, rowPos: number): CellInfo | null {
     return this.sheet.getCellInfoAt(colPos, rowPos);
   }
@@ -147,5 +148,45 @@ export default class LightSheet {
 
   getCellStyle(colKey?: ColumnKey, rowKey?: RowKey): CellStyle {
     return this.sheet.getCellStyle(colKey, rowKey);
+  }
+
+  setRowStyle(rowkey: RowKey, cellStyle: CellStyle): boolean{
+    return this.sheet.setRowStyle(rowkey, cellStyle)
+  }
+
+  setColumnStyle(columnKey: ColumnKey, cellStyle: CellStyle): boolean{
+    return this.sheet.setColumnStyle(columnKey, cellStyle)
+  }
+
+  setCellStyle(
+    colKey: ColumnKey,
+    rowKey: RowKey,
+    style: CellStyle | null,
+  ): boolean{
+    return this.sheet.setCellStyle(colKey, rowKey, style)
+  }
+
+  moveColumn(from: number, to: number): boolean {
+    return this.sheet.moveColumn(from, to);
+  }
+
+  moveRow(from: number, to: number): boolean {
+    return this.sheet.moveRow(from, to);
+  }
+
+  insertColumn(position: number): boolean {
+    return this.sheet.insertColumn(position)
+  }
+
+  insertRow(position: number): boolean {
+    return this.sheet.insertRow(position);
+  }
+
+  deleteColumn(position: number): boolean {
+    return this.sheet.deleteColumn(position);
+  }
+
+  deleteRow(position: number): boolean {
+    return this.sheet.deleteRow(position);
   }
 }
