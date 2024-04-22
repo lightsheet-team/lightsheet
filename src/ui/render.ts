@@ -28,7 +28,7 @@ export default class UI {
   selectedCellsContainer: SelectionContainer;
   toolbarOptions: ToolbarOptions;
   isReadOnly: boolean;
-  selectedCell: Coordinate | undefined;
+  singleSelectedCell: Coordinate | undefined;
 
   constructor(
     el: Element,
@@ -41,7 +41,7 @@ export default class UI {
       selectionStart: null,
       selectionEnd: null,
     };
-    this.selectedCell = undefined;
+    this.singleSelectedCell = undefined;
     this.registerEvents();
     this.toolbarOptions = {
       showToolbar: false,
@@ -155,9 +155,9 @@ export default class UI {
     this.formulaInput.addEventListener("keyup", (event) => {
       const newValue = this.formulaInput.value;
       if (event.key === "Enter") {
-        if (this.selectedCell) {
-          const colIndex = this.selectedCell.columnPosition;
-          const rowIndex = this.selectedCell.rowPosition;
+        if (this.singleSelectedCell) {
+          const colIndex = this.singleSelectedCell.columnPosition;
+          const rowIndex = this.singleSelectedCell.rowPosition;
           this.onUICellValueChange(newValue, colIndex, rowIndex);
         }
         this.formulaInput.blur();
@@ -173,9 +173,9 @@ export default class UI {
     });
     this.formulaInput.onblur = () => {
       const newValue = this.formulaInput.value;
-      if (this.selectedCell) {
-        const colIndex = this.selectedCell.columnPosition;
-        const rowIndex = this.selectedCell.rowPosition;
+      if (this.singleSelectedCell) {
+        const colIndex = this.singleSelectedCell.columnPosition;
+        const rowIndex = this.singleSelectedCell.rowPosition;
         this.onUICellValueChange(newValue, colIndex, rowIndex);
       }
     };
@@ -327,7 +327,7 @@ export default class UI {
         );
         rowIndex = this.lightSheet.sheet.getRowIndex(generateRowKey(rowKey!));
       }
-      this.selectedCell = {
+      this.singleSelectedCell = {
         columnPosition: Number(columnIndex),
         rowPosition: Number(rowIndex),
       };
