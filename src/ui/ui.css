@@ -3,6 +3,8 @@
   --lightsheet-silver-400: #cccccc;
   --lightsheet-gray-200: #f3f3f3;
   --lightsheet-white: #ffffff;
+  --lightsheet-dark-blue: #00008b;
+  --lightsheet-light-blue: #add8e6;
 }
 
 .lightsheet_table_container * {
@@ -127,11 +129,15 @@ td:first-child {
 }
 
 .lightsheet_table_selected_row_number_header_cell {
-  background-color: darkblue;
-  color: white;
+  background-color: var(--lightsheet-dark-blue);
+  color: var(--lightsheet-white);
 }
 
 .lightsheet_table_selected_row_column {
-  background-color: lightblue;
+  background-color: var(--lightsheet-light-blue);
 }
 
+
+.lightsheet_table_selected_cell_range{
+  background-color: var(--lightsheet-light-blue);
+}

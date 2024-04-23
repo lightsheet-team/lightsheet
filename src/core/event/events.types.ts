@@ -1,19 +1,15 @@
 import { PositionInfo } from "../structure/sheet.types.ts";
-
-export type IndexPosition = {
-  columnIndex: number;
-  rowIndex: number;
-};
+import { Coordinate } from "../../utils/common.types.ts";
 
 export type UISetCellPayload = {
   keyPosition?: PositionInfo;
-  indexPosition?: IndexPosition;
+  indexPosition?: Coordinate;
   rawValue: string;
 };
 
 export type CoreSetCellPayload = {
-  position: PositionInfo;
-  indexPosition: IndexPosition;
+  keyPosition: PositionInfo;
+  indexPosition: Coordinate;
   rawValue: string;
   formattedValue: string;
 

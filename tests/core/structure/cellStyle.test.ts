@@ -5,7 +5,8 @@ describe("CellStyle", () => {
   let sheet: Sheet;
 
   beforeEach(() => {
-    sheet = new Sheet();
+    window.sheetHolder?.clear();
+    sheet = new Sheet("Sheet");
   });
 
   it("should apply cell styling rules that are properly combined by getCellStyle", () => {

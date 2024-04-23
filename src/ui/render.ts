@@ -1,18 +1,15 @@
 import LightSheet from "../main";
-import {
-  generateColumnKey,
-  generateRowKey,
-} from "../core/structure/key/keyTypes";
-import { CellIdInfo, Coordinate, SelectionContainer } from "./render.types.ts";
+import { SelectionContainer } from "./render.types.ts";
 import LightsheetEvent from "../core/event/event.ts";
 import {
   CoreSetCellPayload,
   UISetCellPayload,
 } from "../core/event/events.types.ts";
 import EventType from "../core/event/eventType.ts";
-import LightSheetHelper from "../../utils/helpers.ts";
 import { ToolbarOptions } from "../main.types";
-import { ToolbarItems } from "../../utils/constants.ts";
+import { ToolbarItems } from "../utils/constants.ts";
+import { Coordinate } from "../utils/common.types.ts";
+import LightSheetHelper from "../utils/helpers.ts";
 
 export default class UI {
   tableEl: Element;
@@ -23,6 +20,7 @@ export default class UI {
   tableHeadDom: Element;
   tableBodyDom: Element;
   lightSheet: LightSheet;
+  selectedCell: number[];
   selectedRowNumberCell: HTMLElement | null = null;
   selectedHeaderCell: HTMLElement | null = null;
   selectedCellsContainer: SelectionContainer;
@@ -37,6 +35,7 @@ export default class UI {
   ) {
     this.tableEl = el;
     this.lightSheet = lightSheet;
+    this.selectedCell = [];
     this.selectedCellsContainer = {
       selectionStart: null,
       selectionEnd: null,
@@ -60,7 +59,7 @@ export default class UI {
     const lightSheetContainerDom = document.createElement("div");
     this.tableEl.appendChild(lightSheetContainerDom);
 
-    this.createFormulaBar(lightSheetContainerDom);
+    this.createFormulaBar();
 
     const tableContainerDom = document.createElement("table");
     tableContainerDom.classList.add("lightsheet_table");
@@ -116,12 +115,13 @@ export default class UI {
     }
   }
 
-  createFormulaBar(lightSheetContainerDom: HTMLDivElement) {
-    if (this.isReadOnly) {
+  createFormulaBar() {
+    if (this.isReadOnly || this.formulaBarDom) {
       return;
     }
     this.formulaBarDom = document.createElement("div");
     this.formulaBarDom.classList.add("lightsheet_table_formula_bar");
+    const lightSheetContainerDom = this.tableEl.firstChild!;
     lightSheetContainerDom.appendChild(this.formulaBarDom);
 
     //selected cell display element
@@ -156,8 +156,8 @@ export default class UI {
       const newValue = this.formulaInput.value;
       if (event.key === "Enter") {
         if (this.singleSelectedCell) {
-          const colIndex = this.singleSelectedCell.columnPosition;
-          const rowIndex = this.singleSelectedCell.rowPosition;
+          const colIndex = this.singleSelectedCell.column;
+          const rowIndex = this.singleSelectedCell.row;
           this.onUICellValueChange(newValue, colIndex, rowIndex);
         }
         this.formulaInput.blur();
@@ -174,11 +174,15 @@ export default class UI {
     this.formulaInput.onblur = () => {
       const newValue = this.formulaInput.value;
       if (this.singleSelectedCell) {
-        const colIndex = this.singleSelectedCell.columnPosition;
-        const rowIndex = this.singleSelectedCell.rowPosition;
+        const colIndex = this.singleSelectedCell.column;
+        const rowIndex = this.singleSelectedCell.row;
         this.onUICellValueChange(newValue, colIndex, rowIndex);
       }
     };
+  }
+
+  removeFormulaBar() {
+    if (this.formulaBarDom) this.formulaBarDom.remove();
   }
 
   addHeader(headerData: string[]) {
@@ -200,6 +204,7 @@ export default class UI {
           if (!selectedColumn) return;
           const prevSelection = this.selectedHeaderCell;
           this.removeGroupSelection();
+          this.removeCellRangeSelection();
 
           if (prevSelection !== selectedColumn) {
             selectedColumn.classList.add(
@@ -233,6 +238,7 @@ export default class UI {
       if (!selectedRow) return;
       const prevSelection = this.selectedRowNumberCell;
       this.removeGroupSelection();
+      this.removeCellRangeSelection();
 
       if (prevSelection !== selectedRow) {
         selectedRow.classList.add(
@@ -267,7 +273,13 @@ export default class UI {
     return document.getElementById(rowKey);
   }
 
-  addCell(rowDom: Element, colIndex: number, rowIndex: number): HTMLElement {
+  addCell(
+    rowDom: Element,
+    colIndex: number,
+    rowIndex: number,
+    value: any,
+    columnKey?: string,
+  ): HTMLElement {
     const cellDom = document.createElement("td");
     cellDom.classList.add(
       "lightsheet_table_cell",
@@ -276,10 +288,19 @@ export default class UI {
     );
     rowDom.appendChild(cellDom);
     cellDom.id = `${colIndex}_${rowIndex}`;
+    cellDom.setAttribute("column-index", `${colIndex}` || "");
+    cellDom.setAttribute("row-index", `${rowIndex}` || "");
+
     const inputDom = document.createElement("input");
     inputDom.classList.add("lightsheet_table_cell_input");
     inputDom.readOnly = this.isReadOnly;
+    inputDom.value = "";
     cellDom.appendChild(inputDom);
+
+    if (value) {
+      cellDom.id = `${columnKey}_${rowDom.id}`;
+      inputDom.value = value;
+    }
 
     inputDom.addEventListener("input", (e: Event) => {
       const newValue = (e.target as HTMLInputElement).value;
@@ -296,7 +317,7 @@ export default class UI {
     inputDom.onfocus = () => {
       inputDom.value = inputDom.getAttribute("rawValue") ?? "";
       this.removeGroupSelection();
-
+      this.removeCellRangeSelection();
       const previouslySelectedInput = document.querySelector(
         ".lightsheet_table_selected_cell",
       );
@@ -307,29 +328,13 @@ export default class UI {
       }
 
       cellDom.classList.add("lightsheet_table_selected_cell");
-
-      let columnIndex: number | undefined;
-      let rowIndex: number | undefined;
-
-      const cellIdInfo = this.checkCellId(cellDom);
-      if (!cellIdInfo) return;
-      const { keyParts, isIndex } = cellIdInfo;
-
-      if (isIndex) {
-        columnIndex = Number(keyParts[0]);
-        rowIndex = Number(keyParts[1]);
-      } else {
-        const columnKey = keyParts[0];
-        const rowKey = cellDom.parentElement?.id;
-
-        columnIndex = this.lightSheet.sheet.getColumnIndex(
-          generateColumnKey(columnKey!),
-        );
-        rowIndex = this.lightSheet.sheet.getRowIndex(generateRowKey(rowKey!));
+      if (colIndex !== undefined && rowIndex !== undefined) {
+        this.selectedCell.push(colIndex, rowIndex);
       }
+
       this.singleSelectedCell = {
-        columnPosition: Number(columnIndex),
-        rowPosition: Number(rowIndex),
+        column: Number(colIndex),
+        row: Number(rowIndex),
       };
 
       if (this.formulaBarDom) {
@@ -348,6 +353,16 @@ export default class UI {
       }
     });
 
+    inputDom.onmousedown = (e: MouseEvent) => {
+      this.handleMouseDown(e, colIndex, rowIndex);
+    };
+
+    inputDom.onmouseover = (e: MouseEvent) => {
+      if (e.buttons === 1) {
+        this.handleMouseOver(e, colIndex, rowIndex);
+      }
+    };
+
     return cellDom;
   }
 
@@ -357,11 +372,16 @@ export default class UI {
       (input as HTMLInputElement).readOnly = readonly;
     });
     this.isReadOnly = readonly;
+    if (readonly) {
+      this.removeFormulaBar();
+    } else {
+      this.createFormulaBar();
+    }
   }
 
   onUICellValueChange(rawValue: string, colIndex: number, rowIndex: number) {
     const payload: UISetCellPayload = {
-      indexPosition: { columnIndex: colIndex, rowIndex: rowIndex },
+      indexPosition: { column: colIndex, row: rowIndex },
       rawValue: rawValue,
     };
     this.lightSheet.events.emit(
@@ -381,15 +401,17 @@ export default class UI {
     const elInfo = LightSheetHelper.getElementInfoForSetCell(payload);
 
     if (!elInfo.rowDom) {
-      const row = this.addRow(payload.indexPosition.rowIndex);
+      const row = this.addRow(payload.indexPosition.row);
       elInfo.rowDom = row;
       row.id = elInfo.rowDomId;
     }
     if (!elInfo.cellDom) {
       elInfo.cellDom = this.addCell(
         elInfo.rowDom!,
-        payload.indexPosition.columnIndex,
-        payload.indexPosition.rowIndex,
+        payload.indexPosition.column,
+        payload.indexPosition.row,
+        payload.formattedValue,
+        payload.keyPosition.columnKey?.toString(),
       );
     }
 
@@ -401,15 +423,6 @@ export default class UI {
     inputEl.setAttribute("rawValue", payload.rawValue);
     inputEl.setAttribute("resolvedValue", payload.formattedValue);
     inputEl.value = payload.formattedValue;
-  }
-
-  private checkCellId(cellDom: Element): CellIdInfo | undefined {
-    const keyParts = cellDom.id.split("_");
-    if (keyParts.length != 2) return;
-
-    const isIndex = keyParts[0].match("^[0-9]+$") !== null;
-
-    return { keyParts: keyParts, isIndex: isIndex };
   }
 
   removeGroupSelection() {
@@ -449,5 +462,85 @@ export default class UI {
     }
 
     this.selectedHeaderCell = null;
+  }
+
+  removeCellRangeSelection() {
+    const cells = Array.from(document.querySelectorAll("td"));
+    cells.forEach((cell) =>
+      cell.classList.remove("lightsheet_table_selected_cell_range"),
+    );
+  }
+
+  cellInRange(cell: HTMLTableCellElement) {
+    const { selectionStart, selectionEnd } = this.selectedCellsContainer;
+    if (!selectionStart || !selectionEnd) {
+      return false;
+    }
+
+    const cellColumnIndex = Number(cell.getAttribute("column-index"));
+    const cellRowIndex = Number(cell.getAttribute("row-index"));
+
+    if (cellColumnIndex === undefined || cellRowIndex === undefined)
+      return false;
+
+    const withinX =
+      (cellColumnIndex >= selectionStart.column &&
+        cellColumnIndex <= selectionEnd.column) ||
+      (cellColumnIndex <= selectionStart.column &&
+        cellColumnIndex >= selectionEnd.column);
+    const withinY =
+      (cellRowIndex >= selectionStart.row &&
+        cellRowIndex <= selectionEnd.row) ||
+      (cellRowIndex <= selectionStart.row && cellRowIndex >= selectionEnd.row);
+
+    return withinX && withinY;
+  }
+
+  updateSelection() {
+    this.removeCellRangeSelection();
+    const cells = Array.from(document.querySelectorAll("td"));
+    cells.forEach((cell) => {
+      if (
+        cell.classList.contains("lightsheet_table_header") ||
+        cell.classList.contains("lightsheet_table_row_number")
+      )
+        return;
+
+      if (this.cellInRange(cell)) {
+        cell.classList.add("lightsheet_table_selected_cell_range");
+      }
+    });
+  }
+
+  handleMouseDown(e: MouseEvent, colIndex: number, rowIndex: number) {
+    if (e.button === 0) {
+      this.selectedCellsContainer.selectionStart =
+        (colIndex != null || undefined) && (rowIndex != null || undefined)
+          ? {
+              row: rowIndex,
+              column: colIndex,
+            }
+          : null;
+    }
+  }
+
+  handleMouseOver(e: MouseEvent, colIndex: number, rowIndex: number) {
+    if (e.button !== 0) return;
+
+    this.selectedCellsContainer.selectionEnd =
+      (colIndex != null || undefined) && (rowIndex != null || undefined)
+        ? {
+            row: rowIndex,
+            column: colIndex,
+          }
+        : null;
+    if (
+      this.selectedCellsContainer.selectionStart &&
+      this.selectedCellsContainer.selectionEnd &&
+      this.selectedCellsContainer.selectionStart !==
+        this.selectedCellsContainer.selectionEnd
+    ) {
+      this.updateSelection();
+    }
   }
 }
