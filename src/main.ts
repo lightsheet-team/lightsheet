@@ -47,7 +47,7 @@ export default class LightSheet {
 
   static registerFunction(
     name: string,
-    func: (pos: CellReference, ...args: any[]) => string,
+    func: (cellRef: CellReference, ...args: any[]) => string,
   ) {
     ExpressionHandler.registerFunction(name, func);
   }

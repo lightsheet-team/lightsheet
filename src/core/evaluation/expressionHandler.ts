@@ -36,7 +36,7 @@ const math = create({
 export default class ExpressionHandler {
   private static functions: Map<
     string,
-    (cellPos: CellReference, ...args: any[]) => string
+    (cellRef: CellReference, ...args: any[]) => string
   > = new Map();
 
   private sheet: Sheet;
@@ -175,7 +175,7 @@ export default class ExpressionHandler {
 
   static registerFunction(
     name: string,
-    fun: (cellPos: CellReference, ...args: any[]) => string,
+    fun: (cellRef: CellReference, ...args: any[]) => string,
   ) {
     ExpressionHandler.functions.set(name.toLowerCase(), fun);
   }
