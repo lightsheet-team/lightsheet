@@ -14,7 +14,7 @@ import LightSheetHelper from "../utils/helpers.ts";
 export default class UI {
   tableEl: Element;
   toolbarDom: HTMLElement | undefined;
-  formulaBarDom!: HTMLElement;
+  formulaBarDom!: HTMLElement | null;
   formulaInput!: HTMLInputElement;
   selectedCellDisplay!: HTMLElement;
   tableHeadDom: Element;
@@ -116,13 +116,17 @@ export default class UI {
   }
 
   createFormulaBar() {
-    if (this.isReadOnly || this.formulaBarDom) {
+    if (this.isReadOnly || this.formulaBarDom instanceof HTMLElement) {
       return;
     }
     this.formulaBarDom = document.createElement("div");
     this.formulaBarDom.classList.add("lightsheet_table_formula_bar");
     const lightSheetContainerDom = this.tableEl.firstChild!;
-    lightSheetContainerDom.appendChild(this.formulaBarDom);
+
+    lightSheetContainerDom.insertBefore(
+      this.formulaBarDom,
+      lightSheetContainerDom.firstChild,
+    );
 
     //selected cell display element
     this.selectedCellDisplay = document.createElement("div");
@@ -182,7 +186,10 @@ export default class UI {
   }
 
   removeFormulaBar() {
-    if (this.formulaBarDom) this.formulaBarDom.remove();
+    if (this.formulaBarDom) {
+      this.formulaBarDom.remove();
+      this.formulaBarDom = null;
+    }
   }
 
   addHeader(headerData: string[]) {
