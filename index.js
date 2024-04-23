@@ -15,9 +15,8 @@ new Lightsheet(
       console.log(colIndex, rowIndex, newValue);
     },
     toolbarOptions: {
-      showToolbar: false,
+      showToolbar: true,
       items: toolbar,
-      element: document.getElementById("toolbar-dom-id"),
     },
   },
   document.getElementById("lightsheet"),

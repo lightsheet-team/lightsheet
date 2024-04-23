@@ -27,6 +27,7 @@ export default class UI {
   toolbarOptions: ToolbarOptions;
   isReadOnly: boolean;
   singleSelectedCell: Coordinate | undefined;
+  tableContainerDom: any;
 
   constructor(
     el: Element,
@@ -50,31 +51,27 @@ export default class UI {
     };
     this.isReadOnly = lightSheet.options.isReadOnly || false;
 
+    //container
     this.tableEl.classList.add("lightsheet_table_container");
-
-    /*toolbar*/
+    //tool bar
     this.createToolbar();
-
-    /*content*/
-    const lightSheetContainerDom = document.createElement("div");
-    this.tableEl.appendChild(lightSheetContainerDom);
-
+    //formula bar
     this.createFormulaBar();
-
-    const tableContainerDom = document.createElement("table");
-    tableContainerDom.classList.add("lightsheet_table");
-    tableContainerDom.setAttribute("cellpadding", "0");
-    tableContainerDom.setAttribute("cellspacing", "0");
-    tableContainerDom.setAttribute("unselectable", "yes");
-    lightSheetContainerDom.appendChild(tableContainerDom);
+    //table
+    this.tableContainerDom = document.createElement("table");
+    this.tableContainerDom.classList.add("lightsheet_table");
+    this.tableContainerDom.setAttribute("cellpadding", "0");
+    this.tableContainerDom.setAttribute("cellspacing", "0");
+    this.tableContainerDom.setAttribute("unselectable", "yes");
+    this.tableEl.appendChild(this.tableContainerDom);
 
     //thead
     this.tableHeadDom = document.createElement("thead");
-    tableContainerDom.appendChild(this.tableHeadDom);
+    this.tableContainerDom.appendChild(this.tableHeadDom);
 
     //tbody
     this.tableBodyDom = document.createElement("tbody");
-    tableContainerDom.appendChild(this.tableBodyDom);
+    this.tableContainerDom.appendChild(this.tableBodyDom);
   }
 
   createToolbar() {
@@ -83,7 +80,6 @@ export default class UI {
       this.toolbarOptions.items?.length == 0
     )
       return;
-    //Element
     this.toolbarDom = document.createElement("div");
     this.toolbarDom.classList.add("lightsheet_table_toolbar");
 
@@ -121,12 +117,8 @@ export default class UI {
     }
     this.formulaBarDom = document.createElement("div");
     this.formulaBarDom.classList.add("lightsheet_table_formula_bar");
-    const lightSheetContainerDom = this.tableEl.firstChild!;
 
-    lightSheetContainerDom.insertBefore(
-      this.formulaBarDom,
-      lightSheetContainerDom.firstChild,
-    );
+    this.tableEl.insertBefore(this.formulaBarDom, this.tableContainerDom);
 
     //selected cell display element
     this.selectedCellDisplay = document.createElement("div");

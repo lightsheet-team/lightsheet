@@ -6,6 +6,7 @@ describe("Formula", () => {
 
   beforeEach(() => {
     targetElementMock = document.createElement("div");
+    window.sheetHolder?.clear();
   });
 
   afterEach(() => {
@@ -13,10 +14,15 @@ describe("Formula", () => {
   });
 
   test("Exist formula bar in dom", () => {
-    new LightSheet(targetElementMock, {
-      data: [],
-      isReadOnly: false,
-    });
+    new LightSheet(
+      {
+        sheetName: "Sheet 1",
+        data: [],
+        isReadOnly: false,
+      },
+      targetElementMock,
+    );
+
     const formulaBarContainer = document.querySelector(
       ".lightsheet_table_formula_bar",
     );
@@ -26,9 +32,13 @@ describe("Formula", () => {
   });
 
   test("Change cell content from formula bar", () => {
-    new LightSheet(targetElementMock, {
-      data: [],
-    });
+    new LightSheet(
+      {
+        sheetName: "Sheet 2",
+        data: [],
+      },
+      targetElementMock,
+    );
     // Find the cell input element
     const cell = document.querySelector(
       "tbody tr:first-child td:first-child .lightsheet_table_cell_input",
@@ -71,10 +81,13 @@ describe("Formula", () => {
   });
 
   test("Change formula bar content from cell", async () => {
-    new LightSheet(targetElementMock, {
-      data: [],
-    });
-
+    new LightSheet(
+      {
+        sheetName: "Sheet 3",
+        data: [],
+      },
+      targetElementMock,
+    );
     const cell = document.querySelector(
       "tbody tr:first-child td:first-child .lightsheet_table_cell_input",
     ) as HTMLInputElement;
@@ -105,10 +118,14 @@ describe("Formula", () => {
   });
 
   test("Hide formula bar in read only mode", () => {
-    new LightSheet(targetElementMock, {
-      data: [],
-      isReadOnly: true,
-    });
+    new LightSheet(
+      {
+        sheetName: "Sheet 4",
+        data: [],
+        isReadOnly: true,
+      },
+      targetElementMock,
+    );
 
     const formulaBarContainer = document.querySelector(
       ".lightsheet_table_formula_bar",
@@ -117,10 +134,14 @@ describe("Formula", () => {
   });
 
   test("Show formula bar in read only mode", () => {
-    new LightSheet(targetElementMock, {
-      data: [],
-      isReadOnly: false,
-    });
+    new LightSheet(
+      {
+        sheetName: "Sheet 5",
+        data: [],
+        isReadOnly: false,
+      },
+      targetElementMock,
+    );
 
     const formulaBarContainer = document.querySelector(
       ".lightsheet_table_formula_bar",
@@ -131,13 +152,17 @@ describe("Formula", () => {
   });
 
   test("Display the raw value of the cell", () => {
-    new LightSheet(targetElementMock, {
-      data: [
-        ["1", "=1+2/3*6+A1+test(1,2)", "img/nophoto.jpg", "Marketing"],
-        ["2", "Jorge", "img/nophoto.jpg", "Marketing", "3120"],
-        ["3", "Jorge", "img/nophoto.jpg", "Marketing", "3120"],
-      ],
-    });
+    new LightSheet(
+      {
+        sheetName: "Sheet 6",
+        data: [
+          ["1", "=1+2/3*6+A1+test(1,2)", "img/nophoto.jpg", "Marketing"],
+          ["2", "Jorge", "img/nophoto.jpg", "Marketing", "3120"],
+          ["3", "Jorge", "img/nophoto.jpg", "Marketing", "3120"],
+        ],
+      },
+      targetElementMock,
+    );
     // Select cell2
     const cell2 = document.querySelector(
       "tbody tr:nth-child(2) td:first-child .lightsheet_table_cell_input",
