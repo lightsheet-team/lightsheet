@@ -153,6 +153,7 @@ export default class Sheet {
     }
 
     this.updateCellReferenceSymbols(this.cellData.get(cellKey)!, from, to);
+    return true;
   }
 
   public getCellInfoAt(colPos: number, rowPos: number): CellInfo | null {
