@@ -159,7 +159,9 @@ export default class ExpressionHandler {
     return symbolNode;
   }
 
-  private resolveFunction(name: string): (...args: any[]) => string {
+  private resolveFunction(
+    name: string,
+  ): (cellRef: CellReference, ...args: any[]) => string {
     const fun = ExpressionHandler.functions.get(name.toLowerCase());
     if (!fun) {
       console.log(
