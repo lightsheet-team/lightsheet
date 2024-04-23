@@ -114,6 +114,48 @@ export default class Sheet {
     };
   }
 
+  public moveCell(
+    from: Coordinate,
+    to: Coordinate,
+    moveStyling: boolean = true,
+  ) {
+    const fromPosition = this.getCellInfoAt(from.column, from.row)?.position;
+    let toPosition = this.getCellInfoAt(to.column, to.row)?.position;
+
+    if (!fromPosition) return false;
+
+    if (!toPosition) {
+      toPosition = this.initializePosition(to.column, to.row);
+    } else {
+      this.deleteCell(toPosition.columnKey!, toPosition.rowKey!);
+    }
+
+    const fromCol = this.columns.get(fromPosition.columnKey!)!;
+    const fromRow = this.rows.get(fromPosition.rowKey!)!;
+
+    const toCol = this.columns.get(toPosition.columnKey!)!;
+    const toRow = this.rows.get(toPosition.rowKey!)!;
+
+    const cellKey = fromCol.cellIndex.get(fromRow.key)!;
+    const style = fromCol.cellFormatting.get(fromRow.key);
+
+    fromCol.cellIndex.delete(fromRow.key);
+    toCol.cellIndex.set(toRow.key, cellKey);
+    fromRow.cellIndex.delete(fromCol.key);
+    toRow.cellIndex.set(toCol.key, cellKey);
+
+    if (style && moveStyling) {
+      toCol.cellFormatting.set(toRow.key, style);
+      toRow.cellFormatting.set(toCol.key, style);
+
+      fromCol.cellFormatting.delete(fromRow.key);
+      fromRow.cellFormatting.delete(fromCol.key);
+    }
+
+    this.updateCellReferenceSymbols(this.cellData.get(cellKey)!, from, to);
+    return true;
+  }
+
   public getCellInfoAt(colPos: number, rowPos: number): CellInfo | null {
     const colKey = this.columnPositions.get(colPos);
     const rowKey = this.rowPositions.get(rowPos);
