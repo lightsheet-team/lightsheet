@@ -27,6 +27,7 @@ export default class UI {
   toolbarOptions: ToolbarOptions;
   isReadOnly: boolean;
   singleSelectedCell: Coordinate | undefined;
+  tableContainerDom: any;
 
   constructor(
     el: Element,
@@ -54,27 +55,24 @@ export default class UI {
 
     /*toolbar*/
     this.createToolbar();
-
-    /*content*/
-    const lightSheetContainerDom = document.createElement("div");
-    this.tableEl.appendChild(lightSheetContainerDom);
-
+    //formula bar
     this.createFormulaBar();
 
-    const tableContainerDom = document.createElement("table");
-    tableContainerDom.classList.add("lightsheet_table");
-    tableContainerDom.setAttribute("cellpadding", "0");
-    tableContainerDom.setAttribute("cellspacing", "0");
-    tableContainerDom.setAttribute("unselectable", "yes");
-    lightSheetContainerDom.appendChild(tableContainerDom);
+    //table
+    this.tableContainerDom = document.createElement("table");
+    this.tableContainerDom.classList.add("lightsheet_table");
+    this.tableContainerDom.setAttribute("cellpadding", "0");
+    this.tableContainerDom.setAttribute("cellspacing", "0");
+    this.tableContainerDom.setAttribute("unselectable", "yes");
+    this.tableEl.appendChild(this.tableContainerDom);
 
     //thead
     this.tableHeadDom = document.createElement("thead");
-    tableContainerDom.appendChild(this.tableHeadDom);
+    this.tableContainerDom.appendChild(this.tableHeadDom);
 
     //tbody
     this.tableBodyDom = document.createElement("tbody");
-    tableContainerDom.appendChild(this.tableBodyDom);
+    this.tableContainerDom.appendChild(this.tableBodyDom);
   }
 
   createToolbar() {
@@ -121,7 +119,7 @@ export default class UI {
     }
     this.formulaBarDom = document.createElement("div");
     this.formulaBarDom.classList.add("lightsheet_table_formula_bar");
-    this.tableEl.prepend(this.formulaBarDom);
+    this.tableEl.insertBefore(this.formulaBarDom, this.tableContainerDom);
     //selected cell display element
     this.selectedCellDisplay = document.createElement("div");
     this.selectedCellDisplay.classList.add("lightsheet_selected_cell_display");
