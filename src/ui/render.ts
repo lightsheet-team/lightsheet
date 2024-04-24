@@ -517,9 +517,9 @@ export default class UI {
       this.selectedCellsContainer.selectionStart =
         (colIndex != null || undefined) && (rowIndex != null || undefined)
           ? {
-            row: rowIndex,
-            column: colIndex,
-          }
+              row: rowIndex,
+              column: colIndex,
+            }
           : null;
     }
   }
@@ -530,15 +530,15 @@ export default class UI {
     this.selectedCellsContainer.selectionEnd =
       (colIndex != null || undefined) && (rowIndex != null || undefined)
         ? {
-          row: rowIndex,
-          column: colIndex,
-        }
+            row: rowIndex,
+            column: colIndex,
+          }
         : null;
     if (
       this.selectedCellsContainer.selectionStart &&
       this.selectedCellsContainer.selectionEnd &&
       this.selectedCellsContainer.selectionStart !==
-      this.selectedCellsContainer.selectionEnd
+        this.selectedCellsContainer.selectionEnd
     ) {
       this.updateSelection();
     }
