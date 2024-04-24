@@ -87,6 +87,8 @@ export default class LightSheet {
     } else if (row != null) {
       if (style.css)
         this.sheet.setRowCss(row, mappedCss!);
+      if (style.format)
+        this.sheet.setRowFormatter(row, formatter);
     } else if (col != null) {
       if (style.css)
         this.sheet.setColumnCss(col, mappedCss!);

@@ -584,9 +584,33 @@ export default class Sheet {
       };
       this.events.emit(new LightsheetEvent(EventType.CORE_SET_CELL, payload));
     }
+  }
 
+  setRowFormatter(rowIndex: number, formatter: Formatter | null): void {
+    const rowKey = this.rowPositions.get(rowIndex);
+    if (!rowKey) return;
+    const row = this.rows.get(rowKey);
+    if (!row) return;
+    row.defaultStyle = new CellStyle(row.defaultStyle?.styling!, formatter);
 
-    return;
+    const cellStyle = this.getCellStyle(null, rowKey);
+
+    this.setCellGroupStyle(row, cellStyle);
+
+    for (const [opposingKey] of row.cellIndex) {
+      const cell = this.cellData.get(row.cellIndex.get(opposingKey)!)!;
+      this.applyCellFormatter(cell, opposingKey as ColumnKey, row.key,);
+
+      const payload: CoreSetCellPayload = {
+        indexInfo: {
+          rowIndex,
+          columnIndex: this.getColumnIndex(opposingKey)
+        },
+        rawValue: cell ? cell.rawValue : "",
+        formattedValue: cell ? cell.formattedValue : "",
+      };
+      this.events.emit(new LightsheetEvent(EventType.CORE_SET_CELL, payload));
+    }
   }
 
   private setCellGroupStyle(

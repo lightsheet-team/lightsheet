@@ -32,7 +32,7 @@ new Lightsheet(
       {
         position: "3",
         css: "background-color: blue;",
-        format: { type: "currency", options: { name: "EUR", decimal: 2 } },
+        format: { type: "number", options: { decimal: 1 } },
       },
     ],
   },
