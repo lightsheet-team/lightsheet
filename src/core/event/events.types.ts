@@ -17,8 +17,8 @@ export type CoreSetCellPayload = {
   rawValue: string;
   formattedValue: string;
 
-  clearCell: boolean;
-  clearRow: boolean;
+  clearCell?: boolean;
+  clearRow?: boolean;
 };
 
 export type CoreSetStylePayload = {

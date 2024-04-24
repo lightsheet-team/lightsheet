@@ -326,16 +326,16 @@ export default class Sheet {
   setCellFormatter(columnIndex: number,
     rowIndex: number,
     formatter: Formatter | null): void {
-    let colKey = this.columnPositions.get(columnIndex);
+    let columnKey = this.columnPositions.get(columnIndex);
     let rowKey = this.rowPositions.get(rowIndex);
 
-    if (!colKey || !rowKey) {
+    if (!columnKey || !rowKey) {
       const newCellElement = this.initializePosition(columnIndex, rowIndex);
       this.createCell(newCellElement.columnKey!, newCellElement.rowKey!, "");
-      colKey = newCellElement.columnKey;
+      columnKey = newCellElement.columnKey;
       rowKey = newCellElement.rowKey;
     }
-    const col = this.columns.get(colKey!);
+    const col = this.columns.get(columnKey!);
     const row = this.rows.get(rowKey!);
     if (!col || !row) return;
 
@@ -345,21 +345,24 @@ export default class Sheet {
     );
     row.cellFormatting.set(
       col.key,
-      new CellStyle(row.cellFormatting.get(colKey!)?.styling, formatter),
+      new CellStyle(row.cellFormatting.get(columnKey!)?.styling, formatter),
     );
+    const cell = this.getCell(columnKey!, rowKey!);
+    this.applyCellFormatter(cell!, columnKey!, rowKey!);
 
-    // const payload: CoreSetCellPayload = {
-    // //   indexInfo: {
-    // //     rowIndex,
-    // //     columnIndex,
-    // //   },
-    // //   rawValue: LightSheetHelper.GenerateStyleStringFromMap(
-    // //     this.getCellStyle(colKey, rowKey).styling,
-    // //   ),
-    // //   formattedValue: this.getCellInfoAt(columnIndex, rowIndex)?.rawValue
-    // // };
-
-    // // this.events.emit(new LightsheetEvent(EventType.VIEW_SET_STYLE, payload));
+    const payload: CoreSetCellPayload = {
+      keyInfo: {
+        rowKey,
+        columnKey,
+      },
+      indexInfo: {
+        columnIndex,
+        rowIndex,
+      },
+      rawValue: cell ? cell.rawValue : "",
+      formattedValue: cell ? cell.formattedValue : "",
+    };
+    this.events.emit(new LightsheetEvent(EventType.CORE_SET_CELL, payload));
 
     return;
   }
@@ -715,11 +718,11 @@ export default class Sheet {
     cell: Cell | null,
   ) {
     const payload: CoreSetCellPayload = {
-      position: {
+      keyInfo: {
         rowKey,
         columnKey,
       },
-      indexPosition: {
+      indexInfo: {
         columnIndex,
         rowIndex,
       },

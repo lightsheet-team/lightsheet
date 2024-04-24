@@ -286,7 +286,7 @@ export default class UI {
 
   private registerEvents() {
     this.lightSheet.events.on(EventType.CORE_SET_CELL, (event) => {
-      if (this.lightSheet.isReady) this.onCoreSetCell(event);
+      this.onCoreSetCell(event);
     });
     this.lightSheet.events.on(EventType.VIEW_SET_STYLE, (event) => {
       this.onCoreSetStyle(event.payload);
@@ -298,7 +298,7 @@ export default class UI {
     if (indexInfo.columnIndex && indexInfo.rowIndex) {
       const cellDom =
         this.tableBodyDom.children[indexInfo.rowIndex].children[
-          indexInfo.columnIndex + 1
+        indexInfo.columnIndex + 1
         ];
       const inputElement = cellDom! as HTMLElement;
       inputElement.setAttribute("style", value);
@@ -325,19 +325,19 @@ export default class UI {
     const payload = event.payload as CoreSetCellPayload;
     // Get HTML elements and (new) IDs for the payload's cell and row.
     const elInfo = LightSheetHelper.GetElementInfoForSetCell(payload);
-
+    debugger
     if (!elInfo.rowDom) {
-      const row = this.addRow(payload.indexPosition.rowIndex!);
+      const row = this.addRow(payload.indexInfo.rowIndex!);
       elInfo.rowDom = row;
       row.id = elInfo.rowDomId;
     }
     if (!elInfo.cellDom) {
       elInfo.cellDom = this.addCell(
         elInfo.rowDom!,
-        payload.indexPosition.columnIndex!,
-        payload.indexPosition.rowIndex!,
+        payload.indexInfo.columnIndex!,
+        payload.indexInfo.rowIndex!,
         payload.formattedValue,
-        payload.position.columnKey?.toString(),
+        payload.keyInfo!.columnKey?.toString(),
       );
     }
 
