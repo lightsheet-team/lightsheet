@@ -1,7 +1,7 @@
 import { CoreSetCellPayload } from "../core/event/events.types.ts";
 
 export default class LightSheetHelper {
-  static GenerateRowLabel = (rowIndex: number) => {
+  static generateColumnLabel = (rowIndex: number) => {
     let label = "";
     const alphabet = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
     while (rowIndex > 0) {
