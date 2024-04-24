@@ -8,6 +8,7 @@ import { DefaultColCount, DefaultRowCount } from "./utils/constants.ts";
 import LightSheetHelper from "./utils/helpers.ts";
 import ExpressionHandler from "./core/evaluation/expressionHandler.ts";
 import { CellReference } from "./core/structure/cell/types.cell.ts";
+import { SheetKey } from "./core/structure/key/keyTypes.ts";
 
 export default class LightSheet {
   #ui: UI | undefined;
@@ -18,6 +19,11 @@ export default class LightSheet {
   onCellChange?;
   isReady: boolean = false;
 
+  /**
+   * Create a new Lightsheet instance.
+   * @param options Options for configuring the instance.
+   * @param targetElement The element used for creating the table.
+   */
   constructor(
     options: LightSheetOptions,
     targetElement: Element | null = null,
@@ -45,6 +51,11 @@ export default class LightSheet {
     this.onTableReady();
   }
 
+  /**
+   * Register a function to be used in formulas.
+   * @param name The name of the function, case-insensitive.
+   * @param func The function to be called. The first parameter should accept a CellReference, which contains information about the cell the formula is in.
+   */
   static registerFunction(
     name: string,
     func: (cellRef: CellReference, ...args: any[]) => string,
@@ -57,10 +68,18 @@ export default class LightSheet {
     if (this.options.onReady) this.options.onReady();
   }
 
+  /**
+   * Set the table's readonly state. When set to true, the user cannot edit the table and the formula bar is hidden if enabled.
+   * @param isReadOnly
+   */
   setReadOnly(isReadOnly: boolean) {
     this.#ui?.setReadOnly(isReadOnly);
   }
 
+  /**
+   * Set the toolbar's visibility. When set to false, the toolbar element is destroyed.
+   * @param isShown
+   */
   showToolbar(isShown: boolean) {
     this.#ui?.showToolbar(isShown);
   }
@@ -108,15 +127,27 @@ export default class LightSheet {
     }
   }
 
-  getKey() {
+  /**
+   * Get the unique identifier, a SheetKey, of this instance.
+   */
+  getKey(): SheetKey {
     return this.sheet.key;
   }
 
-  getName() {
+  /**
+   * Get this instance's name, used when referring to the sheet in formulas ("=SheetName!A1")
+   */
+  getName(): string {
     return this.options.sheetName;
   }
 
-  setCellAt(columnKey: number, rowKey: number, value: any): CellInfo {
-    return this.sheet.setCellAt(columnKey, rowKey, value.toString());
+  /**
+   * Set the value of a cell at the give position.
+   * @param column The index of the column, starting from 0.
+   * @param row The index of the row, starting from 0.
+   * @param value The new contents of the cell. If starting with "=", the value is treated as a formula.
+   */
+  setCellAt(column: number, row: number, value: string): CellInfo {
+    return this.sheet.setCellAt(column, row, value.toString());
   }
 }
