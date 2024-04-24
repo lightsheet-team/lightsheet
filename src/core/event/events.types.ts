@@ -12,8 +12,8 @@ export type UISetCellPayload = {
 };
 
 export type CoreSetCellPayload = {
-  position: KeyInfo;
-  indexPosition: IndexInfo;
+  keyInfo?: KeyInfo;
+  indexInfo: IndexInfo;
   rawValue: string;
   formattedValue: string;
 

@@ -17,6 +17,7 @@ import EventType from "../event/eventType.ts";
 import { CellState } from "./cell/cellState.ts";
 import { EvaluationResult } from "../evaluation/expressionHandler.types.ts";
 import LightSheetHelper from "../../../utils/helpers.ts";
+import Formatter from "../evaluation/formatter.ts";
 
 export default class Sheet {
   defaultStyle: any;
@@ -108,15 +109,15 @@ export default class Sheet {
     const cell = this.getCell(colKey, rowKey)!;
     return cell
       ? {
-          rawValue: cell.rawValue,
-          resolvedValue: cell.resolvedValue,
-          formattedValue: cell.formattedValue,
-          state: cell.state,
-          position: {
-            columnKey: colKey,
-            rowKey: rowKey,
-          },
-        }
+        rawValue: cell.rawValue,
+        resolvedValue: cell.resolvedValue,
+        formattedValue: cell.formattedValue,
+        state: cell.state,
+        position: {
+          columnKey: colKey,
+          rowKey: rowKey,
+        },
+      }
       : null;
   }
 
@@ -322,6 +323,47 @@ export default class Sheet {
     return cellStyle;
   }
 
+  setCellFormatter(columnIndex: number,
+    rowIndex: number,
+    formatter: Formatter | null): void {
+    let colKey = this.columnPositions.get(columnIndex);
+    let rowKey = this.rowPositions.get(rowIndex);
+
+    if (!colKey || !rowKey) {
+      const newCellElement = this.initializePosition(columnIndex, rowIndex);
+      this.createCell(newCellElement.columnKey!, newCellElement.rowKey!, "");
+      colKey = newCellElement.columnKey;
+      rowKey = newCellElement.rowKey;
+    }
+    const col = this.columns.get(colKey!);
+    const row = this.rows.get(rowKey!);
+    if (!col || !row) return;
+
+    col.cellFormatting.set(
+      row.key,
+      new CellStyle(col.cellFormatting.get(rowKey!)?.styling, formatter),
+    );
+    row.cellFormatting.set(
+      col.key,
+      new CellStyle(row.cellFormatting.get(colKey!)?.styling, formatter),
+    );
+
+    // const payload: CoreSetCellPayload = {
+    // //   indexInfo: {
+    // //     rowIndex,
+    // //     columnIndex,
+    // //   },
+    // //   rawValue: LightSheetHelper.GenerateStyleStringFromMap(
+    // //     this.getCellStyle(colKey, rowKey).styling,
+    // //   ),
+    // //   formattedValue: this.getCellInfoAt(columnIndex, rowIndex)?.rawValue
+    // // };
+
+    // // this.events.emit(new LightsheetEvent(EventType.VIEW_SET_STYLE, payload));
+
+    return;
+  }
+
   setCellCss(
     columnIndex: number,
     rowIndex: number,
@@ -396,7 +438,7 @@ export default class Sheet {
     this.events.emit(new LightsheetEvent(EventType.VIEW_SET_STYLE, payload));
   }
 
-  setRowStyle(rowIndex: number, css: Map<string, string>): void {
+  setRowCss(rowIndex: number, css: Map<string, string>): void {
     const rowKey = this.rowPositions.get(rowIndex);
     if (!rowKey) return;
 

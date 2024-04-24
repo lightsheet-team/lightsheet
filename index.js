@@ -21,17 +21,17 @@ new Lightsheet(document.getElementById("lightsheet"), {
     {
       position: "A",
       css: "font-weight: bold;",
-      format: { type: "number", option: { decimal: 2 } },
+      format: { type: "number", options: { decimal: 2 } },
     },
     {
       position: "B2",
       css: "background-color: yellow;",
-      format: { type: "currency", option: { name: "EUR", decimal: 2 } },
+      format: { type: "currency", options: { name: "EUR", decimal: 2 } },
     },
     {
       position: "3",
       css: "background-color: blue;",
-      format: { type: "currency", option: { name: "EUR", decimal: 2 } },
+      format: { type: "currency", options: { name: "EUR", decimal: 2 } },
     },
   ],
 });

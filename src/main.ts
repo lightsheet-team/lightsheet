@@ -6,6 +6,7 @@ import Events from "./core/event/events.ts";
 import LightSheetHelper from "../utils/helpers.ts";
 import { DefaultRowCount, DefaultColCount } from "../utils/constants.ts";
 import { getRowColFromCellRef } from "./utlis.ts";
+import NumberFormatter from "./core/evaluation/numberFormatter.ts";
 
 export default class LightSheet {
   private ui: UI;
@@ -47,24 +48,39 @@ export default class LightSheet {
     this.ui.showToolbar(isShown);
   }
 
-  setCss(position: string, css: string) {
-    const { row, col } = getRowColFromCellRef(position);
-    const mappedCss = LightSheetHelper.GenerateStyleMapFromString(css);
+  getFormatter(type: string, options?: any) {
+    if (type == 'number') {
+      return new NumberFormatter(options.decimal)
+    }
+    return new NumberFormatter(4)
+  }
 
+  setStyle(position: string, style: StyleInfo) {
+    const { row, col } = getRowColFromCellRef(position);
+    const mappedCss = style.css ? LightSheetHelper.GenerateStyleMapFromString(style.css) : null;
+    const formatter = style.format ? this.getFormatter(style.format.type, style.format.options) : null
     if (row == null && col == null) {
       return;
     } else if (row != null && col != null) {
-      this.sheet.setCellCss(col, row, mappedCss!);
+      if (style.css)
+        this.sheet.setCellCss(col, row, mappedCss!);
+      if (style.format)
+        this.sheet.setCellFormatter(col, row, formatter);
     } else if (row != null) {
-      this.sheet.setRowStyle(row, mappedCss);
+      if (style.css)
+        this.sheet.setRowCss(row, mappedCss!);
+      // if (style.format)
+      //   this.sheet.
     } else if (col != null) {
-      this.sheet.setColumnCss(col, mappedCss!);
+      if (style.css)
+        this.sheet.setColumnCss(col, mappedCss!);
+      // if (style.format)
     }
   }
 
   private initializeStyle() {
     this.style?.forEach((item: StyleInfo) => {
-      if (item.css) this.setCss(item.position, item.css);
+      this.setStyle(item.position, item);
     });
   }
 
