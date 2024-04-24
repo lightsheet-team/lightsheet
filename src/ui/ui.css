@@ -110,3 +110,26 @@ td:first-child {
 .lightsheet_table_selected_cell_range{
   background-color: var(--lightsheet-light-blue);
 }
+
+.lightsheet_table_context_menu {
+  display: none;
+  position: absolute;
+  background-color: var(--lightsheet-white);
+  border: 1px solid var(--lightsheet-silver-400);
+  z-index: 3;
+}
+
+.lightsheet_table_context_menu ul {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.lightsheet_table_context_menu li {
+  padding: 8px 12px;
+  cursor: pointer;
+}
+
+.lightsheet_table_context_menu li:hover {
+  background-color: var(--lightsheet-light-blue);
+}
