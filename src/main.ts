@@ -40,7 +40,7 @@ export default class LightSheet {
 
     if (targetElement) {
       this.#ui = new UI(targetElement, this, this.options.toolbarOptions);
-      this.#initializeTable();
+      this.initializeTable();
     }
 
     if (options.onCellChange) {
@@ -63,7 +63,7 @@ export default class LightSheet {
     ExpressionHandler.registerFunction(name, func);
   }
 
-  onTableReady() {
+  private onTableReady() {
     this.isReady = true;
     if (this.options.onReady) this.options.onReady();
   }
@@ -84,7 +84,7 @@ export default class LightSheet {
     this.#ui?.showToolbar(isShown);
   }
 
-  #initializeTable() {
+  private initializeTable() {
     if (!this.#ui || !this.options.data) return;
 
     // Create header row and add headers
