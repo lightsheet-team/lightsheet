@@ -670,6 +670,42 @@ export default class Sheet {
     return true;
   }
 
+
+  private clearCellCss(colKey: ColumnKey, rowKey: RowKey): boolean {
+    const col = this.columns.get(colKey);
+    const row = this.rows.get(rowKey);
+    if (!col || !row) return false;
+
+    const style = col.cellFormatting.get(row.key);
+    if (style?.formatter) {
+      this.applyCellFormatter(this.getCell(colKey, rowKey)!, colKey, rowKey);
+    }
+    col.cellFormatting.get(row.key)?.clearCss();
+    row.cellFormatting.get(col.key)?.clearCss();
+
+    // Clearing a cell's style may leave it completely empty - delete if needed.
+    this.deleteCellIfUnused(colKey, rowKey);
+
+    return true;
+  }
+
+  private clearCellFormatter(colKey: ColumnKey, rowKey: RowKey): boolean {
+    const col = this.columns.get(colKey);
+    const row = this.rows.get(rowKey);
+    if (!col || !row) return false;
+
+    const style = col.cellFormatting.get(row.key);
+    if (style?.formatter) {
+      this.applyCellFormatter(this.getCell(colKey, rowKey)!, colKey, rowKey);
+    }
+    col.cellFormatting.get(row.key)?.clearFormatter()
+
+    // Clearing a cell's style may leave it completely empty - delete if needed.
+    this.deleteCellIfUnused(colKey, rowKey);
+
+    return true;
+  }
+
   setRowCss(rowIndex: number, css: Map<string, string>): void {
     const rowKey = this.rowPositions.get(rowIndex);
     if (!rowKey) return;

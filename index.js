@@ -22,7 +22,7 @@ new Lightsheet(
       {
         position: "A",
         css: "font-weight: bold;",
-        format: { type: "number", options: { decimal: 2 } },
+        format: { type: "number", options: { decimal: 0 } },
       },
       {
         position: "B2",
@@ -32,7 +32,7 @@ new Lightsheet(
       {
         position: "3",
         css: "background-color: blue;",
-        format: { type: "number", options: { decimal: 1 } },
+        format: { type: "number", options: { decimal: 0 } },
       },
     ],
   },

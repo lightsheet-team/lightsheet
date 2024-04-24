@@ -1,7 +1,7 @@
 import UI from "./ui/render.ts";
 import { LightSheetOptions } from "./main.types.ts";
 import Sheet from "./core/structure/sheet.ts";
-import { CellInfo, StyleInfo } from "./core/structure/sheet.types.ts";
+import { CellInfo, Format, StyleInfo } from "./core/structure/sheet.types.ts";
 import Events from "./core/event/events.ts";
 import SheetHolder from "./core/structure/sheetHolder.ts";
 import { DefaultColCount, DefaultRowCount } from "./utils/constants.ts";
@@ -73,33 +73,40 @@ export default class LightSheet {
     return new NumberFormatter(4)
   }
 
-  setStyle(position: string, style: StyleInfo) {
+  setCss(position: string, css: string) {
     const { row, col } = getRowColFromCellRef(position);
-    const mappedCss = style.css ? LightSheetHelper.GenerateStyleMapFromString(style.css) : null;
-    const formatter = style.format ? this.getFormatter(style.format.type, style.format.options) : null
+    const mappedCss = css ? LightSheetHelper.GenerateStyleMapFromString(css) : null;
     if (row == null && col == null) {
       return;
     } else if (row != null && col != null) {
-      if (style.css)
-        this.sheet.setCellCss(col, row, mappedCss!);
-      if (style.format)
-        this.sheet.setCellFormatter(col, row, formatter);
+      this.sheet.setCellCss(col, row, mappedCss!);
     } else if (row != null) {
-      if (style.css)
-        this.sheet.setRowCss(row, mappedCss!);
-      if (style.format)
-        this.sheet.setRowFormatter(row, formatter);
+      this.sheet.setRowCss(row, mappedCss!);
     } else if (col != null) {
-      if (style.css)
-        this.sheet.setColumnCss(col, mappedCss!);
-      if (style.format)
-        this.sheet.setColumnFormatter(col, formatter);
+      this.sheet.setColumnCss(col, mappedCss!);
+    }
+  }
+
+  setFormatting(position: string, format: Format) {
+    const { row, col } = getRowColFromCellRef(position);
+    const formatter = format ? this.getFormatter(format.type, format.options) : null
+    if (row == null && col == null) {
+      return;
+    } else if (row != null && col != null) {
+      this.sheet.setCellFormatter(col, row, formatter);
+    } else if (row != null) {
+      this.sheet.setRowFormatter(row, formatter);
+    } else if (col != null) {
+      this.sheet.setColumnFormatter(col, formatter);
     }
   }
 
   private initializeStyle() {
     this.style?.forEach((item: StyleInfo) => {
-      this.setStyle(item.position, item);
+      if (item.css)
+        this.setCss(item.position, item.css!);
+      if (item.format)
+        this.setFormatting(item.position, item.format);
     });
   }
   showToolbar(isShown: boolean) {

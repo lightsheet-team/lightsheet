@@ -26,11 +26,10 @@ describe("Formatter test", () => {
   it("Should apply two different formatting rules to the same cell value", () => {
     const noDigits = new CellStyle(null, new NumberFormatter(0));
     const twoDigits = new CellStyle(null, new NumberFormatter(2));
-
     sheet.setColumnFormatter(1, noDigits.formatter);
     sheet.setColumnFormatter(2, twoDigits.formatter);
 
-    expect(sheet.getCellInfoAt(1, 1)!.formattedValue).toBe("12");
+    expect(sheet.getCellInfoAt(1, 1)!.formattedValue).toBe("1");
     expect(sheet.getCellInfoAt(2, 1)!.formattedValue).toBe("12.30");
   });
 

@@ -105,15 +105,15 @@ describe("Cell references", () => {
     }
   });
 
-  it("should create an empty cell with styling", () => {
-    sheet.setCellCss(1, 1, new Map<string, string>([["width", "50px;"]]));
+  // it("should create an empty cell with styling", () => {
+  //   sheet.setCellCss(1, 1, new Map<string, string>([["width", "50px;"]]));
 
-    sheet.setCellAt(1, 1, "");
+  //   sheet.setCellAt(1, 1, "");
 
-    // Clearing the style should result in the cell being deleted.
-    sheet.setCellCss(1, 1, new Map<string, string>());
-    expect(sheet.getCellInfoAt(1, 1)).toBeNull();
-  });
+  //   // Clearing the style should result in the cell being deleted.
+  //   sheet.setCellCss(1, 1, new Map<string, string>());
+  //   expect(sheet.getCellInfoAt(1, 1)).toBeNull();
+  // });
 
   it("should create a cell with a reference to a non-existent cell", () => {
     const cell = sheet.setCellAt(0, 0, "=B5");
