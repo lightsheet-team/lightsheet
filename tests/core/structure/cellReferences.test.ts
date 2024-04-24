@@ -6,7 +6,8 @@ describe("Cell references", () => {
   let sheet: Sheet;
 
   beforeEach(() => {
-    sheet = new Sheet();
+    window.sheetHolder?.clear();
+    sheet = new Sheet("Sheet");
     sheet.setCellAt(0, 0, "1"); // A1
     sheet.setCellAt(1, 0, "2"); // B1
     sheet.setCellAt(0, 1, "3"); // A2

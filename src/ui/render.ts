@@ -1,10 +1,5 @@
-import { ToolbarItems } from "../../utils/constants";
 import LightSheet from "../main";
-import {
-  generateColumnKey,
-  generateRowKey,
-} from "../core/structure/key/keyTypes";
-import { CellIdInfo, SelectionContainer } from "./render.types.ts";
+import { SelectionContainer } from "./render.types.ts";
 import LightsheetEvent from "../core/event/event.ts";
 import {
   CoreSetCellPayload,
@@ -12,12 +7,17 @@ import {
   UISetCellPayload,
 } from "../core/event/events.types.ts";
 import EventType from "../core/event/eventType.ts";
-import LightSheetHelper from "../../utils/helpers.ts";
 import { ToolbarOptions } from "../main.types";
+import { ToolbarItems } from "../utils/constants.ts";
+import { Coordinate } from "../utils/common.types.ts";
+import LightSheetHelper from "../utils/helpers.ts";
 
 export default class UI {
   tableEl: Element;
   toolbarDom: HTMLElement | undefined;
+  formulaBarDom!: HTMLElement | null;
+  formulaInput!: HTMLInputElement;
+  selectedCellDisplay!: HTMLElement;
   tableHeadDom: Element;
   tableBodyDom: Element;
   lightSheet: LightSheet;
@@ -27,6 +27,8 @@ export default class UI {
   selectedCellsContainer: SelectionContainer;
   toolbarOptions: ToolbarOptions;
   isReadOnly: boolean;
+  singleSelectedCell: Coordinate | undefined;
+  tableContainerDom: any;
 
   constructor(
     el: Element,
@@ -40,6 +42,7 @@ export default class UI {
       selectionStart: null,
       selectionEnd: null,
     };
+    this.singleSelectedCell = undefined;
     this.registerEvents();
     this.toolbarOptions = {
       showToolbar: false,
@@ -52,27 +55,25 @@ export default class UI {
     this.tableEl.classList.add("lightsheet_table_container");
 
     /*toolbar*/
-
     this.createToolbar();
+    //formula bar
+    this.createFormulaBar();
 
-    /*content*/
-    const lightSheetContainerDom = document.createElement("div");
-    this.tableEl.appendChild(lightSheetContainerDom);
-
-    const tableContainerDom = document.createElement("table");
-    tableContainerDom.classList.add("lightsheet_table");
-    tableContainerDom.setAttribute("cellpadding", "0");
-    tableContainerDom.setAttribute("cellspacing", "0");
-    tableContainerDom.setAttribute("unselectable", "yes");
-    lightSheetContainerDom.appendChild(tableContainerDom);
+    //table
+    this.tableContainerDom = document.createElement("table");
+    this.tableContainerDom.classList.add("lightsheet_table");
+    this.tableContainerDom.setAttribute("cellpadding", "0");
+    this.tableContainerDom.setAttribute("cellspacing", "0");
+    this.tableContainerDom.setAttribute("unselectable", "yes");
+    this.tableEl.appendChild(this.tableContainerDom);
 
     //thead
     this.tableHeadDom = document.createElement("thead");
-    tableContainerDom.appendChild(this.tableHeadDom);
+    this.tableContainerDom.appendChild(this.tableHeadDom);
 
     //tbody
     this.tableBodyDom = document.createElement("tbody");
-    tableContainerDom.appendChild(this.tableBodyDom);
+    this.tableContainerDom.appendChild(this.tableBodyDom);
   }
 
   createToolbar() {
@@ -113,6 +114,77 @@ export default class UI {
     }
   }
 
+  createFormulaBar() {
+    if (this.isReadOnly || this.formulaBarDom instanceof HTMLElement) {
+      return;
+    }
+    this.formulaBarDom = document.createElement("div");
+    this.formulaBarDom.classList.add("lightsheet_table_formula_bar");
+    this.tableEl.insertBefore(this.formulaBarDom, this.tableContainerDom);
+    //selected cell display element
+    this.selectedCellDisplay = document.createElement("div");
+    this.selectedCellDisplay.classList.add("lightsheet_selected_cell_display");
+    this.formulaBarDom.appendChild(this.selectedCellDisplay);
+
+    //"fx" label element
+    const fxLabel = document.createElement("div");
+    fxLabel.textContent = "fx";
+    fxLabel.classList.add("lightsheet_fx_label");
+    this.formulaBarDom.appendChild(fxLabel);
+
+    //formula input
+    this.formulaInput = document.createElement("input");
+    this.formulaInput.classList.add("lightsheet_formula_input");
+    this.formulaBarDom.appendChild(this.formulaInput);
+    this.setFormulaBar();
+  }
+
+  setFormulaBar() {
+    this.formulaInput.addEventListener("input", () => {
+      const newValue = this.formulaInput.value;
+      const selectedCellInput = document.querySelector(
+        ".lightsheet_table_selected_cell input",
+      ) as HTMLInputElement;
+      if (selectedCellInput) {
+        selectedCellInput.value = newValue;
+      }
+    });
+    this.formulaInput.addEventListener("keyup", (event) => {
+      const newValue = this.formulaInput.value;
+      if (event.key === "Enter") {
+        if (this.singleSelectedCell) {
+          const colIndex = this.singleSelectedCell.column;
+          const rowIndex = this.singleSelectedCell.row;
+          this.onUICellValueChange(newValue, colIndex, rowIndex);
+        }
+        this.formulaInput.blur();
+        const previouslySelectedCell = document.querySelector(
+          ".lightsheet_table_selected_cell",
+        );
+        if (previouslySelectedCell) {
+          previouslySelectedCell.classList.remove(
+            "lightsheet_table_selected_cell",
+          );
+        }
+      }
+    });
+    this.formulaInput.onblur = () => {
+      const newValue = this.formulaInput.value;
+      if (this.singleSelectedCell) {
+        const colIndex = this.singleSelectedCell.column;
+        const rowIndex = this.singleSelectedCell.row;
+        this.onUICellValueChange(newValue, colIndex, rowIndex);
+      }
+    };
+  }
+
+  removeFormulaBar() {
+    if (this.formulaBarDom) {
+      this.formulaBarDom.remove();
+      this.formulaBarDom = null;
+    }
+  }
+
   addHeader(headerData: string[]) {
     const headerRowDom = document.createElement("tr");
     this.tableHeadDom.appendChild(headerRowDom);
@@ -132,6 +204,7 @@ export default class UI {
           if (!selectedColumn) return;
           const prevSelection = this.selectedHeaderCell;
           this.removeGroupSelection();
+          this.removeCellRangeSelection();
 
           if (prevSelection !== selectedColumn) {
             selectedColumn.classList.add(
@@ -165,6 +238,7 @@ export default class UI {
       if (!selectedRow) return;
       const prevSelection = this.selectedRowNumberCell;
       this.removeGroupSelection();
+      this.removeCellRangeSelection();
 
       if (prevSelection !== selectedRow) {
         selectedRow.classList.add(
@@ -188,8 +262,9 @@ export default class UI {
     return rowDom;
   }
 
-  addRow(rowLabelNumber: number): HTMLElement {
-    const rowDom = this.createRowElement(rowLabelNumber);
+  addRow(rowIndex: number): HTMLElement {
+    const rowDom = this.createRowElement(rowIndex);
+    rowDom.id = `row_${rowIndex}`;
     this.tableBodyDom.appendChild(rowDom);
     return rowDom;
   }
@@ -213,6 +288,9 @@ export default class UI {
     );
     rowDom.appendChild(cellDom);
     cellDom.id = `${colIndex}_${rowIndex}`;
+    cellDom.setAttribute("column-index", `${colIndex}` || "");
+    cellDom.setAttribute("row-index", `${rowIndex}` || "");
+
     const inputDom = document.createElement("input");
     inputDom.classList.add("lightsheet_table_cell_input");
     inputDom.value = "";
@@ -224,6 +302,11 @@ export default class UI {
       inputDom.value = value;
     }
 
+    inputDom.addEventListener("input", (e: Event) => {
+      const newValue = (e.target as HTMLInputElement).value;
+      this.formulaInput.value = newValue;
+    });
+
     inputDom.onchange = (e: Event) =>
       this.onUICellValueChange(
         (e.target as HTMLInputElement).value,
@@ -232,35 +315,52 @@ export default class UI {
       );
 
     inputDom.onfocus = () => {
+      inputDom.value = inputDom.getAttribute("rawValue") ?? "";
       this.removeGroupSelection();
+      this.removeCellRangeSelection();
+      const previouslySelectedInput = document.querySelector(
+        ".lightsheet_table_selected_cell",
+      );
+      if (previouslySelectedInput) {
+        previouslySelectedInput.classList.remove(
+          "lightsheet_table_selected_cell",
+        );
+      }
 
       cellDom.classList.add("lightsheet_table_selected_cell");
-
-      let columnIndex: number | undefined;
-      let rowIndex: number | undefined;
-
-      const cellIdInfo = this.checkCellId(cellDom);
-      if (!cellIdInfo) return;
-      const { keyParts, isIndex } = cellIdInfo;
-
-      if (isIndex) {
-        columnIndex = Number(keyParts[0]);
-        rowIndex = Number(keyParts[1]);
-      } else {
-        const columnKey = cellDom.id;
-        const rowKey = cellDom.parentElement?.id;
-
-        columnIndex = this.lightSheet.sheet.getColumnIndex(
-          generateColumnKey(columnKey!),
-        );
-        rowIndex = this.lightSheet.sheet.getRowIndex(generateRowKey(rowKey!));
+      if (colIndex !== undefined && rowIndex !== undefined) {
+        this.selectedCell.push(colIndex, rowIndex);
       }
-      this.selectedCell?.push(Number(columnIndex), Number(rowIndex));
+
+      this.singleSelectedCell = {
+        column: Number(colIndex),
+        row: Number(rowIndex),
+      };
+
+      if (this.formulaBarDom) {
+        this.formulaInput.value = inputDom.getAttribute("rawValue")!;
+      }
     };
 
     inputDom.onblur = () => {
-      this.selectedCell = [];
-      cellDom.classList.remove("lightsheet_table_selected_cell");
+      inputDom.value = inputDom.getAttribute("resolvedValue") ?? "";
+    };
+
+    inputDom.addEventListener("keydown", (event) => {
+      if (event.key === "Enter") {
+        inputDom.blur();
+        cellDom.classList.remove("lightsheet_table_selected_cell");
+      }
+    });
+
+    inputDom.onmousedown = (e: MouseEvent) => {
+      this.handleMouseDown(e, colIndex, rowIndex);
+    };
+
+    inputDom.onmouseover = (e: MouseEvent) => {
+      if (e.buttons === 1) {
+        this.handleMouseOver(e, colIndex, rowIndex);
+      }
     };
 
     return cellDom;
@@ -272,12 +372,17 @@ export default class UI {
       (input as HTMLInputElement).readOnly = readonly;
     });
     this.isReadOnly = readonly;
+    if (readonly) {
+      this.removeFormulaBar();
+    } else {
+      this.createFormulaBar();
+    }
   }
 
-  onUICellValueChange(newValue: string, colIndex: number, rowIndex: number) {
+  onUICellValueChange(rawValue: string, colIndex: number, rowIndex: number) {
     const payload: UISetCellPayload = {
       indexInfo: { columnIndex: colIndex, rowIndex: rowIndex },
-      rawValue: newValue,
+      rawValue,
     };
     this.lightSheet.events.emit(
       new LightsheetEvent(EventType.UI_SET_CELL, payload),
@@ -325,7 +430,6 @@ export default class UI {
     const payload = event.payload as CoreSetCellPayload;
     // Get HTML elements and (new) IDs for the payload's cell and row.
     const elInfo = LightSheetHelper.GetElementInfoForSetCell(payload);
-    debugger
     if (!elInfo.rowDom) {
       const row = this.addRow(payload.indexInfo.rowIndex!);
       elInfo.rowDom = row;
@@ -344,19 +448,11 @@ export default class UI {
     elInfo.cellDom.id = elInfo.cellDomId;
     elInfo.rowDom.id = elInfo.rowDomId;
 
-    // Set cell value to resolved value from the core.
-    // TODO Cell formula should be preserved. (Issue #49)
-    (elInfo.cellDom.firstChild! as HTMLInputElement).value =
-      payload.formattedValue;
-  }
-
-  private checkCellId(cellDom: Element): CellIdInfo | undefined {
-    const keyParts = cellDom.id.split("_");
-    if (keyParts.length != 2) return;
-
-    const isIndex = keyParts[0].match("^[0-9]+$") !== null;
-
-    return { keyParts: keyParts, isIndex: isIndex };
+    // Update input element with values from the core.
+    const inputEl = elInfo.cellDom.firstChild! as HTMLInputElement;
+    inputEl.setAttribute("rawValue", payload.rawValue);
+    inputEl.setAttribute("resolvedValue", payload.formattedValue);
+    inputEl.value = payload.formattedValue;
   }
 
   removeGroupSelection() {
@@ -396,5 +492,85 @@ export default class UI {
     }
 
     this.selectedHeaderCell = null;
+  }
+
+  removeCellRangeSelection() {
+    const cells = Array.from(document.querySelectorAll("td"));
+    cells.forEach((cell) =>
+      cell.classList.remove("lightsheet_table_selected_cell_range"),
+    );
+  }
+
+  cellInRange(cell: HTMLTableCellElement) {
+    const { selectionStart, selectionEnd } = this.selectedCellsContainer;
+    if (!selectionStart || !selectionEnd) {
+      return false;
+    }
+
+    const cellColumnIndex = Number(cell.getAttribute("column-index"));
+    const cellRowIndex = Number(cell.getAttribute("row-index"));
+
+    if (cellColumnIndex === undefined || cellRowIndex === undefined)
+      return false;
+
+    const withinX =
+      (cellColumnIndex >= selectionStart.column &&
+        cellColumnIndex <= selectionEnd.column) ||
+      (cellColumnIndex <= selectionStart.column &&
+        cellColumnIndex >= selectionEnd.column);
+    const withinY =
+      (cellRowIndex >= selectionStart.row &&
+        cellRowIndex <= selectionEnd.row) ||
+      (cellRowIndex <= selectionStart.row && cellRowIndex >= selectionEnd.row);
+
+    return withinX && withinY;
+  }
+
+  updateSelection() {
+    this.removeCellRangeSelection();
+    const cells = Array.from(document.querySelectorAll("td"));
+    cells.forEach((cell) => {
+      if (
+        cell.classList.contains("lightsheet_table_header") ||
+        cell.classList.contains("lightsheet_table_row_number")
+      )
+        return;
+
+      if (this.cellInRange(cell)) {
+        cell.classList.add("lightsheet_table_selected_cell_range");
+      }
+    });
+  }
+
+  handleMouseDown(e: MouseEvent, colIndex: number, rowIndex: number) {
+    if (e.button === 0) {
+      this.selectedCellsContainer.selectionStart =
+        (colIndex != null || undefined) && (rowIndex != null || undefined)
+          ? {
+            row: rowIndex,
+            column: colIndex,
+          }
+          : null;
+    }
+  }
+
+  handleMouseOver(e: MouseEvent, colIndex: number, rowIndex: number) {
+    if (e.button !== 0) return;
+
+    this.selectedCellsContainer.selectionEnd =
+      (colIndex != null || undefined) && (rowIndex != null || undefined)
+        ? {
+          row: rowIndex,
+          column: colIndex,
+        }
+        : null;
+    if (
+      this.selectedCellsContainer.selectionStart &&
+      this.selectedCellsContainer.selectionEnd &&
+      this.selectedCellsContainer.selectionStart !==
+      this.selectedCellsContainer.selectionEnd
+    ) {
+      this.updateSelection();
+    }
   }
 }

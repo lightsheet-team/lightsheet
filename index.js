@@ -7,7 +7,7 @@ var data = [
 
 const toolbar = ["undo", "redo", "save"];
 //
-new Lightsheet(document.getElementById("lightsheet"), {
+new Lightsheet({
   data,
   onCellChange: (colIndex, rowIndex, newValue) => {
     console.log(colIndex, rowIndex, newValue);
@@ -34,4 +34,4 @@ new Lightsheet(document.getElementById("lightsheet"), {
       format: { type: "currency", options: { name: "EUR", decimal: 2 } },
     },
   ],
-});
+},document.getElementById("lightsheet"));

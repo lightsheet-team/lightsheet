@@ -1,5 +1,6 @@
 import { CellKey, generateCellKey } from "../key/keyTypes";
 import { CellState } from "./cellState.ts";
+import { CellReference } from "./types.cell.ts";
 import { KeyInfo } from "../sheet.types.ts";
 
 export default class Cell {
@@ -10,8 +11,8 @@ export default class Cell {
   private cellState: CellState;
 
   // References in this cell's formula.
-  referencesIn: Map<CellKey, KeyInfo>;
-  referencesOut: Map<CellKey, KeyInfo>;
+  referencesIn: Map<CellKey, CellReference>;
+  referencesOut: Map<CellKey, CellReference>;
 
   constructor() {
     this.key = generateCellKey();
@@ -19,8 +20,8 @@ export default class Cell {
     this.resolvedValue = "";
     this.formattedValue = "";
     this.cellState = CellState.OK;
-    this.referencesIn = new Map<CellKey, KeyInfo>();
-    this.referencesOut = new Map<CellKey, KeyInfo>();
+    this.referencesIn = new Map<CellKey, CellReference>();
+    this.referencesOut = new Map<CellKey, CellReference>();
   }
 
   get state() {

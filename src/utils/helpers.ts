@@ -1,8 +1,8 @@
-import { CoreSetCellPayload } from "../src/core/event/events.types";
-import { ElementInfo } from "../src/core/structure/sheet.types";
+import { CoreSetCellPayload } from "../core/event/events.types";
+import { ElementInfo } from "../core/structure/sheet.types";
 
 export default class LightSheetHelper {
-  static GenerateRowLabel = (rowIndex: number) => {
+  static generateColumnLabel = (rowIndex: number) => {
     let label = "";
     const alphabet = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
     while (rowIndex > 0) {
@@ -31,11 +31,11 @@ export default class LightSheetHelper {
   };
 
   static GetElementInfoForSetCell = (payload: CoreSetCellPayload) => {
-    const colKey = payload.position.columnKey?.toString();
-    const rowKey = payload.position.rowKey?.toString();
+    const colKey = payload.keyInfo?.columnKey?.toString();
+    const rowKey = payload.keyInfo?.rowKey?.toString();
 
-    const columnIndex = payload.indexPosition.columnIndex;
-    const rowIndex = payload.indexPosition.rowIndex;
+    const columnIndex = payload.indexInfo.columnIndex;
+    const rowIndex = payload.indexInfo.rowIndex;
 
     const cellDomKey =
       colKey && rowKey ? `${colKey!.toString()}_${rowKey!.toString()}` : null;
