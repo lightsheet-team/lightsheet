@@ -265,6 +265,7 @@ export default class UI {
 
   addRow(rowIndex: number): HTMLElement {
     const rowDom = this.createRowElement(rowIndex);
+    rowDom.id = `row_${rowIndex}`;
     this.tableBodyDom.appendChild(rowDom);
     return rowDom;
   }
