@@ -15,6 +15,7 @@ export default class UI {
   toolbarDom: HTMLElement | undefined;
   tableHeadDom: Element;
   tableBodyDom: Element;
+  tableContextMenuDom: HTMLElement | undefined;
   lightSheet: LightSheet;
   selectedCell: number[];
   selectedRowNumberCell: HTMLElement | null = null;
@@ -49,6 +50,10 @@ export default class UI {
     /*toolbar*/
 
     this.createToolbar();
+
+    /*context menu*/
+    this.createContextMenu();
+    this.hideContextMenu();
 
     /*content*/
     const lightSheetContainerDom = document.createElement("div");
@@ -108,6 +113,46 @@ export default class UI {
     }
   }
 
+  createContextMenu(){
+    // Create context menu container
+    this.tableContextMenuDom = document.createElement('div');
+    this.tableContextMenuDom.id = 'contextMenu';
+    this.tableContextMenuDom.classList.add('lightsheet_table_context_menu');
+    
+    // Create options for the context menu
+    // TODO: Add working options and remove placeholders Copy, Cut, Paste
+    var options = ['Copy', 'Cut', 'Paste'];
+    
+    // Create UL element to hold menu options
+    var ul = document.createElement('ul');
+    
+    // Loop through options and create LI elements
+    options.forEach(function(option) {
+        var li = document.createElement('li');
+        li.textContent = option;
+        li.setAttribute('data-action', option.toLowerCase()); // Set data-action attribute for identification
+        ul.appendChild(li);
+    });
+    
+    // Append UL to context menu
+    this.tableContextMenuDom.appendChild(ul);
+
+    // Append context menu to document body
+    document.body.appendChild(this.tableContextMenuDom);
+  }
+
+  showContextMenu(x:number, y:number) {
+    let contextMenu = document.getElementById('contextMenu');
+    contextMenu!.style.display = 'block';
+    contextMenu!.style.left = x + 'px';
+    contextMenu!.style.top = y + 'px';
+}
+
+  hideContextMenu() {
+    let contextMenu = document.getElementById('contextMenu');
+    contextMenu!.style.display = 'none';
+}
+
   addHeader(headerData: string[]) {
     const headerRowDom = document.createElement("tr");
     this.tableHeadDom.appendChild(headerRowDom);
@@ -123,10 +168,12 @@ export default class UI {
 
       headerRowDom.oncontextmenu = (e: MouseEvent) => {
         e.preventDefault();
+        this.showContextMenu(e.clientX, e.clientY);
       };
 
       if (i > 0) {
         headerCellDom.onclick = (e: MouseEvent) => {
+          this.hideContextMenu();
           const selectedColumn = e.target as HTMLElement;
           if (!selectedColumn) return;
           const prevSelection = this.selectedHeaderCell;
@@ -161,6 +208,7 @@ export default class UI {
     );
     rowDom.appendChild(rowNumberCell);
     rowNumberCell.onclick = (e: MouseEvent) => {
+      this.hideContextMenu();
       const selectedRow = e.target as HTMLElement;
       if (!selectedRow) return;
       const prevSelection = this.selectedRowNumberCell;
@@ -189,7 +237,9 @@ export default class UI {
 
     rowNumberCell.oncontextmenu = (e: MouseEvent) => {
       e.preventDefault();
+      this.showContextMenu(e.clientX, e.clientY);
     };
+
     return rowDom;
   }
 
@@ -265,6 +315,7 @@ export default class UI {
 
     inputDom.oncontextmenu = (e: MouseEvent) => {
       e.preventDefault();
+      this.showContextMenu(e.clientX, e.clientY);
     };
 
     return cellDom;
@@ -415,7 +466,8 @@ export default class UI {
   }
 
   handleMouseDown(e: MouseEvent, colIndex: number, rowIndex: number) {
-    if (e.button === 0) {
+    if(e.button !==0) return;
+      this.hideContextMenu();
       this.selectedCellsContainer.selectionStart =
         (colIndex != null || undefined) && (rowIndex != null || undefined)
           ? {
@@ -423,10 +475,6 @@ export default class UI {
               column: colIndex,
             }
           : null;
-    } else if (e.button === 2) {
-      console.log("Right click /n TODO: Show menu");
-      this.showMenu();
-    }
   }
 
   handleMouseOver(e: MouseEvent, colIndex: number, rowIndex: number) {
