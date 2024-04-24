@@ -11,17 +11,49 @@
   -webkit-box-sizing: border-box;
   box-sizing: border-box;
 }
-
+/*Lightsheet*/
 .lightsheet_table_container {
-  display: block;
+  display: inline-block;
+  box-sizing: border-box;
   outline: none;
 }
 
+/*Formula bar*/
+.lightsheet_table_formula_bar {
+  display: flex;
+  border: 1px solid var(--lightsheet-silver-400);
+  border-bottom: 0px 
+}
+
+.lightsheet_selected_cell_display {
+  width: 75px; 
+  height: 25px;
+  background-color: var(--lightsheet-white);
+  border-right: 1px solid var(--lightsheet-silver-400);
+}
+
+.lightsheet_fx_label {
+  width: 35px;
+  text-align: center;
+  font-family: Arial, sans-serif;
+  font-style: italic;
+  color: var(--lightsheet-silver-400);
+  display: flex; 
+  justify-content: center; 
+  align-items: center;
+}
+
+.lightsheet_formula_input {
+  flex: 1; 
+  border: var(--lightsheet-silver-400);
+  outline: none;
+}
+
+/*Table*/
 .lightsheet_table {
   border-collapse: separate;
   white-space: nowrap;
   empty-cells: show;
-  border: 0px;
   background-color: var(--lightsheet-white);
   border: 1px solid var(--lightsheet-silver-400);
 }
@@ -50,11 +82,9 @@ td:first-child {
   position: -webkit-sticky;
   position: sticky;
   top: 0;
-  z-index: 2;
   text-align: center;
 }
 
-/* All td's in the table below the header row */
 .lightsheet_table_row_td {
   padding: 4px;
   white-space: nowrap;
@@ -106,6 +136,7 @@ td:first-child {
 .lightsheet_table_selected_row_column {
   background-color: var(--lightsheet-light-blue);
 }
+
 
 .lightsheet_table_selected_cell_range{
   background-color: var(--lightsheet-light-blue);
