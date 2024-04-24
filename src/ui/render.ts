@@ -27,7 +27,6 @@ export default class UI {
   toolbarOptions: ToolbarOptions;
   isReadOnly: boolean;
   singleSelectedCell: Coordinate | undefined;
-  tableContainerDom: any;
 
   constructor(
     el: Element,
@@ -51,27 +50,31 @@ export default class UI {
     };
     this.isReadOnly = lightSheet.options.isReadOnly || false;
 
-    //container
     this.tableEl.classList.add("lightsheet_table_container");
-    //tool bar
+
+    /*toolbar*/
     this.createToolbar();
-    //formula bar
+
+    /*content*/
+    const lightSheetContainerDom = document.createElement("div");
+    this.tableEl.appendChild(lightSheetContainerDom);
+
     this.createFormulaBar();
-    //table
-    this.tableContainerDom = document.createElement("table");
-    this.tableContainerDom.classList.add("lightsheet_table");
-    this.tableContainerDom.setAttribute("cellpadding", "0");
-    this.tableContainerDom.setAttribute("cellspacing", "0");
-    this.tableContainerDom.setAttribute("unselectable", "yes");
-    this.tableEl.appendChild(this.tableContainerDom);
+
+    const tableContainerDom = document.createElement("table");
+    tableContainerDom.classList.add("lightsheet_table");
+    tableContainerDom.setAttribute("cellpadding", "0");
+    tableContainerDom.setAttribute("cellspacing", "0");
+    tableContainerDom.setAttribute("unselectable", "yes");
+    lightSheetContainerDom.appendChild(tableContainerDom);
 
     //thead
     this.tableHeadDom = document.createElement("thead");
-    this.tableContainerDom.appendChild(this.tableHeadDom);
+    tableContainerDom.appendChild(this.tableHeadDom);
 
     //tbody
     this.tableBodyDom = document.createElement("tbody");
-    this.tableContainerDom.appendChild(this.tableBodyDom);
+    tableContainerDom.appendChild(this.tableBodyDom);
   }
 
   createToolbar() {
@@ -80,6 +83,7 @@ export default class UI {
       this.toolbarOptions.items?.length == 0
     )
       return;
+    //Element
     this.toolbarDom = document.createElement("div");
     this.toolbarDom.classList.add("lightsheet_table_toolbar");
 
@@ -117,9 +121,7 @@ export default class UI {
     }
     this.formulaBarDom = document.createElement("div");
     this.formulaBarDom.classList.add("lightsheet_table_formula_bar");
-
-    this.tableEl.insertBefore(this.formulaBarDom, this.tableContainerDom);
-
+    this.tableEl.prepend(this.formulaBarDom);
     //selected cell display element
     this.selectedCellDisplay = document.createElement("div");
     this.selectedCellDisplay.classList.add("lightsheet_selected_cell_display");
@@ -263,7 +265,6 @@ export default class UI {
 
   addRow(rowIndex: number): HTMLElement {
     const rowDom = this.createRowElement(rowIndex);
-    rowDom.id = `row_${rowIndex}`; // TODO ID should be unique (see getElementInfoForSetCell).
     this.tableBodyDom.appendChild(rowDom);
     return rowDom;
   }
@@ -292,8 +293,8 @@ export default class UI {
 
     const inputDom = document.createElement("input");
     inputDom.classList.add("lightsheet_table_cell_input");
-    inputDom.readOnly = this.isReadOnly;
     inputDom.value = "";
+    inputDom.readOnly = this.isReadOnly;
     cellDom.appendChild(inputDom);
 
     if (value) {
@@ -381,7 +382,7 @@ export default class UI {
   onUICellValueChange(rawValue: string, colIndex: number, rowIndex: number) {
     const payload: UISetCellPayload = {
       indexPosition: { column: colIndex, row: rowIndex },
-      rawValue: rawValue,
+      rawValue,
     };
     this.lightSheet.events.emit(
       new LightsheetEvent(EventType.UI_SET_CELL, payload),
@@ -516,9 +517,9 @@ export default class UI {
       this.selectedCellsContainer.selectionStart =
         (colIndex != null || undefined) && (rowIndex != null || undefined)
           ? {
-              row: rowIndex,
-              column: colIndex,
-            }
+            row: rowIndex,
+            column: colIndex,
+          }
           : null;
     }
   }
@@ -529,15 +530,15 @@ export default class UI {
     this.selectedCellsContainer.selectionEnd =
       (colIndex != null || undefined) && (rowIndex != null || undefined)
         ? {
-            row: rowIndex,
-            column: colIndex,
-          }
+          row: rowIndex,
+          column: colIndex,
+        }
         : null;
     if (
       this.selectedCellsContainer.selectionStart &&
       this.selectedCellsContainer.selectionEnd &&
       this.selectedCellsContainer.selectionStart !==
-        this.selectedCellsContainer.selectionEnd
+      this.selectedCellsContainer.selectionEnd
     ) {
       this.updateSelection();
     }
