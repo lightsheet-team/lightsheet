@@ -66,7 +66,6 @@ export default class LightSheet {
     this.options.isReadOnly = isReadOnly;
   }
 
-
   getFormatter(type: string, options?: any) {
     if (type == 'number') {
       return new NumberFormatter(options.decimal)
@@ -88,12 +87,11 @@ export default class LightSheet {
     } else if (row != null) {
       if (style.css)
         this.sheet.setRowCss(row, mappedCss!);
-      // if (style.format)
-      //   this.sheet.
     } else if (col != null) {
       if (style.css)
         this.sheet.setColumnCss(col, mappedCss!);
-      // if (style.format)
+      if (style.format)
+        this.sheet.setColumnFormatter(col, formatter);
     }
   }
 
@@ -126,7 +124,6 @@ export default class LightSheet {
     this.#ui.addHeader(headerData);
 
     for (let i = 0; i < rowLength!; i++) {
-      let rowDom;
       for (let j = 0; j < colLength; j++) {
         const data =
           this.options.data[i] && this.options.data[i].length - 1 >= j
@@ -134,14 +131,10 @@ export default class LightSheet {
             : null;
         //if data is not empty add cell to core and render ui, otherwise render only ui
         if (data) {
-          const cell = this.sheet.setCellAt(j, i, data);
-          const rowKeyStr = cell.position.rowKey!.toString();
-          rowDom = this.#ui.getRow(rowKeyStr)!;
+          this.sheet.setCellAt(j, i, data);
         } else {
-          if (!rowDom) {
-            rowDom = this.#ui.addRow(i);
-          }
-          this.#ui.addCell(rowDom, j, i, "");
+          this.#ui.getRowDom(i) ?? this.#ui.addRow(i)
+          this.#ui.addCell(j, i, "");
         }
       }
     }

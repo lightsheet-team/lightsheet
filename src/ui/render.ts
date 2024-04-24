@@ -269,16 +269,14 @@ export default class UI {
     return rowDom;
   }
 
-  getRow(rowKey: string): HTMLElement | null {
-    return document.getElementById(rowKey);
+  getRowDom(rowIndex: number) {
+    return this.tableBodyDom.children.length < rowIndex + 1 ? null : this.tableBodyDom.children[rowIndex]
   }
 
   addCell(
-    rowDom: Element,
     colIndex: number,
     rowIndex: number,
     value: any,
-    columnKey?: string,
   ): HTMLElement {
     const cellDom = document.createElement("td");
     cellDom.classList.add(
@@ -286,6 +284,7 @@ export default class UI {
       "lightsheet_table_row_cell",
       "lightsheet_table_td",
     );
+    const rowDom = this.tableBodyDom.children[rowIndex]
     rowDom.appendChild(cellDom);
     cellDom.id = `${colIndex}_${rowIndex}`;
     cellDom.setAttribute("column-index", `${colIndex}` || "");
@@ -298,7 +297,6 @@ export default class UI {
     cellDom.appendChild(inputDom);
 
     if (value) {
-      cellDom.id = `${columnKey}_${rowDom.id}`;
       inputDom.value = value;
     }
 
@@ -379,9 +377,9 @@ export default class UI {
     }
   }
 
-  onUICellValueChange(rawValue: string, colIndex: number, rowIndex: number) {
+  onUICellValueChange(rawValue: string, columnIndex: number, rowIndex: number) {
     const payload: UISetCellPayload = {
-      indexInfo: { columnIndex: colIndex, rowIndex: rowIndex },
+      indexInfo: { columnIndex, rowIndex },
       rawValue,
     };
     this.lightSheet.events.emit(
@@ -428,28 +426,19 @@ export default class UI {
 
   private onCoreSetCell(event: LightsheetEvent) {
     const payload = event.payload as CoreSetCellPayload;
-    // Get HTML elements and (new) IDs for the payload's cell and row.
-    const elInfo = LightSheetHelper.GetElementInfoForSetCell(payload);
-    if (!elInfo.rowDom) {
-      const row = this.addRow(payload.indexInfo.rowIndex!);
-      elInfo.rowDom = row;
-      row.id = elInfo.rowDomId;
+    let cellDom;
+    const columnIndex = payload.indexInfo.columnIndex!
+    const rowIndex = payload.indexInfo.rowIndex!;
+    if (this.tableBodyDom.children.length < rowIndex + 1) {
+      this.addRow(rowIndex)
+      cellDom = this.addCell(columnIndex, rowIndex, payload.formattedValue)
+    } else {
+      if (this.tableBodyDom.children[rowIndex].children.length < columnIndex + 2) {
+        cellDom = this.addCell(columnIndex, rowIndex, payload.formattedValue)
+      }
+      else cellDom = this.tableBodyDom.children[rowIndex].children[columnIndex + 1]
     }
-    if (!elInfo.cellDom) {
-      elInfo.cellDom = this.addCell(
-        elInfo.rowDom!,
-        payload.indexInfo.columnIndex!,
-        payload.indexInfo.rowIndex!,
-        payload.formattedValue,
-        payload.keyInfo!.columnKey?.toString(),
-      );
-    }
-
-    elInfo.cellDom.id = elInfo.cellDomId;
-    elInfo.rowDom.id = elInfo.rowDomId;
-
-    // Update input element with values from the core.
-    const inputEl = elInfo.cellDom.firstChild! as HTMLInputElement;
+    const inputEl = cellDom.firstChild! as HTMLInputElement;
     inputEl.setAttribute("rawValue", payload.rawValue);
     inputEl.setAttribute("resolvedValue", payload.formattedValue);
     inputEl.value = payload.formattedValue;

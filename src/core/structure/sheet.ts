@@ -559,6 +559,93 @@ export default class Sheet {
     this.events.emit(new LightsheetEvent(EventType.VIEW_SET_STYLE, payload));
   }
 
+  setColumnFormatter(columnIndex: number, formatter: Formatter | null): void {
+    const columnKey = this.columnPositions.get(columnIndex);
+    if (!columnKey) return;
+    const column = this.columns.get(columnKey);
+    if (!column) return;
+    column.defaultStyle = new CellStyle(column.defaultStyle?.styling!, formatter);
+
+    const cellStyle = this.getCellStyle(columnKey, null);
+
+    this.setCellGroupStyle(column, cellStyle);
+
+    for (const [opposingKey] of column.cellIndex) {
+      const cell = this.cellData.get(column.cellIndex.get(opposingKey)!)!;
+      this.applyCellFormatter(cell, column.key, opposingKey as RowKey);
+
+      const payload: CoreSetCellPayload = {
+        indexInfo: {
+          rowIndex: this.getRowIndex(opposingKey),
+          columnIndex,
+        },
+        rawValue: cell ? cell.rawValue : "",
+        formattedValue: cell ? cell.formattedValue : "",
+      };
+      this.events.emit(new LightsheetEvent(EventType.CORE_SET_CELL, payload));
+    }
+
+
+    return;
+  }
+
+  private setCellGroupStyle(
+    group: CellGroup<ColumnKey | RowKey>,
+    style: CellStyle | null,
+  ) {
+    style = style ? new CellStyle().clone(style) : null;
+    const formatterChanged = style?.formatter != group.defaultStyle?.formatter;
+    group.defaultStyle = style;
+
+    // Iterate through formatted cells in this group and clear any styling properties set by the new style.
+    for (const [opposingKey, cellStyle] of group.cellFormatting) {
+      const shouldClear = cellStyle.clearStylingSetBy(style);
+      if (!shouldClear) continue;
+
+      // The cell's style will have no properties after applying this group's new style; clear it.
+      if (group instanceof Column) {
+        this.clearCellStyle(group.key, opposingKey as RowKey);
+        continue;
+      }
+      this.clearCellStyle(opposingKey as ColumnKey, group.key as RowKey);
+    }
+
+    if (!formatterChanged) return;
+
+    // Apply new formatter to all cells in this group.
+    for (const [opposingKey] of group.cellIndex) {
+      const cell = this.cellData.get(group.cellIndex.get(opposingKey)!)!;
+      if (group instanceof Column) {
+        this.applyCellFormatter(cell, group.key, opposingKey as RowKey);
+        continue;
+      }
+      this.applyCellFormatter(
+        cell,
+        opposingKey as ColumnKey,
+        group.key as RowKey,
+      );
+    }
+  }
+
+  private clearCellStyle(colKey: ColumnKey, rowKey: RowKey): boolean {
+    const col = this.columns.get(colKey);
+    const row = this.rows.get(rowKey);
+    if (!col || !row) return false;
+
+    const style = col.cellFormatting.get(row.key);
+    if (style?.formatter) {
+      this.applyCellFormatter(this.getCell(colKey, rowKey)!, colKey, rowKey);
+    }
+
+    col.cellFormatting.delete(row.key);
+    row.cellFormatting.delete(col.key);
+
+    // Clearing a cell's style may leave it completely empty - delete if needed.
+    this.deleteCellIfUnused(colKey, rowKey);
+
+    return true;
+  }
+
   setRowCss(rowIndex: number, css: Map<string, string>): void {
     const rowKey = this.rowPositions.get(rowIndex);
     if (!rowKey) return;
