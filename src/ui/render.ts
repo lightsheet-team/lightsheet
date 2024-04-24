@@ -113,27 +113,27 @@ export default class UI {
     }
   }
 
-  createContextMenu(){
+  createContextMenu() {
     // Create context menu container
-    this.tableContextMenuDom = document.createElement('div');
-    this.tableContextMenuDom.id = 'contextMenu';
-    this.tableContextMenuDom.classList.add('lightsheet_table_context_menu');
-    
+    this.tableContextMenuDom = document.createElement("div");
+    this.tableContextMenuDom.id = "contextMenu";
+    this.tableContextMenuDom.classList.add("lightsheet_table_context_menu");
+
     // Create options for the context menu
     // TODO: Add working options and remove placeholders Copy, Cut, Paste
-    var options = ['Copy', 'Cut', 'Paste'];
-    
+    const options = ["Copy", "Cut", "Paste"];
+
     // Create UL element to hold menu options
-    var ul = document.createElement('ul');
-    
+    const ul = document.createElement("ul");
+
     // Loop through options and create LI elements
-    options.forEach(function(option) {
-        var li = document.createElement('li');
-        li.textContent = option;
-        li.setAttribute('data-action', option.toLowerCase()); // Set data-action attribute for identification
-        ul.appendChild(li);
+    options.forEach(function (option) {
+      const li = document.createElement("li");
+      li.textContent = option;
+      li.setAttribute("data-action", option.toLowerCase()); // Set data-action attribute for identification
+      ul.appendChild(li);
     });
-    
+
     // Append UL to context menu
     this.tableContextMenuDom.appendChild(ul);
 
@@ -141,17 +141,17 @@ export default class UI {
     document.body.appendChild(this.tableContextMenuDom);
   }
 
-  showContextMenu(x:number, y:number) {
-    let contextMenu = document.getElementById('contextMenu');
-    contextMenu!.style.display = 'block';
-    contextMenu!.style.left = x + 'px';
-    contextMenu!.style.top = y + 'px';
-}
+  showContextMenu(x: number, y: number) {
+    const contextMenu = document.getElementById("contextMenu");
+    contextMenu!.style.display = "block";
+    contextMenu!.style.left = x + "px";
+    contextMenu!.style.top = y + "px";
+  }
 
   hideContextMenu() {
-    let contextMenu = document.getElementById('contextMenu');
-    contextMenu!.style.display = 'none';
-}
+    const contextMenu = document.getElementById("contextMenu");
+    contextMenu!.style.display = "none";
+  }
 
   addHeader(headerData: string[]) {
     const headerRowDom = document.createElement("tr");
@@ -466,15 +466,15 @@ export default class UI {
   }
 
   handleMouseDown(e: MouseEvent, colIndex: number, rowIndex: number) {
-    if(e.button !==0) return;
-      this.hideContextMenu();
-      this.selectedCellsContainer.selectionStart =
-        (colIndex != null || undefined) && (rowIndex != null || undefined)
-          ? {
-              row: rowIndex,
-              column: colIndex,
-            }
-          : null;
+    if (e.button !== 0) return;
+    this.hideContextMenu();
+    this.selectedCellsContainer.selectionStart =
+      (colIndex != null || undefined) && (rowIndex != null || undefined)
+        ? {
+            row: rowIndex,
+            column: colIndex,
+          }
+        : null;
   }
 
   handleMouseOver(e: MouseEvent, colIndex: number, rowIndex: number) {
