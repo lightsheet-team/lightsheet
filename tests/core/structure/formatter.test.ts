@@ -19,7 +19,7 @@ describe("Formatter test", () => {
 
   it("Should round a fraction correctly", () => {
     const oneDigit = new CellStyle(null, new NumberFormatter(1));
-    sheet.setColumnStyle(1, oneDigit);
+    sheet.setColumnFormatter(1, oneDigit.formatter);
     expect(sheet.getCellInfoAt(1, 1)!.formattedValue).toBe("0.8");
   });
 
@@ -27,8 +27,8 @@ describe("Formatter test", () => {
     const noDigits = new CellStyle(null, new NumberFormatter(0));
     const twoDigits = new CellStyle(null, new NumberFormatter(2));
 
-    sheet.setColumnStyle(1, noDigits);
-    sheet.setColumnStyle(2, twoDigits);
+    sheet.setColumnFormatter(1, noDigits.formatter);
+    sheet.setColumnFormatter(2, twoDigits.formatter);
 
     expect(sheet.getCellInfoAt(1, 1)!.formattedValue).toBe("12");
     expect(sheet.getCellInfoAt(2, 1)!.formattedValue).toBe("12.30");
@@ -36,7 +36,7 @@ describe("Formatter test", () => {
 
   it("Should format a string value as a number and result in an invalid cell state", () => {
     const style = new CellStyle(null, new NumberFormatter(0));
-    sheet.setColumnStyle(0, style);
+    sheet.setColumnFormatter(0, style.formatter);
 
     expect(sheet.getCellInfoAt(0, 0)!.state).toBe(CellState.INVALID_FORMAT);
   });

@@ -1,6 +1,3 @@
-import { CoreSetCellPayload } from "../core/event/events.types";
-import { ElementInfo } from "../core/structure/sheet.types";
-
 export default class LightSheetHelper {
   static generateColumnLabel = (rowIndex: number) => {
     let label = "";

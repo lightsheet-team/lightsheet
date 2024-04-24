@@ -10,7 +10,6 @@ import EventType from "../core/event/eventType.ts";
 import { ToolbarOptions } from "../main.types";
 import { ToolbarItems } from "../utils/constants.ts";
 import { Coordinate } from "../utils/common.types.ts";
-import LightSheetHelper from "../utils/helpers.ts";
 
 export default class UI {
   tableEl: Element;

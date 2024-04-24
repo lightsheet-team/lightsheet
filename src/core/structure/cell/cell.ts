@@ -1,7 +1,6 @@
 import { CellKey, generateCellKey } from "../key/keyTypes";
 import { CellState } from "./cellState.ts";
 import { CellReference } from "./types.cell.ts";
-import { KeyInfo } from "../sheet.types.ts";
 
 export default class Cell {
   key: CellKey;

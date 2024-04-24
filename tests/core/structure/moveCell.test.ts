@@ -47,10 +47,10 @@ describe("Cell moving tests", () => {
   it("should move a single cell with its styling", () => {
     const style = new CellStyle(new Map([["color", "red"]]));
     const fromCell = sheet.getCellInfoAt(0, 0)!;
-    sheet.setCellStyle(
-      fromCell.position.columnKey!,
-      fromCell.position.rowKey!,
-      style,
+    sheet.setCellCss(
+      0,
+      0,
+      style.styling,
     );
 
     sheet.moveCell({ column: 0, row: 0 }, { column: 3, row: 3 });

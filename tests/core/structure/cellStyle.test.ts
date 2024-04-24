@@ -25,18 +25,18 @@ describe("CellStyle", () => {
       new CellStyle(new Map([["border", "1px solid black"]])),
     ];
 
-    sheet.setCellStyle(pos.columnKey!, pos.rowKey!, styles[0]);
+    sheet.setCellCss(1, 1, styles[0].styling);
     expect(sheet.getCellStyle(pos.columnKey!, pos.rowKey!)!).toEqual(styles[0]);
 
-    sheet.setCellStyle(pos.columnKey!, pos.rowKey!, null);
+    sheet.setCellCss(1, 1, new Map());
     expect(sheet.getCellStyle(pos.columnKey!, pos.rowKey!)).toEqual(
       sheet.defaultStyle,
     );
 
-    sheet.setRowStyle(pos.rowKey!, styles[1]);
+    sheet.setRowCss(1, styles[1].styling);
     expect(sheet.getCellStyle(pos.columnKey!, pos.rowKey!)!).toEqual(styles[1]);
 
-    sheet.setColumnStyle(pos.columnKey!, styles[2]);
+    sheet.setColumnCss(1!, styles[2].styling);
     expect(sheet.getCellStyle(pos.columnKey!, pos.rowKey!)!).toEqual(
       new CellStyle(
         new Map([
@@ -46,7 +46,7 @@ describe("CellStyle", () => {
       ),
     );
 
-    sheet.setCellStyle(pos.columnKey!, pos.rowKey!, styles[3]);
+    sheet.setCellCss(1, 1, styles[3].styling);
     expect(sheet.getCellStyle(pos.columnKey!, pos.rowKey!)!).toEqual(
       new CellStyle(
         new Map([
@@ -57,9 +57,9 @@ describe("CellStyle", () => {
       ),
     );
 
-    sheet.setCellStyle(pos.columnKey!, pos.rowKey!, null);
-    sheet.setRowStyle(pos.rowKey!, null);
-    sheet.setColumnStyle(pos.columnKey!, null);
+    sheet.setCellCss(1, 1, new Map());
+    sheet.setRowCss(1, new Map());
+    sheet.setColumnCss(1, new Map());
     expect(sheet.getCellStyle(pos.columnKey!, pos.rowKey!)).toEqual(
       sheet.defaultStyle,
     );
