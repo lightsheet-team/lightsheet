@@ -1,8 +1,10 @@
 {
   "name": "lightsheet",
   "private": true,
-  "version": "0.0.1",
   "type": "module",
+  "version": "0.0.1",
+  "files": ["dist"],
+  "module": "./dist/main.js",
   "scripts": {
     "dev": "vite",
     "lint": "eslint .",
