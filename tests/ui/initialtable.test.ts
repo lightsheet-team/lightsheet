@@ -24,7 +24,7 @@ describe("LightSheet", () => {
   });
 
   afterEach(() => {
-    jest.clearAllMocks();
+    document.body.removeChild(targetElementMock);
   });
 
   test("initializeData method creates header with the correct number of children in UI", () => {

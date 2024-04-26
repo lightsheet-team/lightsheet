@@ -1,5 +1,5 @@
 export default class LightSheetHelper {
-  static GenerateColumnLabel = (rowIndex: number) => {
+  static generateColumnLabel = (rowIndex: number) => {
     let label = "";
     const alphabet = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
     while (rowIndex > 0) {

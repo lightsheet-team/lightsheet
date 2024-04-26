@@ -19,7 +19,7 @@ describe("LightSheet setCellAt", () => {
     document.body.appendChild(targetElementMock);
   });
   afterEach(() => {
-    jest.clearAllMocks();
+    document.body.removeChild(targetElementMock);
   });
 
   it("Should set the cell and use col and row keys", () => {

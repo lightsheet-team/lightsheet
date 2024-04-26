@@ -5,6 +5,8 @@ import { CellInfo } from "./core/structure/sheet.types.ts";
 import Events from "./core/event/events.ts";
 import SheetHolder from "./core/structure/sheetHolder.ts";
 import { DefaultColCount, DefaultRowCount } from "./utils/constants.ts";
+import ExpressionHandler from "./core/evaluation/expressionHandler.ts";
+import { CellReference } from "./core/structure/cell/types.cell.ts";
 
 export default class LightSheet {
   #ui: UI | undefined;
@@ -23,6 +25,7 @@ export default class LightSheet {
       data: [],
       defaultColCount: DefaultColCount,
       defaultRowCount: DefaultRowCount,
+      isReadOnly: false,
       ...options,
     };
     this.events = new Events();
@@ -58,6 +61,13 @@ export default class LightSheet {
     this.onTableReady();
   }
 
+  static registerFunction(
+    name: string,
+    func: (cellRef: CellReference, ...args: any[]) => string,
+  ) {
+    ExpressionHandler.registerFunction(name, func);
+  }
+
   onTableReady() {
     this.isReady = true;
     if (this.options.onReady) this.options.onReady();
@@ -65,6 +75,7 @@ export default class LightSheet {
 
   setReadOnly(isReadOnly: boolean) {
     this.#ui?.setReadOnly(isReadOnly);
+    this.options.isReadOnly = isReadOnly;
   }
 
   showToolbar(isShown: boolean) {
