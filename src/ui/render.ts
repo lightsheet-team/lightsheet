@@ -12,13 +12,13 @@ import { ToolbarItems } from "../utils/constants.ts";
 import { Coordinate } from "../utils/common.types.ts";
 
 export default class UI {
-  tableEl: Element;
+  tableEl!: Element;
   toolbarDom: HTMLElement | undefined;
   formulaBarDom!: HTMLElement | null;
   formulaInput!: HTMLInputElement;
   selectedCellDisplay!: HTMLElement;
-  tableHeadDom: Element;
-  tableBodyDom: Element;
+  tableHeadDom!: Element;
+  tableBodyDom!: Element;
   lightSheet: LightSheet;
   selectedCell: number[];
   selectedRowNumberCell: HTMLElement | null = null;
@@ -52,13 +52,23 @@ export default class UI {
     this.tableContainerDom = lightSheetContainerDom;
     lightSheetContainerDom.classList.add("lightsheet_table_container");
 
-    /*content*/
+    //table
+    this.createTableDom();
+
+    //toolbar
+    this.createToolbar();
+
+    //formula bar
+    this.createFormulaBar();
+  }
+
+  private createTableDom() {
     const tableDom = document.createElement("table");
     tableDom.classList.add("lightsheet_table");
     tableDom.setAttribute("cellpadding", "0");
     tableDom.setAttribute("cellspacing", "0");
     tableDom.setAttribute("unselectable", "yes");
-    lightSheetContainerDom.appendChild(tableDom);
+    this.tableContainerDom.appendChild(tableDom);
     this.tableEl = tableDom;
 
     //thead
@@ -77,15 +87,9 @@ export default class UI {
     //tbody
     this.tableBodyDom = document.createElement("tbody");
     tableDom.appendChild(this.tableBodyDom);
-
-    //toolbar
-    this.createToolbar();
-
-    //formula bar
-    this.createFormulaBar();
   }
 
-  createToolbar() {
+  private createToolbar() {
     if (
       !this.toolbarOptions.showToolbar ||
       this.toolbarOptions.items?.length == 0
