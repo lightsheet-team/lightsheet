@@ -218,7 +218,7 @@ export default class UI {
     this.tableHeadDom.children[0].appendChild(headerCellDom);
   }
 
-  private onClickHeaderCell(e: MouseEvent, indexOfTheHeader: number) {
+  private onClickHeaderCell(e: MouseEvent, columnIndex: number) {
     const selectedColumn = e.target as HTMLElement;
     if (!selectedColumn) return;
     const prevSelection = this.selectedHeaderCell;
@@ -232,7 +232,7 @@ export default class UI {
       this.selectedHeaderCell = selectedColumn;
       Array.from(this.tableBodyDom.children).forEach((childElement) => {
         // Code inside the forEach loop
-        childElement.children[indexOfTheHeader].classList.add(
+        childElement.children[columnIndex].classList.add(
           "lightsheet_table_selected_row_column",
         );
       });
