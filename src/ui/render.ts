@@ -334,9 +334,9 @@ export default class UI {
 
     // Get the cell by either column and row key or position.
     // TODO Index-based ID may not be unique if there are multiple sheets.
-    const cellDom =
-      (cellDomKey && document.getElementById(cellDomKey)) ||
-      document.getElementById(`${columnIndex}_${rowIndex}`);
+    const cellDom = cellDomKey
+      ? document.getElementById(cellDomKey)
+      : document.getElementById(`${columnIndex}_${rowIndex}`);
 
     const newCellDomId = payload.clearCell
       ? `${columnIndex}_${rowIndex}`
@@ -344,14 +344,9 @@ export default class UI {
 
     const newRowDomId = payload.clearRow ? `row_${rowIndex}` : rowKey!;
 
-    let rowDom: HTMLElement | null = null;
-    if (rowKey) {
-      rowDom = document.getElementById(rowKey);
-    }
-    if (!rowDom) {
-      const rowId = `row_${rowIndex}`;
-      rowDom = document.getElementById(rowId);
-    }
+    const rowDom: HTMLElement | null = rowKey
+      ? document.getElementById(rowKey)
+      : document.getElementById(`row_${rowIndex}`);
 
     return {
       cellDom: cellDom,
