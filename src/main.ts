@@ -35,20 +35,19 @@ export default class LightSheet {
     if (targetElement) {
       this.#ui = new UI(targetElement, this, this.options.toolbarOptions);
 
-      for (let index = 0; index < this.options.defaultColCount!; index++) {
-        this.#ui.addColumn();
-      }
-
-      for (let index = 0; index < this.options.defaultRowCount!; index++) {
-        this.#ui.addRow();
-      }
-
-      if (this.options.data) {
+      if (this.options.data && this.options.data.length > 0) {
         for (let rowI = 0; rowI < this.options.data.length; rowI++) {
           const rowData = this.options.data[rowI];
           for (let colI = 0; colI < rowData.length; colI++) {
             this.sheet.setCellAt(colI, rowI, rowData[colI]);
           }
+        }
+      } else {
+        for (let index = 0; index < this.options.defaultColCount!; index++) {
+          this.#ui.addColumn();
+        }
+        for (let index = 0; index < this.options.defaultRowCount!; index++) {
+          this.#ui.addRow();
         }
       }
     }
