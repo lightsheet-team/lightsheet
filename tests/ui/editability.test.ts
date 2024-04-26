@@ -6,10 +6,11 @@ describe("LightSheet", () => {
   beforeEach(() => {
     window.sheetHolder?.clear();
     targetElementMock = document.createElement("div");
+    document.body.appendChild(targetElementMock);
   });
 
   afterEach(() => {
-    jest.clearAllMocks();
+    document.body.removeChild(targetElementMock);
   });
 
   test("All input elements within the table have readonly property set to true when isReadOnly is true", () => {

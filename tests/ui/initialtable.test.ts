@@ -19,11 +19,12 @@ describe("LightSheet", () => {
       targetElementMock,
     );
 
+    document.body.appendChild(targetElementMock);
     expect(onReady).toHaveBeenCalledWith();
   });
 
   afterEach(() => {
-    jest.clearAllMocks();
+    document.body.removeChild(targetElementMock);
   });
 
   test("initializeData method creates header with the correct number of children in UI", () => {
