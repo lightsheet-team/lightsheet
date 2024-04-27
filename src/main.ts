@@ -12,6 +12,7 @@ import ExpressionHandler from "./core/evaluation/expressionHandler.ts";
 import { CellReference } from "./core/structure/cell/types.cell.ts";
 import { RowKey, ColumnKey } from "./core/structure/key/keyTypes.ts";
 import CellStyle from "./core/structure/cellStyle.ts";
+import { Coordinate } from "./utils/common.types.ts";
 
 export default class LightSheet {
   private ui: UI | undefined;
@@ -115,6 +116,10 @@ export default class LightSheet {
     return this.sheet.setCellAt(columnIndex, rowIndex, value.toString());
   }
 
+  setCell(colKey: ColumnKey, rowKey: RowKey, formula: string): CellInfo | null {
+    return this.sheet.setCell(colKey, rowKey, formula);
+  }
+
   getCellInfoAt(colPos: number, rowPos: number): CellInfo | null {
     return this.sheet.getCellInfoAt(colPos, rowPos);
   }
@@ -155,6 +160,14 @@ export default class LightSheet {
     return this.sheet.moveRow(from, to);
   }
 
+  moveCell(
+    from: Coordinate,
+    to: Coordinate,
+    moveStyling: boolean = true,
+  ) {
+    this.sheet.moveCell(from, to, moveStyling)
+  }
+
   insertColumn(position: number): boolean {
     return this.sheet.insertColumn(position)
   }
@@ -171,5 +184,9 @@ export default class LightSheet {
     return this.sheet.deleteRow(position);
   }
 
-  
+  exportData(): Map<number, Map<number, string>> {
+    return this.sheet.exportData();
+  }
+
+
 }
