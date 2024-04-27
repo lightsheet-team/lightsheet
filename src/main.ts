@@ -87,7 +87,7 @@ export default class LightSheet {
     callback: ListenerFunction,
     eventState: EventState = EventState.POST_EVENT,
   ): void {
-    this.events.removeEventListener(eventType, callback, eventState)
+    this.events.removeEventListener(eventType, callback, eventState);
   }
 
   onTableReady() {
@@ -140,16 +140,16 @@ export default class LightSheet {
     colKey: ColumnKey,
     rowKey: RowKey,
     style: CellStyle | null,
-  ): boolean{
-    return this.sheet.setCellStyle(colKey, rowKey, style)
+  ): boolean {
+    return this.sheet.setCellStyle(colKey, rowKey, style);
   }
 
-  setRowStyle(rowkey: RowKey, cellStyle: CellStyle): boolean{
-    return this.sheet.setRowStyle(rowkey, cellStyle)
+  setRowStyle(rowkey: RowKey, cellStyle: CellStyle): boolean {
+    return this.sheet.setRowStyle(rowkey, cellStyle);
   }
 
-  setColumnStyle(columnKey: ColumnKey, cellStyle: CellStyle): boolean{
-    return this.sheet.setColumnStyle(columnKey, cellStyle)
+  setColumnStyle(columnKey: ColumnKey, cellStyle: CellStyle): boolean {
+    return this.sheet.setColumnStyle(columnKey, cellStyle);
   }
 
   moveColumn(from: number, to: number): boolean {
@@ -160,16 +160,12 @@ export default class LightSheet {
     return this.sheet.moveRow(from, to);
   }
 
-  moveCell(
-    from: Coordinate,
-    to: Coordinate,
-    moveStyling: boolean = true,
-  ) {
-    this.sheet.moveCell(from, to, moveStyling)
+  moveCell(from: Coordinate, to: Coordinate, moveStyling: boolean = true) {
+    this.sheet.moveCell(from, to, moveStyling);
   }
 
   insertColumn(position: number): boolean {
-    return this.sheet.insertColumn(position)
+    return this.sheet.insertColumn(position);
   }
 
   insertRow(position: number): boolean {
@@ -187,6 +183,4 @@ export default class LightSheet {
   exportData(): Map<number, Map<number, string>> {
     return this.sheet.exportData();
   }
-
-
 }

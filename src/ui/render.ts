@@ -1,4 +1,3 @@
-import LightSheet from "../main";
 import { SelectionContainer } from "./render.types.ts";
 import LightsheetEvent from "../core/event/event.ts";
 import {
@@ -411,9 +410,7 @@ export default class UI {
       indexPosition: { column: colIndex, row: rowIndex },
       rawValue,
     };
-    this.events.emit(
-      new LightsheetEvent(EventType.UI_SET_CELL, payload),
-    );
+    this.events.emit(new LightsheetEvent(EventType.UI_SET_CELL, payload));
   }
 
   private registerEvents() {
