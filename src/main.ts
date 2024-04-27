@@ -10,6 +10,8 @@ import SheetHolder from "./core/structure/sheetHolder.ts";
 import { DefaultColCount, DefaultRowCount } from "./utils/constants.ts";
 import ExpressionHandler from "./core/evaluation/expressionHandler.ts";
 import { CellReference } from "./core/structure/cell/types.cell.ts";
+import { RowKey, ColumnKey } from "./core/structure/key/keyTypes.ts";
+import CellStyle from "./core/structure/cellStyle.ts";
 
 export default class LightSheet {
   #ui: UI | undefined;
@@ -111,5 +113,21 @@ export default class LightSheet {
 
   setCellAt(columnIndex: number, rowIndex: number, value: any): CellInfo {
     return this.sheet.setCellAt(columnIndex, rowIndex, value.toString());
+  }
+
+  getCellInfoAt(colPos: number, rowPos: number): CellInfo | null {
+    return this.sheet.getCellInfoAt(colPos, rowPos);
+  }
+
+  getRowIndex(rowKey: RowKey): number | undefined {
+    return this.sheet.getRowIndex(rowKey);
+  }
+
+  getColumnIndex(colKey: ColumnKey): number | undefined {
+    return this.sheet.getColumnIndex(colKey);
+  }
+
+  getCellStyle(colKey?: ColumnKey, rowKey?: RowKey): CellStyle {
+    return this.sheet.getCellStyle(colKey, rowKey);
   }
 }
