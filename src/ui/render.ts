@@ -6,10 +6,11 @@ import {
   UISetCellPayload,
 } from "../core/event/events.types.ts";
 import EventType from "../core/event/eventType.ts";
-import { ToolbarOptions } from "../main.types";
+import { LightSheetOptions, ToolbarOptions } from "../main.types";
 import LightSheetHelper from "../utils/helpers.ts";
 import { ToolbarItems } from "../utils/constants.ts";
 import { Coordinate } from "../utils/common.types.ts";
+import Events from "../core/event/events.ts";
 
 export default class UI {
   tableEl!: Element;
@@ -19,7 +20,6 @@ export default class UI {
   selectedCellDisplay!: HTMLElement;
   tableHeadDom!: Element;
   tableBodyDom!: Element;
-  lightSheet: LightSheet;
   selectedCell: number[];
   selectedRowNumberCell: HTMLElement | null = null;
   selectedHeaderCell: HTMLElement | null = null;
@@ -28,27 +28,28 @@ export default class UI {
   isReadOnly: boolean;
   singleSelectedCell: Coordinate | undefined;
   tableContainerDom: Element;
+  private events: Events;
 
   constructor(
     lightSheetContainerDom: Element,
-    lightSheet: LightSheet,
-    toolbarOptions?: ToolbarOptions,
+    lightSheetOptions: LightSheetOptions,
+    events: Events | null = null,
   ) {
-    this.lightSheet = lightSheet;
     this.selectedCell = [];
     this.selectedCellsContainer = {
       selectionStart: null,
       selectionEnd: null,
     };
     this.singleSelectedCell = undefined;
+    this.events = events ?? new Events();
     this.registerEvents();
     this.toolbarOptions = {
       showToolbar: false,
       element: undefined,
       items: ToolbarItems,
-      ...toolbarOptions,
+      ...lightSheetOptions.toolbarOptions,
     };
-    this.isReadOnly = lightSheet.options.isReadOnly || false;
+    this.isReadOnly = lightSheetOptions.isReadOnly || false;
     this.tableContainerDom = lightSheetContainerDom;
     lightSheetContainerDom.classList.add("lightsheet_table_container");
 
@@ -410,13 +411,13 @@ export default class UI {
       indexPosition: { column: colIndex, row: rowIndex },
       rawValue,
     };
-    this.lightSheet.events.emit(
+    this.events.emit(
       new LightsheetEvent(EventType.UI_SET_CELL, payload),
     );
   }
 
   private registerEvents() {
-    this.lightSheet.events.on(EventType.CORE_SET_CELL, (event) => {
+    this.events.on(EventType.CORE_SET_CELL, (event) => {
       this.onCoreSetCell(event);
     });
   }

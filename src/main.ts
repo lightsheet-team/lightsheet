@@ -38,7 +38,7 @@ export default class LightSheet {
     this.sheet = new Sheet(options.sheetName, this.events);
 
     if (targetElement) {
-      this.ui = new UI(targetElement, this, this.options.toolbarOptions);
+      this.ui = new UI(targetElement, this.options);
 
       if (this.options.data && this.options.data.length > 0) {
         for (let rowI = 0; rowI < this.options.data.length; rowI++) {
@@ -131,6 +131,14 @@ export default class LightSheet {
     return this.sheet.getCellStyle(colKey, rowKey);
   }
 
+  setCellStyle(
+    colKey: ColumnKey,
+    rowKey: RowKey,
+    style: CellStyle | null,
+  ): boolean{
+    return this.sheet.setCellStyle(colKey, rowKey, style)
+  }
+
   setRowStyle(rowkey: RowKey, cellStyle: CellStyle): boolean{
     return this.sheet.setRowStyle(rowkey, cellStyle)
   }
@@ -163,11 +171,5 @@ export default class LightSheet {
     return this.sheet.deleteRow(position);
   }
 
-  setCellStyle(
-    colKey: ColumnKey,
-    rowKey: RowKey,
-    style: CellStyle | null,
-  ): boolean{
-    return this.sheet.setCellStyle(colKey, rowKey, style)
-  }
+  
 }
