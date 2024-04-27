@@ -5,7 +5,6 @@ import { CellInfo } from "./core/structure/sheet.types.ts";
 import Events from "./core/event/events.ts";
 import SheetHolder from "./core/structure/sheetHolder.ts";
 import { DefaultColCount, DefaultRowCount } from "./utils/constants.ts";
-import LightSheetHelper from "./utils/helpers.ts";
 import ExpressionHandler from "./core/evaluation/expressionHandler.ts";
 import { CellReference } from "./core/structure/cell/types.cell.ts";
 import { SheetKey } from "./core/structure/key/keyTypes.ts";
@@ -32,6 +31,7 @@ export default class LightSheet {
       data: [],
       defaultColCount: DefaultColCount,
       defaultRowCount: DefaultRowCount,
+      isReadOnly: false,
       ...options,
     };
     this.events = new Events();
@@ -40,7 +40,22 @@ export default class LightSheet {
 
     if (targetElement) {
       this.#ui = new UI(targetElement, this, this.options.toolbarOptions);
-      this.initializeTable();
+
+      if (this.options.data && this.options.data.length > 0) {
+        for (let rowI = 0; rowI < this.options.data.length; rowI++) {
+          const rowData = this.options.data[rowI];
+          for (let colI = 0; colI < rowData.length; colI++) {
+            this.sheet.setCellAt(colI, rowI, rowData[colI]);
+          }
+        }
+      } else {
+        for (let index = 0; index < this.options.defaultColCount!; index++) {
+          this.#ui.addColumn();
+        }
+        for (let index = 0; index < this.options.defaultRowCount!; index++) {
+          this.#ui.addRow();
+        }
+      }
     }
 
     if (options.onCellChange) {
@@ -74,6 +89,7 @@ export default class LightSheet {
    */
   setReadOnly(isReadOnly: boolean) {
     this.#ui?.setReadOnly(isReadOnly);
+    this.options.isReadOnly = isReadOnly;
   }
 
   /**
@@ -82,49 +98,6 @@ export default class LightSheet {
    */
   showToolbar(isShown: boolean) {
     this.#ui?.showToolbar(isShown);
-  }
-
-  private initializeTable() {
-    if (!this.#ui || !this.options.data) return;
-
-    // Create header row and add headers
-    const rowLength = this.options.data.length
-      ? this.options.data.length
-      : this.options.defaultRowCount;
-    let colLength = this.options.data?.reduce(
-      (total, item) => (total > item.length ? total : item.length),
-      0,
-    );
-    if (!colLength) colLength = this.options.defaultColCount;
-
-    const headerData = Array.from(
-      { length: colLength + 1 }, // Adding 1 for the row number column
-      (_, i) => (i === 0 ? "" : LightSheetHelper.generateColumnLabel(i)), // Generating column labels
-    );
-
-    this.#ui.addHeader(headerData);
-
-    for (let i = 0; i < rowLength!; i++) {
-      //create new row
-      const rowDom = this.#ui.addRow(i);
-      for (let j = 0; j < colLength; j++) {
-        const data =
-          this.options.data[i] && this.options.data[i].length - 1 >= j
-            ? this.options.data[i][j]
-            : null;
-        //if data is not empty add cell to core and render ui, otherwise render only ui
-        if (data) {
-          const cell = this.sheet.setCellAt(j, i, data);
-          const rowKeyStr = cell.position.rowKey!.toString();
-          const columnKeyStr = cell.position.columnKey!.toString();
-
-          if (!rowDom.id) rowDom.id = rowKeyStr;
-          this.#ui.addCell(rowDom, j, i, cell.resolvedValue, columnKeyStr);
-        } else {
-          this.#ui.addCell(rowDom, j, i, "");
-        }
-      }
-    }
   }
 
   /**
@@ -140,14 +113,13 @@ export default class LightSheet {
   getName(): string {
     return this.options.sheetName;
   }
-
   /**
    * Set the value of a cell at the give position.
-   * @param column The index of the column, starting from 0.
-   * @param row The index of the row, starting from 0.
+   * @param columnIndex The index of the column, starting from 0.
+   * @param rowIndex The index of the row, starting from 0.
    * @param value The new contents of the cell. If starting with "=", the value is treated as a formula.
    */
-  setCellAt(column: number, row: number, value: string): CellInfo {
-    return this.sheet.setCellAt(column, row, value.toString());
+  setCellAt(columnIndex: number, rowIndex: number, value: any): CellInfo {
+    return this.sheet.setCellAt(columnIndex, rowIndex, value.toString());
   }
 }

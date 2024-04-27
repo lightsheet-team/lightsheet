@@ -6,12 +6,9 @@ describe("Tool bar", () => {
     window.sheetHolder?.clear();
   });
 
-  afterEach(() => {
-    jest.clearAllMocks();
-  });
-
   test("should create toolbar as the first child in the table container if no element is provided", () => {
     const targetElementMock: HTMLElement = document.createElement("div");
+    document.body.appendChild(targetElementMock);
 
     // Get the toolbar element
     new LightSheet(
