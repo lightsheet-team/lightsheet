@@ -79,6 +79,14 @@ export default class LightSheet {
     this.events.addEventListener(eventType, callback, eventState, once);
   }
 
+  removeEventListener(
+    eventType: EventType,
+    callback: ListenerFunction,
+    eventState: EventState = EventState.POST_EVENT,
+  ): void {
+    this.events.removeEventListener(eventType, callback, eventState)
+  }
+
   onTableReady() {
     this.isReady = true;
     if (this.options.onReady) this.options.onReady();
