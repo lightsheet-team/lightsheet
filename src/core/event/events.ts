@@ -2,7 +2,7 @@ import EventType from "./eventType";
 import Event from "./event";
 import EventState from "./eventState";
 
-type ListenerFunction = (event: Event) => void;
+export type ListenerFunction = (event: Event) => void;
 
 type EventListener = {
   callback: ListenerFunction;

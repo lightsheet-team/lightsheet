@@ -3,6 +3,9 @@ import { LightSheetOptions } from "./main.types.ts";
 import Sheet from "./core/structure/sheet.ts";
 import { CellInfo } from "./core/structure/sheet.types.ts";
 import Events from "./core/event/events.ts";
+import { ListenerFunction } from "./core/event/events.ts";
+import EventState from "./core/event/eventState.ts";
+import EventType from "./core/event/eventType.ts";
 import SheetHolder from "./core/structure/sheetHolder.ts";
 import { DefaultColCount, DefaultRowCount } from "./utils/constants.ts";
 import ExpressionHandler from "./core/evaluation/expressionHandler.ts";
@@ -11,9 +14,9 @@ import { CellReference } from "./core/structure/cell/types.cell.ts";
 export default class LightSheet {
   #ui: UI | undefined;
   options: LightSheetOptions;
-  sheet: Sheet;
+  private sheet: Sheet;
   sheetHolder: SheetHolder;
-  events: Events;
+  private events: Events;
   onCellChange?;
   isReady: boolean = false;
 
@@ -65,6 +68,15 @@ export default class LightSheet {
     func: (cellRef: CellReference, ...args: any[]) => string,
   ) {
     ExpressionHandler.registerFunction(name, func);
+  }
+
+  addEventListener(
+    eventType: EventType,
+    callback: ListenerFunction,
+    eventState: EventState = EventState.POST_EVENT,
+    once: boolean = false,
+  ): void {
+    this.events.addEventListener(eventType, callback, eventState, once);
   }
 
   onTableReady() {
