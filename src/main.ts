@@ -39,7 +39,7 @@ export default class LightSheet {
     this.sheet = new Sheet(options.sheetName, this.events);
 
     if (targetElement) {
-      this.ui = new UI(targetElement, this.options);
+      this.ui = new UI(targetElement, this.options, this.events);
 
       if (this.options.data && this.options.data.length > 0) {
         for (let rowI = 0; rowI < this.options.data.length; rowI++) {
