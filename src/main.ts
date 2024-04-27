@@ -14,7 +14,7 @@ import { RowKey, ColumnKey } from "./core/structure/key/keyTypes.ts";
 import CellStyle from "./core/structure/cellStyle.ts";
 
 export default class LightSheet {
-  #ui: UI | undefined;
+  private ui: UI | undefined;
   options: LightSheetOptions;
   private sheet: Sheet;
   sheetHolder: SheetHolder;
@@ -38,7 +38,7 @@ export default class LightSheet {
     this.sheet = new Sheet(options.sheetName, this.events);
 
     if (targetElement) {
-      this.#ui = new UI(targetElement, this, this.options.toolbarOptions);
+      this.ui = new UI(targetElement, this, this.options.toolbarOptions);
 
       if (this.options.data && this.options.data.length > 0) {
         for (let rowI = 0; rowI < this.options.data.length; rowI++) {
@@ -49,10 +49,10 @@ export default class LightSheet {
         }
       } else {
         for (let index = 0; index < this.options.defaultColCount!; index++) {
-          this.#ui.addColumn();
+          this.ui.addColumn();
         }
         for (let index = 0; index < this.options.defaultRowCount!; index++) {
-          this.#ui.addRow();
+          this.ui.addRow();
         }
       }
     }
@@ -95,12 +95,12 @@ export default class LightSheet {
   }
 
   setReadOnly(isReadOnly: boolean) {
-    this.#ui?.setReadOnly(isReadOnly);
+    this.ui?.setReadOnly(isReadOnly);
     this.options.isReadOnly = isReadOnly;
   }
 
   showToolbar(isShown: boolean) {
-    this.#ui?.showToolbar(isShown);
+    this.ui?.showToolbar(isShown);
   }
 
   getKey() {
@@ -137,6 +137,30 @@ export default class LightSheet {
 
   setColumnStyle(columnKey: ColumnKey, cellStyle: CellStyle): boolean{
     return this.sheet.setColumnStyle(columnKey, cellStyle)
+  }
+
+  moveColumn(from: number, to: number): boolean {
+    return this.sheet.moveColumn(from, to);
+  }
+
+  moveRow(from: number, to: number): boolean {
+    return this.sheet.moveRow(from, to);
+  }
+
+  insertColumn(position: number): boolean {
+    return this.sheet.insertColumn(position)
+  }
+
+  insertRow(position: number): boolean {
+    return this.sheet.insertRow(position);
+  }
+
+  deleteColumn(position: number): boolean {
+    return this.sheet.deleteColumn(position);
+  }
+
+  deleteRow(position: number): boolean {
+    return this.sheet.deleteRow(position);
   }
 
   setCellStyle(
