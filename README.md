@@ -1,7 +1,7 @@
 # Lightsheet
-A lightweight spreadsheet implementation with minimal dependencies written in Typescript. Lightsheet implements a standalone core for efficient spreadsheet data management, as well as a simple UI component for displaying data. Lightsheet supports displaying multiple sheets at once with cross-referenced data. 
+A lightweight spreadsheet implementation with minimal dependencies written in TypeScript. Lightsheet implements a standalone core for efficient spreadsheet data management, as well as a simple UI component for displaying data. Lightsheet supports displaying multiple sheets at once with cross-referenced data. 
 
-The API has been designed with extensibility in mind, implementing features such as custom function definitions and an open event system. The API is documented in `main.ts`, and core structures are described in the project wiki.
+The API has been designed with extensibility in mind, implementing features such as custom function definitions and an open event system. API methods are described in `main.ts`, and core functionality is documented in the project wiki.
 
 ## Installation
 - Run `npm install lightsheet`
