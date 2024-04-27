@@ -130,4 +130,20 @@ export default class LightSheet {
   getCellStyle(colKey?: ColumnKey, rowKey?: RowKey): CellStyle {
     return this.sheet.getCellStyle(colKey, rowKey);
   }
+
+  setRowStyle(rowkey: RowKey, cellStyle: CellStyle): boolean{
+    return this.sheet.setRowStyle(rowkey, cellStyle)
+  }
+
+  setColumnStyle(columnKey: ColumnKey, cellStyle: CellStyle): boolean{
+    return this.sheet.setColumnStyle(columnKey, cellStyle)
+  }
+
+  setCellStyle(
+    colKey: ColumnKey,
+    rowKey: RowKey,
+    style: CellStyle | null,
+  ): boolean{
+    return this.sheet.setCellStyle(colKey, rowKey, style)
+  }
 }
