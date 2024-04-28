@@ -14,7 +14,11 @@ import CellStyle from "./cellStyle.ts";
 import CellGroup from "./group/cellGroup.ts";
 import Events from "../event/events.ts";
 import LightsheetEvent from "../event/event.ts";
-import { CoreSetCellPayload, UISetCellPayload } from "../event/events.types.ts";
+import {
+  CoreSetCellPayload,
+  CoreSetStylePayload,
+  UISetCellPayload,
+} from "../event/events.types.ts";
 import EventType from "../event/eventType.ts";
 import { CellState } from "./cell/cellState.ts";
 import { EvaluationResult } from "../evaluation/expressionHandler.types.ts";
@@ -458,6 +462,16 @@ export default class Sheet {
       this.applyCellFormatter(this.getCell(colKey, rowKey)!, colKey, rowKey);
     }
 
+    this.emitSetStyleEvent(colKey, rowKey, col.position, row.position);
+
+    const payload: CoreSetStylePayload = {
+      columnIndex: col.position,
+      rowIndex: row.position,
+      keyPosition: { columnKey: colKey, rowKey: rowKey },
+      styleMap: this.getCellStyle(colKey, rowKey).styling,
+    };
+
+    this.events.emit(new LightsheetEvent(EventType.CORE_SET_STYLE, payload));
     return true;
   }
 
@@ -477,6 +491,21 @@ export default class Sheet {
     return true;
   }
 
+  setDefaultStyle(style: CellStyle | null) {
+    if (style == null) {
+      this.defaultStyle = new CellStyle();
+    }
+
+    this.defaultStyle = new CellStyle().clone(style);
+    this.emitSetStyleEvent(
+      undefined,
+      undefined,
+      undefined,
+      undefined,
+      this.defaultStyle,
+    );
+  }
+
   private setCellGroupStyle(
     group: CellGroup<ColumnKey | RowKey>,
     style: CellStyle | null,
@@ -484,6 +513,14 @@ export default class Sheet {
     style = style ? new CellStyle().clone(style) : null;
     const formatterChanged = style?.formatter != group.defaultStyle?.formatter;
     group.defaultStyle = style;
+
+    this.emitSetStyleEvent(
+      group instanceof Column ? group.key : undefined,
+      group instanceof Row ? group.key : undefined,
+      undefined,
+      undefined,
+      style || new CellStyle(),
+    );
 
     // Iterate through formatted cells in this group and clear any styling properties set by the new style.
     for (const [opposingKey, cellStyle] of group.cellFormatting) {
@@ -532,6 +569,26 @@ export default class Sheet {
     this.deleteCellIfUnused(colKey, rowKey);
 
     return true;
+  }
+
+  private emitSetStyleEvent(
+    colKey: ColumnKey | undefined,
+    rowKey: RowKey | undefined,
+    colPos: number | undefined,
+    rowPos: number | undefined,
+    style: CellStyle | undefined = undefined,
+  ) {
+    const styleMap = style
+      ? style.styling
+      : this.getCellStyle(colKey, rowKey).styling;
+    const payload: CoreSetStylePayload = {
+      columnIndex: colPos,
+      rowIndex: rowPos,
+      keyPosition: { columnKey: colKey, rowKey: rowKey },
+      styleMap: styleMap,
+    };
+    console.log(styleMap);
+    this.events.emit(new LightsheetEvent(EventType.CORE_SET_STYLE, payload));
   }
 
   // <Row index, <Column index, value>>

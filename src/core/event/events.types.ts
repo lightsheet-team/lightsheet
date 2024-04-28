@@ -16,3 +16,10 @@ export type CoreSetCellPayload = {
   clearCell: boolean;
   clearRow: boolean;
 };
+
+export type CoreSetStylePayload = {
+  columnIndex: number | undefined;
+  rowIndex: number | undefined;
+  keyPosition: PositionInfo;
+  styleMap: Map<string, string>;
+};

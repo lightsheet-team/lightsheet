@@ -3,6 +3,7 @@ import { SelectionContainer } from "./render.types.ts";
 import LightsheetEvent from "../core/event/event.ts";
 import {
   CoreSetCellPayload,
+  CoreSetStylePayload,
   UISetCellPayload,
 } from "../core/event/events.types.ts";
 import EventType from "../core/event/eventType.ts";
@@ -419,7 +420,72 @@ export default class UI {
     this.lightSheet.events.on(EventType.CORE_SET_CELL, (event) => {
       this.onCoreSetCell(event);
     });
+
+    this.lightSheet.events.on(EventType.CORE_SET_STYLE, (event) => {
+      this.onCoreSetStyle(event);
+    });
   }
+
+  private onCoreSetStyle(event: LightsheetEvent) {
+    const payload = event.payload as CoreSetStylePayload;
+    const cells = this.getCellsForSetStyle(payload);
+    cells.forEach((cell) => {
+      this.setCellDomStyle(cell, payload.styleMap);
+    });
+  }
+
+  private setCellDomStyle(cellDom: HTMLElement, styleMap: Map<string, string>) {
+    for (const [key, value] of styleMap) {
+      cellDom.style.setProperty(key, value);
+    }
+  }
+
+  private getCellsForSetStyle = (
+    payload: CoreSetStylePayload,
+  ): HTMLElement[] => {
+    const colKey = payload.keyPosition.columnKey?.toString();
+    const rowKey = payload.keyPosition.rowKey?.toString();
+
+    // Single cell cases.
+    if (colKey && rowKey) {
+      return [document.getElementById(`${colKey}_${rowKey}`)!];
+    }
+
+    if (payload.columnIndex && payload.rowIndex) {
+      return [
+        document.getElementById(`${payload.columnIndex}_${payload.rowIndex}`)!,
+      ];
+    }
+
+    // Column by key or index.
+    if (colKey) {
+      return Array.from(
+        document.querySelectorAll(`[id^="${colKey}_"]`),
+      ) as HTMLElement[];
+    }
+
+    if (payload.columnIndex) {
+      return Array.from(
+        document.querySelectorAll(`[column-index="${payload.columnIndex}"]`),
+      ) as HTMLElement[];
+    }
+
+    // Row by key or index.
+    if (rowKey) {
+      const rowDom = document.getElementById(rowKey);
+      return Array.from(rowDom!.children) as HTMLElement[];
+    }
+
+    if (payload.rowIndex) {
+      const rowDom = document.getElementById(`row_${payload.rowIndex}`);
+      return Array.from(rowDom!.children) as HTMLElement[];
+    }
+
+    // All cells. TODO Row labels also use this class, restrict the query.
+    return Array.from(
+      document.querySelectorAll(".lightsheet_table_cell"),
+    ) as HTMLElement[];
+  };
 
   private onCoreSetCell(event: LightsheetEvent) {
     const payload = event.payload as CoreSetCellPayload;
