@@ -439,6 +439,18 @@ export default class Sheet {
     return cellStyle;
   }
 
+  setCellStyleAt(
+    colPos: number,
+    rowPos: number,
+    style: CellStyle | null,
+  ): boolean {
+    // Skip if clearing style of non-existent cell.
+    if (style == null && !this.getCellInfoAt(colPos, rowPos)) return false;
+
+    const posInfo = this.initializePosition(colPos, rowPos);
+    return this.setCellStyle(posInfo.columnKey!, posInfo.rowKey!, style);
+  }
+
   setCellStyle(
     colKey: ColumnKey,
     rowKey: RowKey,
@@ -449,7 +461,9 @@ export default class Sheet {
     if (!col || !row) return false;
 
     if (style == null) {
-      return this.clearCellStyle(colKey, rowKey);
+      this.clearCellStyle(colKey, rowKey);
+      this.emitSetStyleEvent(colKey, rowKey, col.position, row.position);
+      return true;
     }
 
     // TODO Style could be non-null but empty; should we allow this?
@@ -463,16 +477,12 @@ export default class Sheet {
     }
 
     this.emitSetStyleEvent(colKey, rowKey, col.position, row.position);
-
-    const payload: CoreSetStylePayload = {
-      columnIndex: col.position,
-      rowIndex: row.position,
-      keyPosition: { columnKey: colKey, rowKey: rowKey },
-      styleMap: this.getCellStyle(colKey, rowKey).styling,
-    };
-
-    this.events.emit(new LightsheetEvent(EventType.CORE_SET_STYLE, payload));
     return true;
+  }
+
+  setColumnStyleAt(colPos: number, style: CellStyle | null): boolean {
+    const colKey = this.initializeColumn(colPos);
+    return this.setColumnStyle(colKey, style);
   }
 
   setColumnStyle(colKey: ColumnKey, style: CellStyle | null): boolean {
@@ -481,6 +491,11 @@ export default class Sheet {
 
     this.setCellGroupStyle(col, style);
     return true;
+  }
+
+  setRowStyleAt(rowPos: number, style: CellStyle | null): boolean {
+    const rowKey = this.initializeRow(rowPos);
+    return this.setRowStyle(rowKey, style);
   }
 
   setRowStyle(rowKey: RowKey, style: CellStyle | null): boolean {
@@ -503,6 +518,7 @@ export default class Sheet {
       undefined,
       undefined,
       this.defaultStyle,
+      true,
     );
   }
 
@@ -513,13 +529,13 @@ export default class Sheet {
     style = style ? new CellStyle().clone(style) : null;
     const formatterChanged = style?.formatter != group.defaultStyle?.formatter;
     group.defaultStyle = style;
-
     this.emitSetStyleEvent(
       group instanceof Column ? group.key : undefined,
       group instanceof Row ? group.key : undefined,
-      undefined,
-      undefined,
+      group instanceof Column ? group.position : undefined,
+      group instanceof Row ? group.position : undefined,
       style || new CellStyle(),
+      style != null,
     );
 
     // Iterate through formatted cells in this group and clear any styling properties set by the new style.
@@ -533,6 +549,30 @@ export default class Sheet {
         continue;
       }
       this.clearCellStyle(opposingKey as ColumnKey, group.key as RowKey);
+    }
+
+    // TODO This is not very efficient.
+    //  This is the most straightforward way to ensure all styling is synced with the core's state.
+    //  It could be optimized to send a group update and then individual updates where needed,
+    //  but that would require resolving conflicts between groups and default style.
+    for (const [opposingKey] of group.cellIndex) {
+      const fullStyle = this.getCellStyle(
+        group instanceof Column ? group.key : (opposingKey as ColumnKey),
+        group instanceof Row ? group.key : (opposingKey as RowKey),
+      );
+
+      const opposingGroup =
+        group instanceof Column
+          ? this.rows.get(opposingKey as RowKey)!
+          : this.columns.get(opposingKey as ColumnKey)!;
+
+      this.emitSetStyleEvent(
+        group instanceof Column ? group.key : (opposingKey as ColumnKey),
+        group instanceof Row ? group.key : (opposingKey as RowKey),
+        group instanceof Column ? group.position : opposingGroup?.position,
+        group instanceof Row ? group.position : opposingGroup?.position,
+        fullStyle,
+      );
     }
 
     if (!formatterChanged) return;
@@ -577,17 +617,19 @@ export default class Sheet {
     colPos: number | undefined,
     rowPos: number | undefined,
     style: CellStyle | undefined = undefined,
+    append: boolean = false,
   ) {
     const styleMap = style
       ? style.styling
       : this.getCellStyle(colKey, rowKey).styling;
+
     const payload: CoreSetStylePayload = {
       columnIndex: colPos,
       rowIndex: rowPos,
       keyPosition: { columnKey: colKey, rowKey: rowKey },
       styleMap: styleMap,
+      append: append,
     };
-    console.log(styleMap);
     this.events.emit(new LightsheetEvent(EventType.CORE_SET_STYLE, payload));
   }
 
@@ -831,32 +873,35 @@ export default class Sheet {
   }
 
   private initializePosition(colPos: number, rowPos: number): PositionInfo {
-    let rowKey;
-    let colKey;
-
     // Create row and column if they don't exist yet.
-    if (!this.rowPositions.has(rowPos)) {
-      const row = new Row(this.defaultHeight, rowPos);
-      this.rows.set(row.key, row);
-      this.rowPositions.set(rowPos, row.key);
+    return {
+      columnKey: this.initializeColumn(colPos),
+      rowKey: this.initializeRow(rowPos),
+    };
+  }
 
-      rowKey = row.key;
-    } else {
-      rowKey = this.rowPositions.get(rowPos)!;
+  private initializeColumn(colPos: number): ColumnKey {
+    if (this.columnPositions.has(colPos)) {
+      return this.columnPositions.get(colPos)!;
     }
 
-    if (!this.columnPositions.has(colPos)) {
-      // Create a new column
-      const col = new Column(this.defaultWidth, colPos);
-      this.columns.set(col.key, col);
-      this.columnPositions.set(colPos, col.key);
+    const col = new Column(this.defaultWidth, colPos);
+    this.columns.set(col.key, col);
+    this.columnPositions.set(colPos, col.key);
 
-      colKey = col.key;
-    } else {
-      colKey = this.columnPositions.get(colPos)!;
+    return col.key;
+  }
+
+  private initializeRow(rowPos: number): RowKey {
+    if (this.rowPositions.has(rowPos)) {
+      return this.rowPositions.get(rowPos)!;
     }
 
-    return { rowKey: rowKey, columnKey: colKey };
+    const row = new Row(this.defaultHeight, rowPos);
+    this.rows.set(row.key, row);
+    this.rowPositions.set(rowPos, row.key);
+
+    return row.key;
   }
 
   private emitSetCellEvent(

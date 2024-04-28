@@ -22,4 +22,5 @@ export type CoreSetStylePayload = {
   rowIndex: number | undefined;
   keyPosition: PositionInfo;
   styleMap: Map<string, string>;
+  append: boolean;
 };

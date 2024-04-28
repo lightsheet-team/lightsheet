@@ -430,13 +430,23 @@ export default class UI {
     const payload = event.payload as CoreSetStylePayload;
     const cells = this.getCellsForSetStyle(payload);
     cells.forEach((cell) => {
-      this.setCellDomStyle(cell, payload.styleMap);
+      this.setCellDomStyle(cell, payload.styleMap, payload.append);
     });
   }
 
-  private setCellDomStyle(cellDom: HTMLElement, styleMap: Map<string, string>) {
+  private setCellDomStyle(
+    cellDom: HTMLElement,
+    styleMap: Map<string, string>,
+    append: boolean,
+  ) {
+    if (!append) {
+      cellDom.removeAttribute("style");
+    }
+
     for (const [key, value] of styleMap) {
-      cellDom.style.setProperty(key, value);
+      const element = cellDom.firstChild as HTMLInputElement;
+      if (append && element.style.getPropertyValue(key) !== "") continue;
+      element.style.setProperty(key, value);
     }
   }
 
@@ -447,41 +457,38 @@ export default class UI {
     const rowKey = payload.keyPosition.rowKey?.toString();
 
     // Single cell cases.
-    if (colKey && rowKey) {
-      return [document.getElementById(`${colKey}_${rowKey}`)!];
-    }
-
-    if (payload.columnIndex && payload.rowIndex) {
+    if (
+      (colKey && rowKey) ||
+      (payload.columnIndex != undefined && payload.rowIndex != undefined)
+    ) {
+      const keyId = colKey && rowKey ? `${colKey}_${rowKey}` : null;
+      const indexId = `${payload.columnIndex}_${payload.rowIndex}`;
       return [
-        document.getElementById(`${payload.columnIndex}_${payload.rowIndex}`)!,
+        document.getElementById(indexId) || document.getElementById(keyId!)!,
       ];
     }
 
     // Column by key or index.
-    if (colKey) {
+    if (colKey || payload.columnIndex != undefined) {
+      const keyQuery = `[id^="${colKey}_"]`;
+      const indexQuery = `[column-index="${payload.columnIndex}"]`;
+      const indexResult = document.querySelectorAll(indexQuery);
       return Array.from(
-        document.querySelectorAll(`[id^="${colKey}_"]`),
-      ) as HTMLElement[];
-    }
-
-    if (payload.columnIndex) {
-      return Array.from(
-        document.querySelectorAll(`[column-index="${payload.columnIndex}"]`),
+        indexResult.length > 0
+          ? indexResult
+          : document.querySelectorAll(keyQuery),
       ) as HTMLElement[];
     }
 
     // Row by key or index.
-    if (rowKey) {
-      const rowDom = document.getElementById(rowKey);
-      return Array.from(rowDom!.children) as HTMLElement[];
+    if (rowKey || payload.rowIndex != undefined) {
+      const rowDom =
+        document.getElementById(`row_${payload.rowIndex}`) ||
+        document.getElementById(rowKey!);
+      return Array.from(rowDom!.children).slice(1) as HTMLElement[];
     }
 
-    if (payload.rowIndex) {
-      const rowDom = document.getElementById(`row_${payload.rowIndex}`);
-      return Array.from(rowDom!.children) as HTMLElement[];
-    }
-
-    // All cells. TODO Row labels also use this class, restrict the query.
+    // All cells.
     return Array.from(
       document.querySelectorAll(".lightsheet_table_cell"),
     ) as HTMLElement[];

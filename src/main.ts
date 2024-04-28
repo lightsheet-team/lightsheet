@@ -7,6 +7,8 @@ import SheetHolder from "./core/structure/sheetHolder.ts";
 import { DefaultColCount, DefaultRowCount } from "./utils/constants.ts";
 import ExpressionHandler from "./core/evaluation/expressionHandler.ts";
 import { CellReference } from "./core/structure/cell/types.cell.ts";
+import CellStyle from "./core/structure/cellStyle.ts";
+import LightSheetHelper from "./utils/helpers.ts";
 
 export default class LightSheet {
   #ui: UI | undefined;
@@ -56,8 +58,47 @@ export default class LightSheet {
       this.onCellChange = options.onCellChange;
     }
 
+    this.parseStyleOptions(options.style || []);
     if (options.onReady) options.onReady = this.options.onReady;
     this.onTableReady();
+  }
+
+  private parseStyleOptions(styleConfig: any[]) {
+    for (const styleEntry of styleConfig) {
+      const cssStr: string = styleEntry.css;
+      /* TODO Implement formatter parsing
+      const formatterType = styleEntry.format?.type;
+      const formatterParams = styleEntry.format?.params;
+       */
+
+      let position;
+      try {
+        position = LightSheetHelper.parseSymbolToPosition(
+          styleEntry.position,
+          true,
+        );
+      } catch (e) {
+        console.error("Invalid position while parsing style options: ", e);
+        return false;
+      }
+
+      const cssRules = cssStr.split(";").filter((s) => s !== "");
+      const styleMap = new Map<string, string>();
+      for (const rule of cssRules) {
+        const [key, value] = rule.split(":").map((s) => s.trim());
+        styleMap.set(key, value);
+      }
+
+      const style = new CellStyle(styleMap);
+
+      if (position.colIndex == -1) {
+        this.sheet.setRowStyleAt(position.rowIndex!, style);
+      } else if (position.rowIndex == -1) {
+        this.sheet.setColumnStyleAt(position.colIndex!, style);
+      } else {
+        this.sheet.setCellStyleAt(position.colIndex, position.rowIndex, style);
+      }
+    }
   }
 
   static registerFunction(

@@ -18,6 +18,23 @@ new Lightsheet(
       showToolbar: true,
       items: toolbar,
     },
+    style: [
+      {
+        position: "A",
+        css: "font-weight: bold;",
+        format: { type: "number", options: { decimal: 0 } },
+      },
+      {
+        position: "3",
+        css: "background-color: yellow;",
+        format: { type: "currency", options: { name: "EUR", decimal: 2 } },
+      },
+      {
+        position: "B",
+        css: "background-color: blue;",
+        format: { type: "number", options: { decimal: 0 } },
+      },
+    ],
   },
   document.getElementById("lightsheet"),
 );
