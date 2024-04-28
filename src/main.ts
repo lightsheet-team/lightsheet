@@ -70,7 +70,35 @@ export default class LightSheet {
     if (type == 'number') {
       return new NumberFormatter(options.decimal)
     }
-    return new NumberFormatter(4)
+    return
+  }
+
+  clearCss(position: string) {
+    const { row, col } = getRowColFromCellRef(position);
+    if (row == null && col == null) {
+      return;
+    } else if (row != null && col != null) {
+      this.sheet.clearCellCss(col, row);
+    }
+    else if (row != null) {
+      this.sheet.clearRowCss(row);
+    } else if (col != null) {
+      this.sheet.clearColumnCss(col);
+    }
+  }
+
+  clearFormatter(position: string) {
+    const { row, col } = getRowColFromCellRef(position);
+    if (row == null && col == null) {
+      return;
+    } else if (row != null && col != null) {
+      this.sheet.clearCellFormatter(col, row);
+    }
+    else if (row != null) {
+      this.sheet.clearRowFormatter(row);
+    } else if (col != null) {
+      this.sheet.clearColumnFormatter(col);
+    }
   }
 
   setCss(position: string, css: string) {
@@ -90,6 +118,7 @@ export default class LightSheet {
   setFormatting(position: string, format: Format) {
     const { row, col } = getRowColFromCellRef(position);
     const formatter = format ? this.getFormatter(format.type, format.options) : null
+    if (!formatter) return
     if (row == null && col == null) {
       return;
     } else if (row != null && col != null) {

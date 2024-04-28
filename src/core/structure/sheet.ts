@@ -671,39 +671,152 @@ export default class Sheet {
   }
 
 
-  private clearCellCss(colKey: ColumnKey, rowKey: RowKey): boolean {
-    const col = this.columns.get(colKey);
-    const row = this.rows.get(rowKey);
-    if (!col || !row) return false;
-
-    const style = col.cellFormatting.get(row.key);
-    if (style?.formatter) {
-      this.applyCellFormatter(this.getCell(colKey, rowKey)!, colKey, rowKey);
-    }
+  clearCellCss(columnIndex: number, rowIndex: number): boolean {
+    const columnKey = this.columnPositions.get(columnIndex);
+    const rowKey = this.rowPositions.get(rowIndex);
+    if (!columnKey || !rowKey) return false;
+    const col = this.columns.get(columnKey)!
+    const row = this.rows.get(rowKey)!
     col.cellFormatting.get(row.key)?.clearCss();
     row.cellFormatting.get(col.key)?.clearCss();
 
     // Clearing a cell's style may leave it completely empty - delete if needed.
-    this.deleteCellIfUnused(colKey, rowKey);
+    this.deleteCellIfUnused(columnKey, rowKey);
+
+    const payload: CoreSetStylePayload = {
+      indexInfo: { columnIndex, rowIndex },
+      value: LightSheetHelper.GenerateStyleStringFromMap(
+        this.getCellStyle(columnKey).styling,
+      ),
+    };
+
+    this.events.emit(new LightsheetEvent(EventType.VIEW_SET_STYLE, payload));
 
     return true;
   }
 
-  private clearCellFormatter(colKey: ColumnKey, rowKey: RowKey): boolean {
-    const col = this.columns.get(colKey);
-    const row = this.rows.get(rowKey);
-    if (!col || !row) return false;
+  clearRowCss(rowIndex: number): boolean {
+    const rowKey = this.rowPositions.get(rowIndex);
+    if (!rowKey) return false;
 
-    const style = col.cellFormatting.get(row.key);
-    if (style?.formatter) {
-      this.applyCellFormatter(this.getCell(colKey, rowKey)!, colKey, rowKey);
-    }
-    col.cellFormatting.get(row.key)?.clearFormatter()
+    const row = this.rows.get(rowKey)!
+    row!.defaultStyle?.clearCss()
 
     // Clearing a cell's style may leave it completely empty - delete if needed.
-    this.deleteCellIfUnused(colKey, rowKey);
+
+    const payload: CoreSetStylePayload = {
+      indexInfo: { rowIndex },
+      value: LightSheetHelper.GenerateStyleStringFromMap(
+        this.getCellStyle(null, rowKey).styling,
+      ),
+    };
+
+    this.events.emit(new LightsheetEvent(EventType.VIEW_SET_STYLE, payload));
 
     return true;
+  }
+
+  clearColumnCss(columnIndex: number): boolean {
+    const columnKey = this.columnPositions.get(columnIndex);
+    if (!columnKey) return false;
+
+    const col = this.columns.get(columnKey)!
+    col!.defaultStyle?.clearCss()
+
+    // Clearing a cell's style may leave it completely empty - delete if needed.
+
+    const payload: CoreSetStylePayload = {
+      indexInfo: { columnIndex },
+      value: LightSheetHelper.GenerateStyleStringFromMap(
+        this.getCellStyle(columnKey).styling,
+      ),
+    };
+
+    this.events.emit(new LightsheetEvent(EventType.VIEW_SET_STYLE, payload));
+
+    return true;
+  }
+
+  clearCellFormatter(columnIndex: number, rowIndex: number): boolean {
+    const columnKey = this.columnPositions.get(columnIndex);
+    const rowKey = this.rowPositions.get(rowIndex);
+    if (!columnKey || !rowKey) return false;
+    const column = this.columns.get(columnKey)!
+    const row = this.rows.get(rowKey)!
+
+    column.cellFormatting.get(row.key)?.clearFormatter()
+    row.cellFormatting.get(column.key)?.clearFormatter()
+    const cell = this.getCell(columnKey!, rowKey!);
+    this.applyCellFormatter(cell!, columnKey, rowKey)
+    // Clearing a cell's style may leave it completely empty - delete if needed.
+    this.deleteCellIfUnused(columnKey, rowKey);
+
+    const payload: CoreSetCellPayload = {
+      indexInfo: {
+        rowIndex,
+        columnIndex
+      },
+      rawValue: cell ? cell.rawValue : "",
+      formattedValue: cell ? cell.formattedValue : "",
+    };
+    this.events.emit(new LightsheetEvent(EventType.CORE_SET_CELL, payload));
+
+    return true;
+  }
+
+  clearRowFormatter(rowIndex: number): void {
+    const rowKey = this.rowPositions.get(rowIndex);
+    if (!rowKey) return;
+    const row = this.rows.get(rowKey)!
+
+    row.defaultStyle?.clearFormatter()
+    // Clearing a cell's style may leave it completely empty - delete if needed.
+
+    const cellStyle = this.getCellStyle(null, rowKey);
+
+    this.setCellGroupStyle(row, cellStyle);
+
+    for (const [opposingKey] of row.cellIndex) {
+      const cell = this.cellData.get(row.cellIndex.get(opposingKey)!)!;
+      this.applyCellFormatter(cell, opposingKey as ColumnKey, row.key,);
+
+      const payload: CoreSetCellPayload = {
+        indexInfo: {
+          rowIndex,
+          columnIndex: this.getColumnIndex(opposingKey)
+        },
+        rawValue: cell ? cell.rawValue : "",
+        formattedValue: cell ? cell.formattedValue : "",
+      };
+      this.events.emit(new LightsheetEvent(EventType.CORE_SET_CELL, payload));
+    }
+  }
+
+  clearColumnFormatter(columnIndex: number): void {
+    const columnKey = this.columnPositions.get(columnIndex);
+    if (!columnKey) return;
+    const column = this.columns.get(columnKey)!
+
+    column.defaultStyle?.clearFormatter()
+    // Clearing a cell's style may leave it completely empty - delete if needed.
+
+    const cellStyle = this.getCellStyle(columnKey);
+
+    this.setCellGroupStyle(column, cellStyle);
+
+    for (const [opposingKey] of column.cellIndex) {
+      const cell = this.cellData.get(column.cellIndex.get(opposingKey)!)!;
+      this.applyCellFormatter(cell, column.key, opposingKey as RowKey,);
+      const payload: CoreSetCellPayload = {
+        indexInfo: {
+          rowIndex: this.getRowIndex(opposingKey),
+          columnIndex
+        },
+        rawValue: cell ? cell.rawValue : "",
+        formattedValue: cell ? cell.formattedValue : "",
+      };
+      this.events.emit(new LightsheetEvent(EventType.CORE_SET_CELL, payload));
+    }
   }
 
   setRowCss(rowIndex: number, css: Map<string, string>): void {

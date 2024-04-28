@@ -397,7 +397,7 @@ export default class UI {
 
   private onCoreSetStyle(event: CoreSetStylePayload) {
     const { indexInfo, value } = event;
-    if (indexInfo.columnIndex && indexInfo.rowIndex) {
+    if (indexInfo.columnIndex != undefined && indexInfo.rowIndex != undefined) {
       const cellDom =
         this.tableBodyDom.children[indexInfo.rowIndex].children[
         indexInfo.columnIndex + 1
