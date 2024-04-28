@@ -15,8 +15,4 @@ export const ToolbarItems = [
   "vertical_align_bottom",
   "format_text_wrap",
 ];
-export const ContextMenuItems = [
-  "cut",
-  "copy",
-  "paste",
-];
+export const ContextMenuItems = ["cut", "copy", "paste"];
