@@ -1,4 +1,4 @@
-import { Coordinate } from "../utils/common.types.ts";
+import { IndexInfo } from "../core/event/events.types";
 
 export type CellIdInfo = {
   keyParts: string[];
@@ -6,6 +6,6 @@ export type CellIdInfo = {
 };
 
 export type SelectionContainer = {
-  selectionStart: Coordinate | null;
-  selectionEnd: Coordinate | null;
+  selectionStart: IndexInfo | null;
+  selectionEnd: IndexInfo | null;
 };

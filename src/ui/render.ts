@@ -4,12 +4,12 @@ import LightsheetEvent from "../core/event/event.ts";
 import {
   CoreSetCellPayload,
   CoreSetStylePayload,
+  IndexInfo,
   UISetCellPayload,
 } from "../core/event/events.types.ts";
 import EventType from "../core/event/eventType.ts";
 import { ToolbarOptions } from "../main.types";
 import { ToolbarItems } from "../utils/constants.ts";
-import { Coordinate } from "../utils/common.types.ts";
 
 export default class UI {
   tableEl: Element;
@@ -26,7 +26,7 @@ export default class UI {
   selectedCellsContainer: SelectionContainer;
   toolbarOptions: ToolbarOptions;
   isReadOnly: boolean;
-  singleSelectedCell: Coordinate | undefined;
+  singleSelectedCell: IndexInfo | undefined;
   tableContainerDom: any;
 
   constructor(
@@ -152,8 +152,8 @@ export default class UI {
       const newValue = this.formulaInput.value;
       if (event.key === "Enter") {
         if (this.singleSelectedCell) {
-          const colIndex = this.singleSelectedCell.column;
-          const rowIndex = this.singleSelectedCell.row;
+          const colIndex = this.singleSelectedCell.columnIndex!;
+          const rowIndex = this.singleSelectedCell.rowIndex!;
           this.onUICellValueChange(newValue, colIndex, rowIndex);
         }
         this.formulaInput.blur();
@@ -170,8 +170,8 @@ export default class UI {
     this.formulaInput.onblur = () => {
       const newValue = this.formulaInput.value;
       if (this.singleSelectedCell) {
-        const colIndex = this.singleSelectedCell.column;
-        const rowIndex = this.singleSelectedCell.row;
+        const colIndex = this.singleSelectedCell.columnIndex!;
+        const rowIndex = this.singleSelectedCell.rowIndex!;
         this.onUICellValueChange(newValue, colIndex, rowIndex);
       }
     };
@@ -330,8 +330,8 @@ export default class UI {
       }
 
       this.singleSelectedCell = {
-        column: Number(colIndex),
-        row: Number(rowIndex),
+        columnIndex: Number(colIndex),
+        rowIndex: Number(rowIndex),
       };
 
       if (this.formulaBarDom) {

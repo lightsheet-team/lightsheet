@@ -17,6 +17,7 @@ import LightsheetEvent from "../event/event.ts";
 import {
   CoreSetCellPayload,
   CoreSetStylePayload,
+  IndexInfo,
   UISetCellPayload,
 } from "../event/events.types.ts";
 import EventType from "../event/eventType.ts";
@@ -25,7 +26,6 @@ import { EvaluationResult } from "../evaluation/expressionHandler.types.ts";
 import Formatter from "../evaluation/formatter.ts";
 import SheetHolder from "./sheetHolder.ts";
 import { CellReference } from "./cell/types.cell.ts";
-import { Coordinate } from "../../utils/common.types.ts";
 import LightSheetHelper from "../../utils/helpers.ts";
 
 export default class Sheet {
@@ -121,17 +121,17 @@ export default class Sheet {
   }
 
   public moveCell(
-    from: Coordinate,
-    to: Coordinate,
+    from: IndexInfo,
+    to: IndexInfo,
     moveStyling: boolean = true,
   ) {
-    const fromPosition = this.getCellInfoAt(from.column, from.row)?.position;
-    let toPosition = this.getCellInfoAt(to.column, to.row)?.position;
+    const fromPosition = this.getCellInfoAt(from.columnIndex!, from.rowIndex!)?.position;
+    let toPosition = this.getCellInfoAt(to.columnIndex!, to.rowIndex!)?.position;
 
     if (!fromPosition) return false;
 
     if (!toPosition) {
-      toPosition = this.initializePosition(to.column, to.row);
+      toPosition = this.initializePosition(to.columnIndex!, to.rowIndex!);
     } else {
       this.deleteCell(toPosition.columnKey!, toPosition.rowKey!);
     }
@@ -339,14 +339,14 @@ export default class Sheet {
           ? this.rows.get(oppositeKey as RowKey)!.position
           : this.columns.get(oppositeKey as ColumnKey)!.position;
 
-      const fromCoord: Coordinate = {
-        column: group instanceof Column ? from : oppositeGroupPos!,
-        row: group instanceof Row ? from : oppositeGroupPos!,
+      const fromCoord: IndexInfo = {
+        columnIndex: group instanceof Column ? from : oppositeGroupPos!,
+        rowIndex: group instanceof Row ? from : oppositeGroupPos!,
       };
 
-      const toCoord: Coordinate = {
-        column: group instanceof Column ? to : oppositeGroupPos!,
-        row: group instanceof Row ? to : oppositeGroupPos!,
+      const toCoord: IndexInfo = {
+        columnIndex: group instanceof Column ? to : oppositeGroupPos!,
+        rowIndex: group instanceof Row ? to : oppositeGroupPos!,
       };
 
       this.updateCellReferenceSymbols(cell, fromCoord, toCoord);
@@ -355,8 +355,8 @@ export default class Sheet {
 
   private updateCellReferenceSymbols(
     cell: Cell,
-    from: Coordinate,
-    to: Coordinate,
+    from: IndexInfo,
+    to: IndexInfo,
   ) {
     // Update reference symbols for all cell formulas that refer to the cell being moved.
     for (const [refCellKey, refInfo] of cell.referencesIn) {
@@ -750,7 +750,7 @@ export default class Sheet {
    */
   private deleteCellIfUnused(colKey: ColumnKey, rowKey: RowKey): boolean {
     const cell = this.getCell(colKey, rowKey)!;
-    if (!cell) return
+    if (!cell) return false;
     if (cell.rawValue != "") return false;
 
     // Check if this cell is referenced by anything.
@@ -780,10 +780,10 @@ export default class Sheet {
 
       // Initialize the referred cell if it doesn't exist yet.
       const position = refSheet.initializePosition(
-        ref.position.column,
-        ref.position.row,
+        ref.position.columnIndex!,
+        ref.position.rowIndex!,
       );
-      if (!refSheet.getCellInfoAt(ref.position.column, ref.position.row)) {
+      if (!refSheet.getCellInfoAt(ref.position.columnIndex!, ref.position.rowIndex!)) {
         refSheet.createCell(position.columnKey!, position.rowKey!, "");
       }
 

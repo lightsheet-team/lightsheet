@@ -1,9 +1,9 @@
 import { SheetKey } from "../structure/key/keyTypes.ts";
-import { Coordinate } from "../../utils/common.types.ts";
+import { IndexInfo } from "../event/events.types.ts";
 
 export type CellSheetPosition = {
   sheetKey: SheetKey;
-  position: Coordinate;
+  position: IndexInfo;
 };
 
 export type EvaluationResult = {
