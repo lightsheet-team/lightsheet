@@ -1,8 +1,8 @@
 import { KeyInfo } from "../structure/sheet.types.ts";
 
 export type IndexInfo = {
-  columnIndex?: number;
-  rowIndex?: number;
+  columnIndex?: number | null;
+  rowIndex?: number | null;
 };
 
 export type UISetCellPayload = {

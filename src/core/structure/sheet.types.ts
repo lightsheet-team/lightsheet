@@ -15,6 +15,13 @@ export type CellInfo = {
   state?: CellState;
 };
 
+export enum GroupTypes {
+  Column = 1,
+  Row,
+}
+export type GroupType = GroupTypes
+
+
 export type ElementInfo = {
   keyInfo?: KeyInfo;
   indexInfo?: IndexInfo;

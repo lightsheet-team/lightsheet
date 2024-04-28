@@ -1,7 +1,7 @@
 import UI from "./ui/render.ts";
 import { LightSheetOptions } from "./main.types.ts";
 import Sheet from "./core/structure/sheet.ts";
-import { CellInfo, Format, StyleInfo } from "./core/structure/sheet.types.ts";
+import { CellInfo, Format, GroupTypes, StyleInfo } from "./core/structure/sheet.types.ts";
 import Events from "./core/event/events.ts";
 import SheetHolder from "./core/structure/sheetHolder.ts";
 import { DefaultColCount, DefaultRowCount } from "./utils/constants.ts";
@@ -9,7 +9,8 @@ import LightSheetHelper from "./utils/helpers.ts";
 import ExpressionHandler from "./core/evaluation/expressionHandler.ts";
 import { CellReference } from "./core/structure/cell/types.cell.ts";
 import NumberFormatter from "./core/evaluation/numberFormatter.ts";
-import { getRowColFromCellRef } from "./utlis.ts";
+import { getRowColFromCellRef } from "./utils.ts";
+import Formatter from "./core/evaluation/formatter.ts";
 
 export default class LightSheet {
   #ui: UI | undefined;
@@ -73,34 +74,6 @@ export default class LightSheet {
     return
   }
 
-  clearCss(position: string) {
-    const { row, col } = getRowColFromCellRef(position);
-    if (row == null && col == null) {
-      return;
-    } else if (row != null && col != null) {
-      this.sheet.clearCellCss(col, row);
-    }
-    else if (row != null) {
-      this.sheet.clearRowCss(row);
-    } else if (col != null) {
-      this.sheet.clearColumnCss(col);
-    }
-  }
-
-  clearFormatter(position: string) {
-    const { row, col } = getRowColFromCellRef(position);
-    if (row == null && col == null) {
-      return;
-    } else if (row != null && col != null) {
-      this.sheet.clearCellFormatter(col, row);
-    }
-    else if (row != null) {
-      this.sheet.clearRowFormatter(row);
-    } else if (col != null) {
-      this.sheet.clearColumnFormatter(col);
-    }
-  }
-
   setCss(position: string, css: string) {
     const { row, col } = getRowColFromCellRef(position);
     const mappedCss = css ? LightSheetHelper.GenerateStyleMapFromString(css) : null;
@@ -109,10 +82,15 @@ export default class LightSheet {
     } else if (row != null && col != null) {
       this.sheet.setCellCss(col, row, mappedCss!);
     } else if (row != null) {
-      this.sheet.setRowCss(row, mappedCss!);
+      this.sheet.setGroupCss(row, GroupTypes.Row, mappedCss!);
     } else if (col != null) {
-      this.sheet.setColumnCss(col, mappedCss!);
+      this.sheet.setGroupCss(col, GroupTypes.Column, mappedCss!);
+
     }
+  }
+
+  clearCss(position: string) {
+    this.setCss(position, "")
   }
 
   setFormatting(position: string, format: Format) {
@@ -124,9 +102,23 @@ export default class LightSheet {
     } else if (row != null && col != null) {
       this.sheet.setCellFormatter(col, row, formatter);
     } else if (row != null) {
-      this.sheet.setRowFormatter(row, formatter);
+      this.sheet.setGroupFormatter(row, GroupTypes.Row, formatter);
     } else if (col != null) {
-      this.sheet.setColumnFormatter(col, formatter);
+      this.sheet.setGroupFormatter(col, GroupTypes.Column, formatter);
+    }
+  }
+
+  clearFormatter(position: string) {
+    const { row, col } = getRowColFromCellRef(position);
+    if (row == null && col == null) {
+      return;
+    } else if (row != null && col != null) {
+      this.sheet.setCellFormatter(col, row);
+    }
+    else if (row != null) {
+      this.sheet.setGroupFormatter(row, GroupTypes.Row);
+    } else if (col != null) {
+      this.sheet.setGroupFormatter(col, GroupTypes.Column);
     }
   }
 
