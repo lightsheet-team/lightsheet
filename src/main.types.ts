@@ -9,10 +9,17 @@ export type LightSheetOptions = {
   defaultColCount?: number;
   isReadOnly?: boolean;
   toolbarOptions?: ToolbarOptions;
+  contextMenuOptions?: ContextMenuOptions;
 };
 
 export type ToolbarOptions = {
   showToolbar?: boolean;
+  items?: string[];
+  element?: HTMLElement;
+};
+
+export type ContextMenuOptions = {
+  showContextMenu?: boolean;
   items?: string[];
   element?: HTMLElement;
 };

@@ -6,9 +6,10 @@ import {
   UISetCellPayload,
 } from "../core/event/events.types.ts";
 import EventType from "../core/event/eventType.ts";
-import { ToolbarOptions } from "../main.types";
+import { ToolbarOptions, ContextMenuOptions } from "../main.types";
 import LightSheetHelper from "../utils/helpers.ts";
 import { ToolbarItems } from "../utils/constants.ts";
+import { ContextMenuItems } from "../utils/constants.ts";
 import { Coordinate } from "../utils/common.types.ts";
 
 export default class UI {
@@ -26,6 +27,7 @@ export default class UI {
   selectedHeaderCell: HTMLElement | null = null;
   selectedCellsContainer: SelectionContainer;
   toolbarOptions: ToolbarOptions;
+  contextMenuOptions: ContextMenuOptions;
   isReadOnly: boolean;
   singleSelectedCell: Coordinate | undefined;
   tableContainerDom: Element;
@@ -34,6 +36,7 @@ export default class UI {
     lightSheetContainerDom: Element,
     lightSheet: LightSheet,
     toolbarOptions?: ToolbarOptions,
+    contextMenuOptions?: ContextMenuOptions,
   ) {
     this.lightSheet = lightSheet;
     this.selectedCell = [];
@@ -48,6 +51,12 @@ export default class UI {
       element: undefined,
       items: ToolbarItems,
       ...toolbarOptions,
+    };
+    this.contextMenuOptions = {
+      showContextMenu: false,
+      element: undefined,
+      items: ContextMenuItems,
+      ...contextMenuOptions,
     };
     this.isReadOnly = lightSheet.options.isReadOnly || false;
     this.tableContainerDom = lightSheetContainerDom;
@@ -211,7 +220,7 @@ export default class UI {
 
     // Create options for the context menu
     // TODO: Add working options and remove placeholders Copy, Cut, Paste
-    const options = ["Copy", "Cut", "Paste"];
+    const options = this.contextMenuOptions?.items;
 
     // Create UL element to hold menu options
     const ul = document.createElement("ul");
