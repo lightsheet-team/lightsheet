@@ -1,5 +1,5 @@
 import UI from "./ui/render.ts";
-import { LightSheetOptions } from "./main.types.ts";
+import { LightsheetOptions } from "./main.types.ts";
 import Sheet from "./core/structure/sheet.ts";
 import { CellInfo } from "./core/structure/sheet.types.ts";
 import Events from "./core/event/events.ts";
@@ -8,9 +8,9 @@ import { DefaultColCount, DefaultRowCount } from "./utils/constants.ts";
 import ExpressionHandler from "./core/evaluation/expressionHandler.ts";
 import { CellReference } from "./core/structure/cell/types.cell.ts";
 
-export default class LightSheet {
+export default class Lightsheet {
   #ui: UI | undefined;
-  options: LightSheetOptions;
+  options: LightsheetOptions;
   sheet: Sheet;
   sheetHolder: SheetHolder;
   events: Events;
@@ -18,7 +18,7 @@ export default class LightSheet {
   isReady: boolean = false;
 
   constructor(
-    options: LightSheetOptions,
+    options: LightsheetOptions,
     targetElement: Element | null = null,
   ) {
     this.options = {

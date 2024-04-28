@@ -1,5 +1,5 @@
 import Sheet from "../../../src/core/structure/sheet.ts";
-import LightSheet from "../../../src/main.ts";
+import Lightsheet from "../../../src/main.ts";
 import SheetHolder from "../../../src/core/structure/sheetHolder.ts";
 import { CellReference } from "../../../src/core/structure/cell/types.cell.ts";
 
@@ -16,11 +16,11 @@ describe("Custom formula function test", () => {
     sheet.setCellAt(0, 2, "5"); // A3
     sheet.setCellAt(1, 2, "6"); // B3
 
-    LightSheet.registerFunction("concat", (_, values: string[]) =>
+    Lightsheet.registerFunction("concat", (_, values: string[]) =>
       values.join(""),
     );
 
-    LightSheet.registerFunction(
+    Lightsheet.registerFunction(
       "spread",
       (cellPos: CellReference, value: string) => {
         const sheet = SheetHolder.getInstance().getSheet(cellPos.sheetKey)!;

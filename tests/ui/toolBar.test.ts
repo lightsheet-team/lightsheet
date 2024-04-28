@@ -1,4 +1,4 @@
-import LightSheet from "../../src/main";
+import Lightsheet from "../../src/main";
 import { ToolbarItems } from "../../src/utils/constants.ts";
 
 describe("Tool bar", () => {
@@ -11,7 +11,7 @@ describe("Tool bar", () => {
     document.body.appendChild(targetElementMock);
 
     // Get the toolbar element
-    new LightSheet(
+    new Lightsheet(
       {
         sheetName: "Sheet",
         toolbarOptions: { showToolbar: true },
@@ -31,7 +31,7 @@ describe("Tool bar", () => {
   test("should create items in toolbar from the constant file in the table container if no items provided", () => {
     const targetElementMock: HTMLElement = document.createElement("div");
 
-    new LightSheet(
+    new Lightsheet(
       {
         sheetName: "Sheet",
         toolbarOptions: { showToolbar: true },
@@ -51,7 +51,7 @@ describe("Tool bar", () => {
     const toolbarItems = ["undo", "redo", "save"];
     const targetElementMock: HTMLElement = document.createElement("div");
 
-    new LightSheet(
+    new Lightsheet(
       {
         sheetName: "Sheet",
         toolbarOptions: {
@@ -72,7 +72,7 @@ describe("Tool bar", () => {
   test("should show toolbar when showToolbar option is true", () => {
     const targetElementMock: HTMLElement = document.createElement("div");
 
-    new LightSheet(
+    new Lightsheet(
       {
         sheetName: "Sheet",
         toolbarOptions: {
@@ -93,7 +93,7 @@ describe("Tool bar", () => {
   test("should hide toolbar when showToolbar option is false", () => {
     const targetElementMock: HTMLElement = document.createElement("div");
 
-    new LightSheet(
+    new Lightsheet(
       {
         sheetName: "Sheet",
         toolbarOptions: {
@@ -113,7 +113,7 @@ describe("Tool bar", () => {
   test("should hide toolbar when there is no show toolbar option", () => {
     const targetElementMock: HTMLElement = document.createElement("div");
 
-    new LightSheet({ sheetName: "Sheet" }, targetElementMock);
+    new Lightsheet({ sheetName: "Sheet" }, targetElementMock);
     // Get the toolbar element
     const toolBarElement = targetElementMock.querySelector(
       ".lightsheet_table_toolbar",

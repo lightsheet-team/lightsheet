@@ -1,4 +1,4 @@
-export default class LightSheetHelper {
+export default class LightsheetHelper {
   static generateColumnLabel = (rowIndex: number) => {
     let label = "";
     const alphabet = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";

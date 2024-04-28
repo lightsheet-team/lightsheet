@@ -1,10 +1,10 @@
-import LightSheet from "../../../src/main.ts";
+import Lightsheet from "../../../src/main.ts";
 
 describe("Multiple sheets test", () => {
   beforeEach(() => {
     window.sheetHolder?.clear();
     for (let i = 0; i < 2; i++) {
-      new LightSheet({ data: [], sheetName: `Sheet${i + 1}` });
+      new Lightsheet({ data: [], sheetName: `Sheet${i + 1}` });
     }
   });
 
