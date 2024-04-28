@@ -7,18 +7,18 @@ import {
 } from "../core/event/events.types.ts";
 import EventType from "../core/event/eventType.ts";
 import { ToolbarOptions } from "../main.types";
+import LightSheetHelper from "../utils/helpers.ts";
 import { ToolbarItems } from "../utils/constants.ts";
 import { Coordinate } from "../utils/common.types.ts";
-import LightSheetHelper from "../utils/helpers.ts";
 
 export default class UI {
-  tableEl: Element;
+  tableEl!: Element;
   toolbarDom: HTMLElement | undefined;
   formulaBarDom!: HTMLElement | null;
   formulaInput!: HTMLInputElement;
   selectedCellDisplay!: HTMLElement;
-  tableHeadDom: Element;
-  tableBodyDom: Element;
+  tableHeadDom!: Element;
+  tableBodyDom!: Element;
   tableContextMenuDom: HTMLElement | undefined;
   lightSheet: LightSheet;
   selectedCell: number[];
@@ -28,14 +28,13 @@ export default class UI {
   toolbarOptions: ToolbarOptions;
   isReadOnly: boolean;
   singleSelectedCell: Coordinate | undefined;
-  tableContainerDom: any;
+  tableContainerDom: Element;
 
   constructor(
-    el: Element,
+    lightSheetContainerDom: Element,
     lightSheet: LightSheet,
     toolbarOptions?: ToolbarOptions,
   ) {
-    this.tableEl = el;
     this.lightSheet = lightSheet;
     this.selectedCell = [];
     this.selectedCellsContainer = {
@@ -51,36 +50,51 @@ export default class UI {
       ...toolbarOptions,
     };
     this.isReadOnly = lightSheet.options.isReadOnly || false;
+    this.tableContainerDom = lightSheetContainerDom;
+    lightSheetContainerDom.classList.add("lightsheet_table_container");
 
-    this.tableEl.classList.add("lightsheet_table_container");
+    //table
+    this.createTableDom();
 
-    /*toolbar*/
+    //toolbar
     this.createToolbar();
 
     /*context menu*/
     this.createContextMenu();
     this.hideContextMenu();
+
     //formula bar
     this.createFormulaBar();
+  }
 
-    //table
-    this.tableContainerDom = document.createElement("table");
-    this.tableContainerDom.classList.add("lightsheet_table");
-    this.tableContainerDom.setAttribute("cellpadding", "0");
-    this.tableContainerDom.setAttribute("cellspacing", "0");
-    this.tableContainerDom.setAttribute("unselectable", "yes");
-    this.tableEl.appendChild(this.tableContainerDom);
+  private createTableDom() {
+    const tableDom = document.createElement("table");
+    tableDom.classList.add("lightsheet_table");
+    tableDom.setAttribute("cellpadding", "0");
+    tableDom.setAttribute("cellspacing", "0");
+    tableDom.setAttribute("unselectable", "yes");
+    this.tableContainerDom.appendChild(tableDom);
+    this.tableEl = tableDom;
 
     //thead
     this.tableHeadDom = document.createElement("thead");
-    this.tableContainerDom.appendChild(this.tableHeadDom);
+    tableDom.appendChild(this.tableHeadDom);
+    const tableHeadRowDom = document.createElement("tr");
+    this.tableHeadDom.appendChild(tableHeadRowDom);
+    const rowNumberCell = document.createElement("th");
+    rowNumberCell.classList.add(
+      "lightsheet_table_row_number",
+      "lightsheet_table_td",
+    );
+    rowNumberCell.textContent = " ";
+    tableHeadRowDom.appendChild(rowNumberCell);
 
     //tbody
     this.tableBodyDom = document.createElement("tbody");
-    this.tableContainerDom.appendChild(this.tableBodyDom);
+    tableDom.appendChild(this.tableBodyDom);
   }
 
-  createToolbar() {
+  private createToolbar() {
     if (
       !this.toolbarOptions.showToolbar ||
       this.toolbarOptions.items?.length == 0
@@ -93,7 +107,7 @@ export default class UI {
     if (this.toolbarOptions.element != null) {
       this.toolbarOptions.element.appendChild(this.toolbarDom);
     } else {
-      this.tableEl.insertBefore(this.toolbarDom, this.tableEl.firstChild);
+      this.tableEl.parentNode!.insertBefore(this.toolbarDom, this.tableEl);
     }
 
     for (let i = 0; i < this.toolbarOptions.items!.length; i++) {
@@ -124,7 +138,7 @@ export default class UI {
     }
     this.formulaBarDom = document.createElement("div");
     this.formulaBarDom.classList.add("lightsheet_table_formula_bar");
-    this.tableEl.insertBefore(this.formulaBarDom, this.tableContainerDom);
+    this.tableContainerDom.insertBefore(this.formulaBarDom, this.tableEl);
     //selected cell display element
     this.selectedCellDisplay = document.createElement("div");
     this.selectedCellDisplay.classList.add("lightsheet_selected_cell_display");
@@ -229,52 +243,66 @@ export default class UI {
     contextMenu!.style.display = "none";
   }
 
-  addHeader(headerData: string[]) {
-    const headerRowDom = document.createElement("tr");
-    this.tableHeadDom.appendChild(headerRowDom);
+  addColumn() {
+    const headerCellDom = document.createElement("th");
+    headerCellDom.classList.add(
+      "lightsheet_table_header",
+      "lightsheet_table_td",
+    );
 
-    for (let i = 0; i < headerData.length; i++) {
-      const headerCellDom = document.createElement("td");
-      headerCellDom.classList.add(
-        "lightsheet_table_header",
-        "lightsheet_table_td",
+    const newColumnNumber = this.getColumnCount() + 1;
+    const newHeaderValue =
+      LightSheetHelper.generateColumnLabel(newColumnNumber);
+
+    headerCellDom.textContent = newHeaderValue;
+    headerCellDom.onclick = (e: MouseEvent) =>
+      this.onClickHeaderCell(e, newColumnNumber);
+
+    const rowCount = this.getRowCount();
+    for (let rowIndex = 0; rowIndex < rowCount; rowIndex++) {
+      const rowDom = this.tableBodyDom.children[rowIndex];
+      this.addCell(rowDom, newColumnNumber - 1, rowIndex, "");
+    }
+
+    this.tableHeadDom.children[0].appendChild(headerCellDom);
+  }
+
+  private onClickHeaderCell(e: MouseEvent, columnIndex: number) {
+    const selectedColumn = e.target as HTMLElement;
+    if (!selectedColumn) return;
+    const prevSelection = this.selectedHeaderCell;
+    this.removeGroupSelection();
+    this.removeCellRangeSelection();
+
+    if (prevSelection !== selectedColumn) {
+      selectedColumn.classList.add(
+        "lightsheet_table_selected_row_number_header_cell",
       );
-      headerCellDom.textContent = headerData[i];
-      headerRowDom.appendChild(headerCellDom);
-
-      headerRowDom.oncontextmenu = (e: MouseEvent) => {
-        e.preventDefault();
-        this.showContextMenu(e.clientX, e.clientY);
-      };
-
-      if (i > 0) {
-        headerCellDom.onclick = (e: MouseEvent) => {
-          this.hideContextMenu();
-          const selectedColumn = e.target as HTMLElement;
-          if (!selectedColumn) return;
-          const prevSelection = this.selectedHeaderCell;
-          this.removeGroupSelection();
-          this.removeCellRangeSelection();
-
-          if (prevSelection !== selectedColumn) {
-            selectedColumn.classList.add(
-              "lightsheet_table_selected_row_number_header_cell",
-            );
-            this.selectedHeaderCell = selectedColumn;
-            Array.from(this.tableBodyDom.children).forEach((childElement) => {
-              // Code inside the forEach loop
-              childElement.children[i].classList.add(
-                "lightsheet_table_selected_row_column",
-              );
-            });
-          }
-        };
-      }
+      this.selectedHeaderCell = selectedColumn;
+      Array.from(this.tableBodyDom.children).forEach((childElement) => {
+        // Code inside the forEach loop
+        childElement.children[columnIndex].classList.add(
+          "lightsheet_table_selected_row_column",
+        );
+      });
     }
   }
 
-  createRowElement(labelCount: number): HTMLElement {
+  addRow(): HTMLElement {
+    const rowCount = this.getRowCount();
+    const rowDom = this.createRowElement(rowCount);
+    this.tableBodyDom.appendChild(rowDom);
+
+    const columnCount = this.getColumnCount();
+    for (let columnIndex = 0; columnIndex < columnCount; columnIndex++) {
+      this.addCell(rowDom, columnIndex, rowCount, "");
+    }
+    return rowDom;
+  }
+
+  private createRowElement(labelCount: number): HTMLElement {
     const rowDom = document.createElement("tr");
+    rowDom.id = `row_${labelCount}`;
     const rowNumberCell = document.createElement("td");
     rowNumberCell.innerHTML = `${labelCount + 1}`; // Row numbers start from 1
     rowNumberCell.classList.add(
@@ -310,19 +338,6 @@ export default class UI {
         }
       }
     };
-
-    rowNumberCell.oncontextmenu = (e: MouseEvent) => {
-      e.preventDefault();
-      this.showContextMenu(e.clientX, e.clientY);
-    };
-
-    return rowDom;
-  }
-
-  addRow(rowIndex: number): HTMLElement {
-    const rowDom = this.createRowElement(rowIndex);
-    rowDom.id = `row_${rowIndex}`;
-    this.tableBodyDom.appendChild(rowDom);
     return rowDom;
   }
 
@@ -459,32 +474,75 @@ export default class UI {
 
   private onCoreSetCell(event: LightsheetEvent) {
     const payload = event.payload as CoreSetCellPayload;
+    // Create new columns if the column index is greater than the current column count.
+    const newColumns = payload.indexPosition.column - this.getColumnCount() + 1;
+    for (let i = 0; i < newColumns; i++) {
+      this.addColumn();
+    }
+
+    const newRows = payload.indexPosition.row - this.getRowCount() + 1;
+    for (let i = 0; i < newRows; i++) {
+      this.addRow();
+    }
+
     // Get HTML elements and (new) IDs for the payload's cell and row.
-    const elInfo = LightSheetHelper.getElementInfoForSetCell(payload);
+    const elInfo = this.getElementInfoForSetCell(payload);
 
-    if (!elInfo.rowDom) {
-      const row = this.addRow(payload.indexPosition.row);
-      elInfo.rowDom = row;
-      row.id = elInfo.rowDomId;
-    }
-    if (!elInfo.cellDom) {
-      elInfo.cellDom = this.addCell(
-        elInfo.rowDom!,
-        payload.indexPosition.column,
-        payload.indexPosition.row,
-        payload.formattedValue,
-        payload.keyPosition.columnKey?.toString(),
-      );
-    }
-
-    elInfo.cellDom.id = elInfo.cellDomId;
-    elInfo.rowDom.id = elInfo.rowDomId;
+    elInfo.cellDom!.id = elInfo.cellDomId;
+    elInfo.rowDom!.id = elInfo.rowDomId;
 
     // Update input element with values from the core.
-    const inputEl = elInfo.cellDom.firstChild! as HTMLInputElement;
+    const inputEl = elInfo.cellDom!.firstChild! as HTMLInputElement;
     inputEl.setAttribute("rawValue", payload.rawValue);
     inputEl.setAttribute("resolvedValue", payload.formattedValue);
     inputEl.value = payload.formattedValue;
+  }
+
+  private getElementInfoForSetCell = (payload: CoreSetCellPayload) => {
+    const colKey = payload.keyPosition.columnKey?.toString();
+    const rowKey = payload.keyPosition.rowKey?.toString();
+
+    const columnIndex = payload.indexPosition.column;
+    const rowIndex = payload.indexPosition.row;
+
+    const cellDomKey =
+      colKey && rowKey ? `${colKey!.toString()}_${rowKey!.toString()}` : null;
+
+    // Get the cell by either column and row key or position.
+    // TODO Index-based ID may not be unique if there are multiple sheets.
+    const cellDom =
+      (cellDomKey && document.getElementById(cellDomKey)) ||
+      document.getElementById(`${columnIndex}_${rowIndex}`);
+
+    const newCellDomId = payload.clearCell
+      ? `${columnIndex}_${rowIndex}`
+      : `${colKey}_${rowKey}`;
+
+    const newRowDomId = payload.clearRow ? `row_${rowIndex}` : rowKey!;
+
+    let rowDom: HTMLElement | null = null;
+    if (rowKey) {
+      rowDom = document.getElementById(rowKey);
+    }
+    if (!rowDom) {
+      const rowId = `row_${rowIndex}`;
+      rowDom = document.getElementById(rowId);
+    }
+
+    return {
+      cellDom: cellDom,
+      cellDomId: newCellDomId,
+      rowDom: rowDom,
+      rowDomId: newRowDomId,
+    };
+  };
+
+  getColumnCount() {
+    return this.tableHeadDom.children[0].children.length - 1;
+  }
+
+  getRowCount() {
+    return this.tableBodyDom.children.length;
   }
 
   removeGroupSelection() {
