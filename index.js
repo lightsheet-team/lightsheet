@@ -18,6 +18,10 @@ new Lightsheet(
       showToolbar: true,
       items: toolbar,
     },
+    contextMenuOptions: {
+      showContextMenu: true,
+      items: ["copy", "paste", "delete"],
+    },
   },
   document.getElementById("lightsheet"),
 );

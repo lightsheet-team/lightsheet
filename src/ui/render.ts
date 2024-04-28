@@ -6,9 +6,10 @@ import {
   UISetCellPayload,
 } from "../core/event/events.types.ts";
 import EventType from "../core/event/eventType.ts";
-import { ToolbarOptions } from "../main.types";
+import { ToolbarOptions, ContextMenuOptions } from "../main.types";
 import LightSheetHelper from "../utils/helpers.ts";
 import { ToolbarItems } from "../utils/constants.ts";
+import { ContextMenuItems } from "../utils/constants.ts";
 import { Coordinate } from "../utils/common.types.ts";
 
 export default class UI {
@@ -19,12 +20,14 @@ export default class UI {
   selectedCellDisplay!: HTMLElement;
   tableHeadDom!: Element;
   tableBodyDom!: Element;
+  tableContextMenuDom: HTMLElement | undefined;
   lightSheet: LightSheet;
   selectedCell: number[];
   selectedRowNumberCell: HTMLElement | null = null;
   selectedHeaderCell: HTMLElement | null = null;
   selectedCellsContainer: SelectionContainer;
   toolbarOptions: ToolbarOptions;
+  contextMenuOptions: ContextMenuOptions;
   isReadOnly: boolean;
   singleSelectedCell: Coordinate | undefined;
   tableContainerDom: Element;
@@ -33,6 +36,7 @@ export default class UI {
     lightSheetContainerDom: Element,
     lightSheet: LightSheet,
     toolbarOptions?: ToolbarOptions,
+    contextMenuOptions?: ContextMenuOptions,
   ) {
     this.lightSheet = lightSheet;
     this.selectedCell = [];
@@ -48,6 +52,12 @@ export default class UI {
       items: ToolbarItems,
       ...toolbarOptions,
     };
+    this.contextMenuOptions = {
+      showContextMenu: false,
+      element: undefined,
+      items: ContextMenuItems,
+      ...contextMenuOptions,
+    };
     this.isReadOnly = lightSheet.options.isReadOnly || false;
     this.tableContainerDom = lightSheetContainerDom;
     lightSheetContainerDom.classList.add("lightsheet_table_container");
@@ -57,6 +67,10 @@ export default class UI {
 
     //toolbar
     this.createToolbar();
+
+    /*context menu*/
+    this.createContextMenu();
+    this.hideContextMenu();
 
     //formula bar
     this.createFormulaBar();
@@ -198,6 +212,46 @@ export default class UI {
     }
   }
 
+  createContextMenu() {
+    // Create context menu container
+    this.tableContextMenuDom = document.createElement("div");
+    this.tableContextMenuDom.id = "contextMenu";
+    this.tableContextMenuDom.classList.add("lightsheet_table_context_menu");
+
+    // Create options for the context menu
+    // TODO: Add working options and remove placeholders Copy, Cut, Paste
+    const options = this.contextMenuOptions?.items;
+
+    // Create UL element to hold menu options
+    const ul = document.createElement("ul");
+
+    // Loop through options and create LI elements
+    options.forEach(function (option) {
+      const li = document.createElement("li");
+      li.textContent = option;
+      li.setAttribute("data-action", option.toLowerCase()); // Set data-action attribute for identification
+      ul.appendChild(li);
+    });
+
+    // Append UL to context menu
+    this.tableContextMenuDom.appendChild(ul);
+
+    // Append context menu to document body
+    document.body.appendChild(this.tableContextMenuDom);
+  }
+
+  showContextMenu(x: number, y: number) {
+    const contextMenu = document.getElementById("contextMenu");
+    contextMenu!.style.display = "block";
+    contextMenu!.style.left = x + "px";
+    contextMenu!.style.top = y + "px";
+  }
+
+  hideContextMenu() {
+    const contextMenu = document.getElementById("contextMenu");
+    contextMenu!.style.display = "none";
+  }
+
   addColumn() {
     const headerCellDom = document.createElement("th");
     headerCellDom.classList.add(
@@ -267,6 +321,7 @@ export default class UI {
     );
     rowDom.appendChild(rowNumberCell);
     rowNumberCell.onclick = (e: MouseEvent) => {
+      this.hideContextMenu();
       const selectedRow = e.target as HTMLElement;
       if (!selectedRow) return;
       const prevSelection = this.selectedRowNumberCell;
@@ -387,6 +442,11 @@ export default class UI {
       if (e.buttons === 1) {
         this.handleMouseOver(e, colIndex, rowIndex);
       }
+    };
+
+    inputDom.oncontextmenu = (e: MouseEvent) => {
+      e.preventDefault();
+      this.showContextMenu(e.clientX, e.clientY);
     };
 
     return cellDom;
@@ -581,16 +641,20 @@ export default class UI {
     });
   }
 
+  showMenu() {
+    console.log("TODO: Render menu here");
+  }
+
   handleMouseDown(e: MouseEvent, colIndex: number, rowIndex: number) {
-    if (e.button === 0) {
-      this.selectedCellsContainer.selectionStart =
-        (colIndex != null || undefined) && (rowIndex != null || undefined)
-          ? {
-              row: rowIndex,
-              column: colIndex,
-            }
-          : null;
-    }
+    if (e.button !== 0) return;
+    this.hideContextMenu();
+    this.selectedCellsContainer.selectionStart =
+      (colIndex != null || undefined) && (rowIndex != null || undefined)
+        ? {
+            row: rowIndex,
+            column: colIndex,
+          }
+        : null;
   }
 
   handleMouseOver(e: MouseEvent, colIndex: number, rowIndex: number) {
