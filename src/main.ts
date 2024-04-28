@@ -10,7 +10,6 @@ import ExpressionHandler from "./core/evaluation/expressionHandler.ts";
 import { CellReference } from "./core/structure/cell/types.cell.ts";
 import NumberFormatter from "./core/evaluation/numberFormatter.ts";
 import { getRowColFromCellRef } from "./utils.ts";
-import Formatter from "./core/evaluation/formatter.ts";
 
 export default class LightSheet {
   #ui: UI | undefined;
