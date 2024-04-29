@@ -1,7 +1,7 @@
 import Event from "../../../src/core/event/event";
-import EventType from "../../../src/core/event/eventType";
 import EventState from "../../../src/core/event/eventState";
 import Events from "../../../src/core/event/events";
+import { EventType } from "../../../src/core/event/events.types";
 
 describe("Events", () => {
   let events: Events;
@@ -12,9 +12,9 @@ describe("Events", () => {
 
   test("should register and trigger an event", () => {
     const mockCallback = jest.fn();
-    events.on(EventType.UI_SET_CELL, mockCallback);
+    events.on(EventType.VIEW_SET_CELL, mockCallback);
 
-    const event = new Event(EventType.UI_SET_CELL, "test payload", false);
+    const event = new Event(EventType.VIEW_SET_CELL, "test payload", false);
     events.emit(event);
 
     expect(mockCallback).toHaveBeenCalledWith(event);
@@ -96,10 +96,10 @@ describe("Events", () => {
 
   test("should remove an event listener", () => {
     const mockCallback = jest.fn();
-    events.on(EventType.UI_SET_CELL, mockCallback);
-    events.removeEventListener(EventType.UI_SET_CELL, mockCallback);
+    events.on(EventType.VIEW_SET_CELL, mockCallback);
+    events.removeEventListener(EventType.VIEW_SET_CELL, mockCallback);
 
-    const event = new Event(EventType.UI_SET_CELL, "test payload");
+    const event = new Event(EventType.VIEW_SET_CELL, "test payload");
     events.emit(event);
 
     expect(mockCallback).not.toHaveBeenCalled();
@@ -107,17 +107,17 @@ describe("Events", () => {
 
   test("should remove an event listener only with correct state", () => {
     const mockCallback = jest.fn();
-    events.on(EventType.UI_SET_CELL, mockCallback);
-    events.on(EventType.UI_SET_CELL, mockCallback, EventState.PRE_EVENT);
+    events.on(EventType.VIEW_SET_CELL, mockCallback);
+    events.on(EventType.VIEW_SET_CELL, mockCallback, EventState.PRE_EVENT);
 
     events.removeEventListener(
-      EventType.UI_SET_CELL,
+      EventType.VIEW_SET_CELL,
       mockCallback,
       EventState.PRE_EVENT,
     );
 
     const event = new Event(
-      EventType.UI_SET_CELL,
+      EventType.VIEW_SET_CELL,
       "test payload",
       false,
       EventState.PRE_EVENT,
@@ -130,10 +130,10 @@ describe("Events", () => {
   test("should handle multiple listeners for the same event", () => {
     const firstCallback = jest.fn();
     const secondCallback = jest.fn();
-    events.on(EventType.UI_SET_CELL, firstCallback);
-    events.on(EventType.UI_SET_CELL, secondCallback);
+    events.on(EventType.VIEW_SET_CELL, firstCallback);
+    events.on(EventType.VIEW_SET_CELL, secondCallback);
 
-    const event = new Event(EventType.UI_SET_CELL, "test payload");
+    const event = new Event(EventType.VIEW_SET_CELL, "test payload");
     events.emit(event);
 
     expect(firstCallback).toHaveBeenCalledWith(event);
@@ -142,7 +142,7 @@ describe("Events", () => {
 
   test("should not trigger listeners of a different event type", () => {
     const mockCallback = jest.fn();
-    events.on(EventType.UI_SET_CELL, mockCallback);
+    events.on(EventType.VIEW_SET_CELL, mockCallback);
 
     const event = new Event(EventType.CORE_SET_CELL, "test payload");
     events.emit(event);
@@ -152,10 +152,10 @@ describe("Events", () => {
 
   test("should not trigger listeners after they are removed", () => {
     const mockCallback = jest.fn();
-    events.on(EventType.UI_SET_CELL, mockCallback);
-    events.removeEventListener(EventType.UI_SET_CELL, mockCallback);
+    events.on(EventType.VIEW_SET_CELL, mockCallback);
+    events.removeEventListener(EventType.VIEW_SET_CELL, mockCallback);
 
-    const event = new Event(EventType.UI_SET_CELL, "test payload");
+    const event = new Event(EventType.VIEW_SET_CELL, "test payload");
     events.emit(event);
 
     expect(mockCallback).not.toHaveBeenCalled();
@@ -167,11 +167,11 @@ describe("Events", () => {
     });
     const anotherCallback = jest.fn();
 
-    events.on(EventType.UI_SET_CELL, mockCallback, EventState.PRE_EVENT);
-    events.addEventListener(EventType.UI_SET_CELL, anotherCallback);
+    events.on(EventType.VIEW_SET_CELL, mockCallback, EventState.PRE_EVENT);
+    events.addEventListener(EventType.VIEW_SET_CELL, anotherCallback);
 
     const event = new Event(
-      EventType.UI_SET_CELL,
+      EventType.VIEW_SET_CELL,
       "test payload",
       false,
       EventState.PRE_EVENT,
@@ -188,20 +188,20 @@ describe("Events", () => {
     const postEventCallback = jest.fn();
 
     events.addEventListener(
-      EventType.UI_SET_CELL,
+      EventType.VIEW_SET_CELL,
       preEventCallback,
       EventState.PRE_EVENT,
     );
-    events.on(EventType.UI_SET_CELL, postEventCallback, EventState.POST_EVENT);
+    events.on(EventType.VIEW_SET_CELL, postEventCallback, EventState.POST_EVENT);
 
     const preEvent = new Event(
-      EventType.UI_SET_CELL,
+      EventType.VIEW_SET_CELL,
       "pre payload",
       false,
       EventState.PRE_EVENT,
     );
     const postEvent = new Event(
-      EventType.UI_SET_CELL,
+      EventType.VIEW_SET_CELL,
       "post payload",
       false,
       EventState.POST_EVENT,
