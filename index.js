@@ -7,7 +7,7 @@ var data = [
 
 const toolbar = ["undo", "redo", "save"];
 
-const ls = new Lightsheet(
+new Lightsheet(
   {
     data,
     onCellChange: (colIndex, rowIndex, newValue) => {
@@ -36,5 +36,5 @@ const ls = new Lightsheet(
       },
     ],
   },
-  document.getElementById("lightsheet")
+  document.getElementById("lightsheet"),
 );
