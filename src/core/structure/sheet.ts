@@ -519,7 +519,7 @@ export default class Sheet {
       this.emitSetStyleEvent(
         columnIndex,
         rowIndex,
-        GenerateStyleStringFromMap(this.getMergedCellStyle(columnKey).css),
+        (this.getMergedCellStyle(columnKey).css),
       );
       return;
     }
@@ -536,9 +536,7 @@ export default class Sheet {
     this.emitSetStyleEvent(
       columnIndex,
       rowIndex,
-      GenerateStyleStringFromMap(
-        this.getMergedCellStyle(columnKey, rowKey).css,
-      ),
+      this.getMergedCellStyle(columnKey, rowKey).css,
     );
   }
 
@@ -563,11 +561,10 @@ export default class Sheet {
       this.emitSetStyleEvent(
         isColumnGroup ? groupIndex : null,
         !isColumnGroup ? groupIndex : null,
-        GenerateStyleStringFromMap(
-          isColumnGroup
-            ? this.getMergedCellStyle(groupKey as ColumnKey).css
-            : this.getMergedCellStyle(null, groupKey as RowKey).css,
-        ),
+        isColumnGroup
+          ? this.getMergedCellStyle(groupKey as ColumnKey).css
+          : this.getMergedCellStyle(null, groupKey as RowKey).css,
+
       );
       return;
     }
@@ -577,11 +574,10 @@ export default class Sheet {
     this.emitSetStyleEvent(
       isColumnGroup ? groupIndex : null,
       !isColumnGroup ? groupIndex : null,
-      GenerateStyleStringFromMap(
-        isColumnGroup
-          ? this.getMergedCellStyle(groupKey as ColumnKey).css
-          : this.getMergedCellStyle(null, groupKey as RowKey).css,
-      ),
+      isColumnGroup
+        ? this.getMergedCellStyle(groupKey as ColumnKey).css
+        : this.getMergedCellStyle(null, groupKey as RowKey).css,
+
     );
   }
 
@@ -961,14 +957,14 @@ export default class Sheet {
   private emitSetStyleEvent(
     columnIndex: number | null,
     rowIndex: number | null,
-    value: string,
+    css: Map<string, string>,
   ) {
     const payload: CoreSetStylePayload = {
       indexPosition: {
         rowIndex,
         columnIndex,
       },
-      value,
+      value: GenerateStyleStringFromMap(css),
     };
 
     this.events.emit(new LightsheetEvent(EventType.VIEW_SET_STYLE, payload));
