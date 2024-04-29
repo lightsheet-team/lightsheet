@@ -32,7 +32,7 @@ import { EvaluationResult } from "../evaluation/expressionHandler.types.ts";
 import Formatter from "../evaluation/formatter.ts";
 import SheetHolder from "./sheetHolder.ts";
 import { CellReference } from "./cell/types.cell.ts";
-import LightSheetHelper from "../../utils/helpers.ts";
+import { GenerateStyleStringFromMap } from "../../utils/helpers.ts";
 
 export default class Sheet {
   key: SheetKey;
@@ -512,14 +512,14 @@ export default class Sheet {
 
     if (!column || !row) return;
 
-    if (css.size == 0) {
+    if (!css || css.size == 0) {
       column.cellFormatting.get(row.key)?.clearCss();
       row.cellFormatting.get(column.key)?.clearCss();
       this.deleteCellIfUnused(columnKey!, rowKey!);
       this.emitSetStyleEvent(
         columnIndex,
         rowIndex,
-        LightSheetHelper.GenerateStyleStringFromMap(
+        GenerateStyleStringFromMap(
           this.getMergedCellStyle(columnKey).styling,
         ),
       );
@@ -538,7 +538,7 @@ export default class Sheet {
     this.emitSetStyleEvent(
       columnIndex,
       rowIndex,
-      LightSheetHelper.GenerateStyleStringFromMap(
+      GenerateStyleStringFromMap(
         this.getMergedCellStyle(columnKey, rowKey).styling,
       ),
     );
@@ -560,17 +560,18 @@ export default class Sheet {
       : this.rows.get(groupKey as RowKey);
     if (!group) return;
 
-    if (css.size == 0) {
+    if (!css || css.size == 0) {
       group.defaultStyle?.clearCss();
       this.emitSetStyleEvent(
         isColumnGroup ? groupIndex : null,
         !isColumnGroup ? groupIndex : null,
-        LightSheetHelper.GenerateStyleStringFromMap(
+        GenerateStyleStringFromMap(
           isColumnGroup
             ? this.getMergedCellStyle(groupKey as ColumnKey).styling
             : this.getMergedCellStyle(null, groupKey as RowKey).styling,
         ),
       );
+      return
     }
 
     group.defaultStyle = new CellStyle(css, group.defaultStyle?.formatter);
@@ -578,7 +579,7 @@ export default class Sheet {
     this.emitSetStyleEvent(
       isColumnGroup ? groupIndex : null,
       !isColumnGroup ? groupIndex : null,
-      LightSheetHelper.GenerateStyleStringFromMap(
+      GenerateStyleStringFromMap(
         isColumnGroup
           ? this.getMergedCellStyle(groupKey as ColumnKey).styling
           : this.getMergedCellStyle(null, groupKey as RowKey).styling,

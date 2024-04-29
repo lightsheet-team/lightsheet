@@ -1,5 +1,5 @@
-import LightSheet from "../main";
-import { SelectionContainer } from "./render.types.ts";
+import LightSheet from "../main.ts";
+import { SelectionContainer } from "./view.types.ts";
 import LightsheetEvent from "../core/event/event.ts";
 import {
   CoreSetCellPayload,
@@ -8,9 +8,9 @@ import {
   UISetCellPayload,
 } from "../core/event/events.types.ts";
 import EventType from "../core/event/eventType.ts";
-import { ToolbarOptions } from "../main.types";
-import LightSheetHelper from "../utils/helpers.ts";
+import { ToolbarOptions } from "../main.types.ts";
 import { ToolbarItems } from "../utils/constants.ts";
+import { GenerateColumnLabel } from "../utils/helpers.ts";
 
 export default class UI {
   tableEl!: Element;
@@ -208,7 +208,7 @@ export default class UI {
 
     const newColumnNumber = this.getColumnCount() + 1;
     const newHeaderValue =
-      LightSheetHelper.generateColumnLabel(newColumnNumber);
+      GenerateColumnLabel(newColumnNumber);
 
     headerCellDom.textContent = newHeaderValue;
     headerCellDom.onclick = (e: MouseEvent) =>
@@ -425,7 +425,7 @@ export default class UI {
     if (indexInfo.columnIndex != undefined && indexInfo.rowIndex != undefined) {
       const cellDom =
         this.tableBodyDom.children[indexInfo.rowIndex].children[
-          indexInfo.columnIndex + 1
+        indexInfo.columnIndex + 1
         ];
       const inputElement = cellDom! as HTMLElement;
       inputElement.setAttribute("style", value);
@@ -597,9 +597,9 @@ export default class UI {
       this.selectedCellsContainer.selectionStart =
         (colIndex != null || undefined) && (rowIndex != null || undefined)
           ? {
-              rowIndex: rowIndex,
-              columnIndex: colIndex,
-            }
+            rowIndex: rowIndex,
+            columnIndex: colIndex,
+          }
           : null;
     }
   }
@@ -610,15 +610,15 @@ export default class UI {
     this.selectedCellsContainer.selectionEnd =
       (colIndex != null || undefined) && (rowIndex != null || undefined)
         ? {
-            rowIndex: rowIndex,
-            columnIndex: colIndex,
-          }
+          rowIndex: rowIndex,
+          columnIndex: colIndex,
+        }
         : null;
     if (
       this.selectedCellsContainer.selectionStart &&
       this.selectedCellsContainer.selectionEnd &&
       this.selectedCellsContainer.selectionStart !==
-        this.selectedCellsContainer.selectionEnd
+      this.selectedCellsContainer.selectionEnd
     ) {
       this.updateSelection();
     }

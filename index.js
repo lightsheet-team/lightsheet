@@ -6,8 +6,8 @@ var data = [
 ];
 
 const toolbar = ["undo", "redo", "save"];
-//
-new Lightsheet(
+
+const ls = new Lightsheet(
   {
     data,
     onCellChange: (colIndex, rowIndex, newValue) => {
@@ -22,7 +22,7 @@ new Lightsheet(
       {
         position: "A",
         css: "font-weight: bold;",
-        format: { type: "number", options: { decimal: 0 } },
+        format: { type: "number", options: { decimal: 2 } },
       },
       {
         position: "B2",
@@ -36,5 +36,7 @@ new Lightsheet(
       },
     ],
   },
-  document.getElementById("lightsheet"),
+  document.getElementById("lightsheet")
 );
+
+ls.clearFormatter("A2");

@@ -1,4 +1,4 @@
-import UI from "./ui/render.ts";
+import UI from "./view/view.ts";
 import { LightSheetOptions } from "./main.types.ts";
 import Sheet from "./core/structure/sheet.ts";
 import {
@@ -13,8 +13,7 @@ import { DefaultColCount, DefaultRowCount } from "./utils/constants.ts";
 import ExpressionHandler from "./core/evaluation/expressionHandler.ts";
 import { CellReference } from "./core/structure/cell/types.cell.ts";
 import NumberFormatter from "./core/evaluation/numberFormatter.ts";
-import { getRowColFromCellRef } from "./utils.ts";
-import LightSheetHelper from "./utils/helpers.ts";
+import { GenerateStyleMapFromString, GetRowColFromCellRef } from "./utils/helpers.ts";
 
 export default class LightSheet {
   #ui: UI | undefined;
@@ -94,18 +93,18 @@ export default class LightSheet {
   }
 
   setCss(position: string, css: string) {
-    const { row, col } = getRowColFromCellRef(position);
+    const { rowIndex, columnIndex } = GetRowColFromCellRef(position);
     const mappedCss = css
-      ? LightSheetHelper.GenerateStyleMapFromString(css)
+      ? GenerateStyleMapFromString(css)
       : null;
-    if (row == null && col == null) {
+    if (rowIndex == null && columnIndex == null) {
       return;
-    } else if (row != null && col != null) {
-      this.sheet.setCellCss(col, row, mappedCss!);
-    } else if (row != null) {
-      this.sheet.setGroupCss(row, GroupTypes.Row, mappedCss!);
-    } else if (col != null) {
-      this.sheet.setGroupCss(col, GroupTypes.Column, mappedCss!);
+    } else if (rowIndex != null && columnIndex != null) {
+      this.sheet.setCellCss(columnIndex, rowIndex, mappedCss!);
+    } else if (rowIndex != null) {
+      this.sheet.setGroupCss(rowIndex, GroupTypes.Row, mappedCss!);
+    } else if (columnIndex != null) {
+      this.sheet.setGroupCss(columnIndex, GroupTypes.Column, mappedCss!);
     }
   }
 
@@ -114,32 +113,32 @@ export default class LightSheet {
   }
 
   setFormatting(position: string, format: Format) {
-    const { row, col } = getRowColFromCellRef(position);
+    const { rowIndex, columnIndex } = GetRowColFromCellRef(position);
     const formatter = format
       ? this.getFormatter(format.type, format.options)
       : null;
     if (!formatter) return;
-    if (row == null && col == null) {
+    if (rowIndex == null && columnIndex == null) {
       return;
-    } else if (row != null && col != null) {
-      this.sheet.setCellFormatter(col, row, formatter);
-    } else if (row != null) {
-      this.sheet.setGroupFormatter(row, GroupTypes.Row, formatter);
-    } else if (col != null) {
-      this.sheet.setGroupFormatter(col, GroupTypes.Column, formatter);
+    } else if (rowIndex != null && columnIndex != null) {
+      this.sheet.setCellFormatter(columnIndex, rowIndex, formatter);
+    } else if (rowIndex != null) {
+      this.sheet.setGroupFormatter(rowIndex, GroupTypes.Row, formatter);
+    } else if (columnIndex != null) {
+      this.sheet.setGroupFormatter(columnIndex, GroupTypes.Column, formatter);
     }
   }
 
   clearFormatter(position: string) {
-    const { row, col } = getRowColFromCellRef(position);
-    if (row == null && col == null) {
+    const { rowIndex, columnIndex } = GetRowColFromCellRef(position);
+    if (rowIndex == null && columnIndex == null) {
       return;
-    } else if (row != null && col != null) {
-      this.sheet.setCellFormatter(col, row);
-    } else if (row != null) {
-      this.sheet.setGroupFormatter(row, GroupTypes.Row);
-    } else if (col != null) {
-      this.sheet.setGroupFormatter(col, GroupTypes.Column);
+    } else if (rowIndex != null && columnIndex != null) {
+      this.sheet.setCellFormatter(columnIndex, rowIndex);
+    } else if (rowIndex != null) {
+      this.sheet.setGroupFormatter(rowIndex, GroupTypes.Row);
+    } else if (columnIndex != null) {
+      this.sheet.setGroupFormatter(columnIndex, GroupTypes.Column);
     }
   }
 

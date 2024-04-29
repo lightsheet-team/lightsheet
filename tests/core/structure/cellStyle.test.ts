@@ -33,7 +33,6 @@ describe("CellStyle", () => {
     expect(sheet.getMergedCellStyle(pos.columnKey, pos.rowKey).styling).toEqual(
       sheet.defaultStyle.styling,
     );
-    debugger
     sheet.setGroupCss(1, GroupTypes.Row, styles[1].styling);
     expect(sheet.getMergedCellStyle(pos.columnKey, pos.rowKey).styling).toEqual(styles[1].styling);
 

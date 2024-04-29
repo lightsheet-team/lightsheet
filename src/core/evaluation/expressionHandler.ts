@@ -18,9 +18,9 @@ import {
 } from "./expressionHandler.types.ts";
 
 import { CellState } from "../structure/cell/cellState.ts";
-import LightSheetHelper from "../../utils/helpers.ts";
 import { CellReference } from "../structure/cell/types.cell.ts";
 import { IndexInfo } from "../event/events.types.ts";
+import { GenerateColumnLabel } from "../../utils/helpers.ts";
 
 const math = create({
   parseDependencies,
@@ -92,10 +92,10 @@ export default class ExpressionHandler {
     const parseResult = math.parse(expression);
 
     const fromSymbol =
-      LightSheetHelper.generateColumnLabel(from.columnIndex! + 1) +
+      GenerateColumnLabel(from.columnIndex! + 1) +
       (from.rowIndex! + 1);
     const toSymbol =
-      LightSheetHelper.generateColumnLabel(to.columnIndex! + 1) +
+      GenerateColumnLabel(to.columnIndex! + 1) +
       (to.rowIndex! + 1);
 
     // Update each symbol in the expression.
