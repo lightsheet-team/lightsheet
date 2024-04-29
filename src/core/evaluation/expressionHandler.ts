@@ -213,7 +213,7 @@ export default class ExpressionHandler {
 
           this.cellRefHolder.push({
             sheetKey: targetSheet.key,
-            position: { column: j, row: i },
+            position: { columnIndex: j, rowIndex: i },
           });
           values.push(cellInfo?.resolvedValue ?? "");
         }
@@ -231,8 +231,8 @@ export default class ExpressionHandler {
     this.cellRefHolder.push({
       sheetKey: targetSheet.key,
       position: {
-        column: colIndex,
-        row: rowIndex,
+        columnIndex: colIndex,
+        rowIndex: rowIndex,
       },
     });
     return cellInfo?.resolvedValue ?? "";
