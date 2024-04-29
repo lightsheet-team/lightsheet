@@ -19,7 +19,7 @@ import {
 
 import { CellState } from "../structure/cell/cellState.ts";
 import { CellReference } from "../structure/cell/types.cell.ts";
-import { IndexInfo } from "../event/events.types.ts";
+import { IndexPosition } from "../event/events.types.ts";
 import { GenerateColumnLabel } from "../../utils/helpers.ts";
 
 const math = create({
@@ -85,7 +85,7 @@ export default class ExpressionHandler {
     }
   }
 
-  updatePositionalReferences(from: IndexInfo, to: IndexInfo) {
+  updatePositionalReferences(from: IndexPosition, to: IndexPosition) {
     if (!this.rawValue.startsWith("=")) return this.rawValue;
 
     const expression = this.rawValue.substring(1);

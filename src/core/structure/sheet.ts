@@ -12,7 +12,7 @@ import {
   CellInfo,
   GroupType,
   GroupTypes,
-  KeyInfo,
+  KeyPosition,
   ShiftDirection,
 } from "./sheet.types.ts";
 import ExpressionHandler from "../evaluation/expressionHandler.ts";
@@ -23,10 +23,10 @@ import LightsheetEvent from "../event/event.ts";
 import {
   CoreSetCellPayload,
   CoreSetStylePayload,
-  IndexInfo,
+  EventType,
+  IndexPosition,
   UISetCellPayload,
 } from "../event/events.types.ts";
-import EventType from "../event/eventType.ts";
 import { CellState } from "./cell/cellState.ts";
 import { EvaluationResult } from "../evaluation/expressionHandler.types.ts";
 import Formatter from "../evaluation/formatter.ts";
@@ -126,7 +126,7 @@ export default class Sheet {
     };
   }
 
-  public moveCell(from: IndexInfo, to: IndexInfo, moveStyling: boolean = true) {
+  public moveCell(from: IndexPosition, to: IndexPosition, moveStyling: boolean = true) {
     const fromPosition = this.getCellInfoAt(
       from.columnIndex!,
       from.rowIndex!,
@@ -347,12 +347,12 @@ export default class Sheet {
           ? this.rows.get(oppositeKey as RowKey)!.position
           : this.columns.get(oppositeKey as ColumnKey)!.position;
 
-      const fromCoord: IndexInfo = {
+      const fromCoord: IndexPosition = {
         columnIndex: group instanceof Column ? from : oppositeGroupPos!,
         rowIndex: group instanceof Row ? from : oppositeGroupPos!,
       };
 
-      const toCoord: IndexInfo = {
+      const toCoord: IndexPosition = {
         columnIndex: group instanceof Column ? to : oppositeGroupPos!,
         rowIndex: group instanceof Row ? to : oppositeGroupPos!,
       };
@@ -363,8 +363,8 @@ export default class Sheet {
 
   private updateCellReferenceSymbols(
     cell: Cell,
-    from: IndexInfo,
-    to: IndexInfo,
+    from: IndexPosition,
+    to: IndexPosition,
   ) {
     // Update reference symbols for all cell formulas that refer to the cell being moved.
     for (const [refCellKey, refInfo] of cell.referencesIn) {
@@ -912,7 +912,7 @@ export default class Sheet {
     return false;
   }
 
-  private initializePosition(colPos: number, rowPos: number): KeyInfo {
+  private initializePosition(colPos: number, rowPos: number): KeyPosition {
     let rowKey;
     let colKey;
 
@@ -947,7 +947,7 @@ export default class Sheet {
     cell: Cell | null,
   ) {
     const payload: CoreSetCellPayload = {
-      indexInfo: {
+      indexPosition: {
         columnIndex,
         rowIndex,
       },
@@ -964,7 +964,7 @@ export default class Sheet {
     value: string,
   ) {
     const payload: CoreSetStylePayload = {
-      indexInfo: {
+      indexPosition: {
         rowIndex,
         columnIndex,
       },
@@ -983,16 +983,16 @@ export default class Sheet {
   private handleUISetCell(event: LightsheetEvent) {
     const payload = event.payload as UISetCellPayload;
     // Use either setCellAt or setCell depending on what information is provided.
-    if (payload.keyInfo) {
+    if (payload.keyPosition) {
       this.setCell(
-        payload.keyInfo.columnKey!,
-        payload.keyInfo.rowKey!,
+        payload.keyPosition.columnKey!,
+        payload.keyPosition.rowKey!,
         payload.rawValue,
       );
-    } else if (payload.indexInfo) {
+    } else if (payload.indexPosition) {
       this.setCellAt(
-        payload.indexInfo.columnIndex!,
-        payload.indexInfo.rowIndex!,
+        payload.indexPosition.columnIndex!,
+        payload.indexPosition.rowIndex!,
         payload.rawValue,
       );
     } else {

@@ -1,14 +1,14 @@
 import { ColumnKey, RowKey } from "./key/keyTypes.ts";
 import { CellState } from "./cell/cellState.ts";
-import { IndexInfo } from "../event/events.types.ts";
+import { IndexPosition } from "../event/events.types.ts";
 
-export type KeyInfo = {
+export type KeyPosition = {
   columnKey?: ColumnKey;
   rowKey?: RowKey;
 };
 
 export type CellInfo = {
-  position: KeyInfo;
+  position: KeyPosition;
   rawValue?: string;
   resolvedValue?: string;
   formattedValue?: string;
@@ -22,8 +22,8 @@ export enum GroupTypes {
 export type GroupType = GroupTypes;
 
 export type ElementInfo = {
-  keyInfo?: KeyInfo;
-  indexInfo?: IndexInfo;
+  keyPosition?: KeyPosition;
+  indexPosition?: IndexPosition;
 };
 
 export enum ShiftDirection {

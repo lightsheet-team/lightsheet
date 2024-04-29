@@ -1,4 +1,4 @@
-import { IndexInfo } from "../core/event/events.types";
+import { IndexPosition } from "../core/event/events.types";
 
 export function GenerateRowLabel(rowIndex: number): string {
   let label = "";
@@ -11,7 +11,7 @@ export function GenerateRowLabel(rowIndex: number): string {
   return label || "A"; // Return "A" if index is 0
 }
 
-export function GetRowColFromCellRef(cellRef: string): IndexInfo {
+export function GetRowColFromCellRef(cellRef: string): IndexPosition {
   // Regular expression to extract the column and row indexes
   const matches = cellRef.match(/^([A-Z]+)?(\d+)?$/);
   if (matches) {

@@ -1,4 +1,4 @@
-import { IndexInfo } from "../core/event/events.types";
+import { IndexPosition } from "../core/event/events.types";
 
 export type CellIdInfo = {
   keyParts: string[];
@@ -6,6 +6,6 @@ export type CellIdInfo = {
 };
 
 export type SelectionContainer = {
-  selectionStart: IndexInfo | null;
-  selectionEnd: IndexInfo | null;
+  selectionStart: IndexPosition | null;
+  selectionEnd: IndexPosition | null;
 };

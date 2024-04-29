@@ -4,10 +4,10 @@ import LightsheetEvent from "../core/event/event.ts";
 import {
   CoreSetCellPayload,
   CoreSetStylePayload,
-  IndexInfo,
+  EventType,
+  IndexPosition,
   UISetCellPayload,
 } from "../core/event/events.types.ts";
-import EventType from "../core/event/eventType.ts";
 import { ToolbarOptions } from "../main.types.ts";
 import { ToolbarItems } from "../utils/constants.ts";
 import { GenerateColumnLabel } from "../utils/helpers.ts";
@@ -27,7 +27,7 @@ export default class UI {
   selectedCellsContainer: SelectionContainer;
   toolbarOptions: ToolbarOptions;
   isReadOnly: boolean;
-  singleSelectedCell: IndexInfo | undefined;
+  singleSelectedCell: IndexPosition | undefined;
   tableContainerDom: any;
 
   constructor(
@@ -402,7 +402,7 @@ export default class UI {
 
   onUICellValueChange(rawValue: string, columnIndex: number, rowIndex: number) {
     const payload: UISetCellPayload = {
-      indexInfo: { columnIndex, rowIndex },
+      indexPosition: { columnIndex, rowIndex },
       rawValue,
     };
     this.lightSheet.events.emit(
@@ -420,27 +420,27 @@ export default class UI {
   }
 
   private onCoreSetStyle(event: CoreSetStylePayload) {
-    const { indexInfo, value } = event;
-    if (indexInfo.columnIndex != undefined && indexInfo.rowIndex != undefined) {
+    const { indexPosition, value } = event;
+    if (indexPosition.columnIndex != undefined && indexPosition.rowIndex != undefined) {
       const cellDom =
-        this.tableBodyDom.children[indexInfo.rowIndex].children[
-        indexInfo.columnIndex + 1
+        this.tableBodyDom.children[indexPosition.rowIndex].children[
+        indexPosition.columnIndex + 1
         ];
       const inputElement = cellDom! as HTMLElement;
       inputElement.setAttribute("style", value);
-    } else if (indexInfo.columnIndex || indexInfo.columnIndex === 0) {
+    } else if (indexPosition.columnIndex || indexPosition.columnIndex === 0) {
       for (let i = 0; i < this.tableBodyDom.children.length; i++) {
         this.tableBodyDom.children[i].children[
-          indexInfo.columnIndex + 1
+          indexPosition.columnIndex + 1
         ].setAttribute("style", value);
       }
     } else {
       for (
         let i = 1;
-        i < this.tableBodyDom.children[indexInfo.rowIndex!].children.length;
+        i < this.tableBodyDom.children[indexPosition.rowIndex!].children.length;
         i++
       ) {
-        this.tableBodyDom.children[indexInfo.rowIndex!].children[
+        this.tableBodyDom.children[indexPosition.rowIndex!].children[
           i
         ].setAttribute("style", value);
       }
@@ -451,20 +451,20 @@ export default class UI {
     const payload = event.payload as CoreSetCellPayload;
     // Create new columns if the column index is greater than the current column count.
     const newColumns =
-      payload.indexInfo.columnIndex! - this.getColumnCount() + 1;
+      payload.indexPosition.columnIndex! - this.getColumnCount() + 1;
     for (let i = 0; i < newColumns; i++) {
       this.addColumn();
     }
 
-    const newRows = payload.indexInfo.rowIndex! - this.getRowCount() + 1;
+    const newRows = payload.indexPosition.rowIndex! - this.getRowCount() + 1;
     for (let i = 0; i < newRows; i++) {
       this.addRow();
     }
 
     // Get HTML elements and (new) IDs for the payload's cell and row.
     const cellInputDom = this.getElementInfoForSetCell(
-      payload.indexInfo.columnIndex!,
-      payload.indexInfo.rowIndex!,
+      payload.indexPosition.columnIndex!,
+      payload.indexPosition.rowIndex!,
       payload.formattedValue,
     );
 
