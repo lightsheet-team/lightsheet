@@ -6,11 +6,12 @@ describe("Formula", () => {
 
   beforeEach(() => {
     targetElementMock = document.createElement("div");
+    document.body.appendChild(targetElementMock);
     window.sheetHolder?.clear();
   });
 
   afterEach(() => {
-    jest.clearAllMocks();
+    document.body.removeChild(targetElementMock);
   });
 
   test("Exist formula bar in dom", () => {
@@ -26,9 +27,7 @@ describe("Formula", () => {
     const formulaBarContainer = document.querySelector(
       ".lightsheet_table_formula_bar",
     );
-    setTimeout(() => {
-      expect(formulaBarContainer).toBeTruthy();
-    }, 100);
+    expect(formulaBarContainer).toBeTruthy();
   });
 
   test("Change cell content from formula bar", () => {
@@ -117,7 +116,7 @@ describe("Formula", () => {
     }, 100);
   });
 
-  test("Hide formula bar in read only mode", () => {
+  test("Hide formula bar when read only mode is on", () => {
     new LightSheet(
       {
         sheetName: "Sheet 4",
@@ -133,7 +132,7 @@ describe("Formula", () => {
     expect(formulaBarContainer).toBeNull();
   });
 
-  test("Show formula bar in read only mode", () => {
+  test("Show formula bar when read only mode is off", () => {
     new LightSheet(
       {
         sheetName: "Sheet 5",
@@ -146,9 +145,7 @@ describe("Formula", () => {
     const formulaBarContainer = document.querySelector(
       ".lightsheet_table_formula_bar",
     );
-    setTimeout(() => {
-      expect(formulaBarContainer).toBeTruthy();
-    }, 100);
+    expect(formulaBarContainer).toBeTruthy();
   });
 
   test("Display the raw value of the cell", () => {

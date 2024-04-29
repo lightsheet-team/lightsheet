@@ -5,11 +5,11 @@ import { CellInfo, Format, GroupTypes, StyleInfo } from "./core/structure/sheet.
 import Events from "./core/event/events.ts";
 import SheetHolder from "./core/structure/sheetHolder.ts";
 import { DefaultColCount, DefaultRowCount } from "./utils/constants.ts";
-import LightSheetHelper from "./utils/helpers.ts";
 import ExpressionHandler from "./core/evaluation/expressionHandler.ts";
 import { CellReference } from "./core/structure/cell/types.cell.ts";
 import NumberFormatter from "./core/evaluation/numberFormatter.ts";
 import { getRowColFromCellRef } from "./utils.ts";
+import LightSheetHelper from "./utils/helpers.ts";
 
 export default class LightSheet {
   #ui: UI | undefined;
@@ -38,7 +38,22 @@ export default class LightSheet {
     this.style = options.style;
     if (targetElement) {
       this.#ui = new UI(targetElement, this, this.options.toolbarOptions);
-      this.#initializeTable();
+
+      if (this.options.data && this.options.data.length > 0) {
+        for (let rowI = 0; rowI < this.options.data.length; rowI++) {
+          const rowData = this.options.data[rowI];
+          for (let colI = 0; colI < rowData.length; colI++) {
+            this.sheet.setCellAt(colI, rowI, rowData[colI]);
+          }
+        }
+      } else {
+        for (let index = 0; index < this.options.defaultColCount!; index++) {
+          this.#ui.addColumn();
+        }
+        for (let index = 0; index < this.options.defaultRowCount!; index++) {
+          this.#ui.addRow();
+        }
+      }
     }
 
     if (options.onCellChange) {
@@ -133,42 +148,6 @@ export default class LightSheet {
     this.#ui?.showToolbar(isShown);
   }
 
-  #initializeTable() {
-    if (!this.#ui || !this.options.data) return;
-    // Create header row and add headers
-    const rowLength = this.options.data.length
-      ? this.options.data.length
-      : this.options.defaultRowCount;
-    let colLength = this.options.data?.reduce(
-      (total, item) => (total > item.length ? total : item.length),
-      0,
-    );
-    if (!colLength) colLength = this.options.defaultColCount;
-
-    const headerData = Array.from(
-      { length: colLength + 1 }, // Adding 1 for the row number column
-      (_, i) => (i === 0 ? "" : LightSheetHelper.generateColumnLabel(i)), // Generating column labels
-    );
-
-    this.#ui.addHeader(headerData);
-
-    for (let i = 0; i < rowLength!; i++) {
-      for (let j = 0; j < colLength; j++) {
-        const data =
-          this.options.data[i] && this.options.data[i].length - 1 >= j
-            ? this.options.data[i][j]
-            : null;
-        //if data is not empty add cell to core and render ui, otherwise render only ui
-        if (data) {
-          this.sheet.setCellAt(j, i, data);
-        } else {
-          this.#ui.getRowDom(i) ?? this.#ui.addRow(i)
-          this.#ui.addCell(j, i, "");
-        }
-      }
-    }
-  }
-
   getKey() {
     return this.sheet.key;
   }
@@ -177,7 +156,7 @@ export default class LightSheet {
     return this.options.sheetName;
   }
 
-  setCellAt(columnKey: number, rowKey: number, value: any): CellInfo {
-    return this.sheet.setCellAt(columnKey, rowKey, value.toString());
+  setCellAt(columnIndex: number, rowIndex: number, value: any): CellInfo {
+    return this.sheet.setCellAt(columnIndex, rowIndex, value.toString());
   }
 }
