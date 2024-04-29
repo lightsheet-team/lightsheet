@@ -178,15 +178,15 @@ export default class Sheet {
     const cell = this.getCell(colKey, rowKey)!;
     return cell
       ? {
-        rawValue: cell.rawValue,
-        resolvedValue: cell.resolvedValue,
-        formattedValue: cell.formattedValue,
-        state: cell.state,
-        position: {
-          columnKey: colKey,
-          rowKey: rowKey,
-        },
-      }
+          rawValue: cell.rawValue,
+          resolvedValue: cell.resolvedValue,
+          formattedValue: cell.formattedValue,
+          state: cell.state,
+          position: {
+            columnKey: colKey,
+            rowKey: rowKey,
+          },
+        }
       : null;
   }
 

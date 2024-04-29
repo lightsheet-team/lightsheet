@@ -106,7 +106,6 @@ describe("Cell references", () => {
   });
 
   it("should create an empty cell with styling", () => {
-    debugger
     sheet.setCellCss(1, 1, new Map<string, string>([["width", "50px;"]]));
 
     sheet.setCellAt(1, 1, "");
