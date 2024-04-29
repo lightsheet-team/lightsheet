@@ -178,15 +178,15 @@ export default class Sheet {
     const cell = this.getCell(colKey, rowKey)!;
     return cell
       ? {
-          rawValue: cell.rawValue,
-          resolvedValue: cell.resolvedValue,
-          formattedValue: cell.formattedValue,
-          state: cell.state,
-          position: {
-            columnKey: colKey,
-            rowKey: rowKey,
-          },
-        }
+        rawValue: cell.rawValue,
+        resolvedValue: cell.resolvedValue,
+        formattedValue: cell.formattedValue,
+        state: cell.state,
+        position: {
+          columnKey: colKey,
+          rowKey: rowKey,
+        },
+      }
       : null;
   }
 
@@ -485,11 +485,11 @@ export default class Sheet {
     } else {
       column.cellFormatting.set(
         row.key,
-        new CellStyle(column.cellFormatting.get(rowKey!)?.styling, formatter),
+        new CellStyle(column.cellFormatting.get(rowKey!)?.css, formatter),
       );
       row.cellFormatting.set(
         column.key,
-        new CellStyle(row.cellFormatting.get(columnKey!)?.styling, formatter),
+        new CellStyle(row.cellFormatting.get(columnKey!)?.css, formatter),
       );
     }
 
@@ -519,7 +519,7 @@ export default class Sheet {
       this.emitSetStyleEvent(
         columnIndex,
         rowIndex,
-        GenerateStyleStringFromMap(this.getMergedCellStyle(columnKey).styling),
+        GenerateStyleStringFromMap(this.getMergedCellStyle(columnKey).css),
       );
       return;
     }
@@ -537,7 +537,7 @@ export default class Sheet {
       columnIndex,
       rowIndex,
       GenerateStyleStringFromMap(
-        this.getMergedCellStyle(columnKey, rowKey).styling,
+        this.getMergedCellStyle(columnKey, rowKey).css,
       ),
     );
   }
@@ -565,8 +565,8 @@ export default class Sheet {
         !isColumnGroup ? groupIndex : null,
         GenerateStyleStringFromMap(
           isColumnGroup
-            ? this.getMergedCellStyle(groupKey as ColumnKey).styling
-            : this.getMergedCellStyle(null, groupKey as RowKey).styling,
+            ? this.getMergedCellStyle(groupKey as ColumnKey).css
+            : this.getMergedCellStyle(null, groupKey as RowKey).css,
         ),
       );
       return;
@@ -579,8 +579,8 @@ export default class Sheet {
       !isColumnGroup ? groupIndex : null,
       GenerateStyleStringFromMap(
         isColumnGroup
-          ? this.getMergedCellStyle(groupKey as ColumnKey).styling
-          : this.getMergedCellStyle(null, groupKey as RowKey).styling,
+          ? this.getMergedCellStyle(groupKey as ColumnKey).css
+          : this.getMergedCellStyle(null, groupKey as RowKey).css,
       ),
     );
   }
@@ -600,8 +600,8 @@ export default class Sheet {
       : this.rows.get(groupKey as RowKey);
     if (!group) return;
 
-    const cellStyle = group.defaultStyle?.styling
-      ? new CellStyle(group.defaultStyle?.styling, formatter)
+    const cellStyle = group.defaultStyle?.css
+      ? new CellStyle(group.defaultStyle?.css, formatter)
       : new CellStyle(null, formatter);
 
     this.setCellGroupStyle(group, cellStyle);

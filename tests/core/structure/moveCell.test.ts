@@ -60,7 +60,7 @@ describe("Cell moving tests", () => {
     const style = new CellStyle(new Map([["color", "red"]]));
     const fromCell = sheet.getCellInfoAt(0, 0)!;
 
-    sheet.setCellCss(0, 0, style.styling);
+    sheet.setCellCss(0, 0, style.css);
 
     sheet.moveCell(
       { columnIndex: 0, rowIndex: 0 },
