@@ -975,7 +975,7 @@ export default class Sheet {
   }
 
   private registerEvents() {
-    this.events.on(EventType.UI_SET_CELL, (event) =>
+    this.events.on(EventType.VIEW_SET_CELL, (event) =>
       this.handleUISetCell(event),
     );
   }
