@@ -21,7 +21,10 @@ describe("Cell moving tests", () => {
   });
 
   it("should move a single cell and not invalidate incoming references", () => {
-    sheet.moveCell({ columnIndex: 0, rowIndex: 0 }, { columnIndex: 3, rowIndex: 3 });
+    sheet.moveCell(
+      { columnIndex: 0, rowIndex: 0 },
+      { columnIndex: 3, rowIndex: 3 },
+    );
     const referringCell = sheet.getCellInfoAt(1, 0);
     expect(sheet.getCellInfoAt(0, 0)).toBe(null);
     expect(referringCell!.resolvedValue).toBe("1");
@@ -29,9 +32,18 @@ describe("Cell moving tests", () => {
   });
 
   it("should move multiple cells and not invalidate references", () => {
-    sheet.moveCell({ columnIndex: 0, rowIndex: 0 }, { columnIndex: 3, rowIndex: 0 });
-    sheet.moveCell({ columnIndex: 1, rowIndex: 1 }, { columnIndex: 4, rowIndex: 1 });
-    sheet.moveCell({ columnIndex: 2, rowIndex: 2 }, { columnIndex: 5, rowIndex: 2 });
+    sheet.moveCell(
+      { columnIndex: 0, rowIndex: 0 },
+      { columnIndex: 3, rowIndex: 0 },
+    );
+    sheet.moveCell(
+      { columnIndex: 1, rowIndex: 1 },
+      { columnIndex: 4, rowIndex: 1 },
+    );
+    sheet.moveCell(
+      { columnIndex: 2, rowIndex: 2 },
+      { columnIndex: 5, rowIndex: 2 },
+    );
 
     expect(sheet.getCellInfoAt(0, 0)).toBe(null);
     expect(sheet.getCellInfoAt(1, 0)?.rawValue).toBe("=D1");
@@ -50,7 +62,10 @@ describe("Cell moving tests", () => {
 
     sheet.setCellCss(0, 0, style.styling);
 
-    sheet.moveCell({ columnIndex: 0, rowIndex: 0 }, { columnIndex: 3, rowIndex: 3 });
+    sheet.moveCell(
+      { columnIndex: 0, rowIndex: 0 },
+      { columnIndex: 3, rowIndex: 3 },
+    );
     expect(
       sheet.getMergedCellStyle(
         fromCell.position.columnKey!,
@@ -60,7 +75,10 @@ describe("Cell moving tests", () => {
 
     const toCell = sheet.getCellInfoAt(3, 3)!;
     expect(
-      sheet.getMergedCellStyle(toCell.position.columnKey!, toCell.position.rowKey!),
+      sheet.getMergedCellStyle(
+        toCell.position.columnKey!,
+        toCell.position.rowKey!,
+      ),
     ).toEqual(style);
   });
 });

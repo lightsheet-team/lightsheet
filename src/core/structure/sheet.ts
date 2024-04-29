@@ -178,15 +178,15 @@ export default class Sheet {
     const cell = this.getCell(colKey, rowKey)!;
     return cell
       ? {
-        rawValue: cell.rawValue,
-        resolvedValue: cell.resolvedValue,
-        formattedValue: cell.formattedValue,
-        state: cell.state,
-        position: {
-          columnKey: colKey,
-          rowKey: rowKey,
-        },
-      }
+          rawValue: cell.rawValue,
+          resolvedValue: cell.resolvedValue,
+          formattedValue: cell.formattedValue,
+          state: cell.state,
+          position: {
+            columnKey: colKey,
+            rowKey: rowKey,
+          },
+        }
       : null;
   }
 
@@ -519,9 +519,7 @@ export default class Sheet {
       this.emitSetStyleEvent(
         columnIndex,
         rowIndex,
-        GenerateStyleStringFromMap(
-          this.getMergedCellStyle(columnKey).styling,
-        ),
+        GenerateStyleStringFromMap(this.getMergedCellStyle(columnKey).styling),
       );
       return;
     }
@@ -571,7 +569,7 @@ export default class Sheet {
             : this.getMergedCellStyle(null, groupKey as RowKey).styling,
         ),
       );
-      return
+      return;
     }
 
     group.defaultStyle = new CellStyle(css, group.defaultStyle?.formatter);

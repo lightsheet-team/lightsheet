@@ -92,11 +92,9 @@ export default class ExpressionHandler {
     const parseResult = math.parse(expression);
 
     const fromSymbol =
-      GenerateColumnLabel(from.columnIndex! + 1) +
-      (from.rowIndex! + 1);
+      GenerateColumnLabel(from.columnIndex! + 1) + (from.rowIndex! + 1);
     const toSymbol =
-      GenerateColumnLabel(to.columnIndex! + 1) +
-      (to.rowIndex! + 1);
+      GenerateColumnLabel(to.columnIndex! + 1) + (to.rowIndex! + 1);
 
     // Update each symbol in the expression.
     const transform = parseResult.transform((node) =>

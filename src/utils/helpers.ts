@@ -9,11 +9,9 @@ export function GenerateRowLabel(rowIndex: number): string {
     rowIndex = Math.floor(rowIndex / 26);
   }
   return label || "A"; // Return "A" if index is 0
-};
+}
 
-export function GetRowColFromCellRef(
-  cellRef: string,
-): IndexInfo {
+export function GetRowColFromCellRef(cellRef: string): IndexInfo {
   // Regular expression to extract the column and row indexes
   const matches = cellRef.match(/^([A-Z]+)?(\d+)?$/);
   if (matches) {
@@ -39,8 +37,7 @@ export function GetRowColFromCellRef(
     // Invalid cell reference
     return { rowIndex: null, columnIndex: null };
   }
-};
-
+}
 
 export function GenerateColumnLabel(rowIndex: number) {
   let label = "";
@@ -51,7 +48,7 @@ export function GenerateColumnLabel(rowIndex: number) {
     rowIndex = Math.floor(rowIndex / 26);
   }
   return label || "A"; // Return "A" if index is 0
-};
+}
 
 export function GenerateStyleMapFromString(style: string): Map<string, string> {
   const mappedStyle = new Map<string, string>();
@@ -70,4 +67,3 @@ export function GenerateStyleStringFromMap(style: Map<string, string>) {
   }
   return result;
 }
-

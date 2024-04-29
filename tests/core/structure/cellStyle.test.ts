@@ -27,14 +27,18 @@ describe("CellStyle", () => {
     ];
 
     sheet.setCellCss(1, 1, styles[0].styling);
-    expect(sheet.getMergedCellStyle(pos.columnKey, pos.rowKey).styling!).toEqual(styles[0].styling);
+    expect(
+      sheet.getMergedCellStyle(pos.columnKey, pos.rowKey).styling!,
+    ).toEqual(styles[0].styling);
 
     sheet.setCellCss(1, 1, new Map());
     expect(sheet.getMergedCellStyle(pos.columnKey, pos.rowKey).styling).toEqual(
       sheet.defaultStyle.styling,
     );
     sheet.setGroupCss(1, GroupTypes.Row, styles[1].styling);
-    expect(sheet.getMergedCellStyle(pos.columnKey, pos.rowKey).styling).toEqual(styles[1].styling);
+    expect(sheet.getMergedCellStyle(pos.columnKey, pos.rowKey).styling).toEqual(
+      styles[1].styling,
+    );
 
     sheet.setGroupCss(1!, GroupTypes.Column, styles[2].styling);
     expect(sheet.getMergedCellStyle(pos.columnKey, pos.rowKey).styling).toEqual(

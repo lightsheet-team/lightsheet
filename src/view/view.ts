@@ -207,8 +207,7 @@ export default class UI {
     );
 
     const newColumnNumber = this.getColumnCount() + 1;
-    const newHeaderValue =
-      GenerateColumnLabel(newColumnNumber);
+    const newHeaderValue = GenerateColumnLabel(newColumnNumber);
 
     headerCellDom.textContent = newHeaderValue;
     headerCellDom.onclick = (e: MouseEvent) =>
@@ -425,7 +424,7 @@ export default class UI {
     if (indexInfo.columnIndex != undefined && indexInfo.rowIndex != undefined) {
       const cellDom =
         this.tableBodyDom.children[indexInfo.rowIndex].children[
-        indexInfo.columnIndex + 1
+          indexInfo.columnIndex + 1
         ];
       const inputElement = cellDom! as HTMLElement;
       inputElement.setAttribute("style", value);
@@ -597,9 +596,9 @@ export default class UI {
       this.selectedCellsContainer.selectionStart =
         (colIndex != null || undefined) && (rowIndex != null || undefined)
           ? {
-            rowIndex: rowIndex,
-            columnIndex: colIndex,
-          }
+              rowIndex: rowIndex,
+              columnIndex: colIndex,
+            }
           : null;
     }
   }
@@ -610,15 +609,15 @@ export default class UI {
     this.selectedCellsContainer.selectionEnd =
       (colIndex != null || undefined) && (rowIndex != null || undefined)
         ? {
-          rowIndex: rowIndex,
-          columnIndex: colIndex,
-        }
+            rowIndex: rowIndex,
+            columnIndex: colIndex,
+          }
         : null;
     if (
       this.selectedCellsContainer.selectionStart &&
       this.selectedCellsContainer.selectionEnd &&
       this.selectedCellsContainer.selectionStart !==
-      this.selectedCellsContainer.selectionEnd
+        this.selectedCellsContainer.selectionEnd
     ) {
       this.updateSelection();
     }

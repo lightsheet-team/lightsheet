@@ -13,7 +13,10 @@ import { DefaultColCount, DefaultRowCount } from "./utils/constants.ts";
 import ExpressionHandler from "./core/evaluation/expressionHandler.ts";
 import { CellReference } from "./core/structure/cell/types.cell.ts";
 import NumberFormatter from "./core/evaluation/numberFormatter.ts";
-import { GenerateStyleMapFromString, GetRowColFromCellRef } from "./utils/helpers.ts";
+import {
+  GenerateStyleMapFromString,
+  GetRowColFromCellRef,
+} from "./utils/helpers.ts";
 
 export default class LightSheet {
   #ui: UI | undefined;
@@ -94,9 +97,7 @@ export default class LightSheet {
 
   setCss(position: string, css: string) {
     const { rowIndex, columnIndex } = GetRowColFromCellRef(position);
-    const mappedCss = css
-      ? GenerateStyleMapFromString(css)
-      : null;
+    const mappedCss = css ? GenerateStyleMapFromString(css) : null;
     if (rowIndex == null && columnIndex == null) {
       return;
     } else if (rowIndex != null && columnIndex != null) {

@@ -36,7 +36,7 @@ const ls = new Lightsheet(
       },
     ],
   },
-  document.getElementById("lightsheet")
+  document.getElementById("lightsheet"),
 );
 
 ls.clearFormatter("A2");
