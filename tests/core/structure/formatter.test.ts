@@ -2,6 +2,7 @@ import Sheet from "../../../src/core/structure/sheet.ts";
 import CellStyle from "../../../src/core/structure/cellStyle.ts";
 import NumberFormatter from "../../../src/core/evaluation/numberFormatter.ts";
 import { CellState } from "../../../src/core/structure/cell/cellState.ts";
+import { GroupTypes } from "../../../src/core/structure/sheet.types.ts";
 
 describe("Formatter test", () => {
   let sheet: Sheet;
@@ -19,15 +20,15 @@ describe("Formatter test", () => {
 
   it("Should round a fraction correctly", () => {
     const oneDigit = new CellStyle(null, new NumberFormatter(1));
-    sheet.setColumnFormatter(1, oneDigit.formatter);
+    sheet.setGroupFormatter(1, GroupTypes.Column, oneDigit.formatter);
     expect(sheet.getCellInfoAt(1, 1)!.formattedValue).toBe("0.8");
   });
 
   it("Should apply two different formatting rules to the same cell value", () => {
     const noDigits = new CellStyle(null, new NumberFormatter(0));
     const twoDigits = new CellStyle(null, new NumberFormatter(2));
-    sheet.setColumnFormatter(1, noDigits.formatter);
-    sheet.setColumnFormatter(2, twoDigits.formatter);
+    sheet.setGroupFormatter(1, GroupTypes.Column, noDigits.formatter);
+    sheet.setGroupFormatter(2, GroupTypes.Column, twoDigits.formatter);
 
     expect(sheet.getCellInfoAt(1, 1)!.formattedValue).toBe("1");
     expect(sheet.getCellInfoAt(2, 1)!.formattedValue).toBe("12.30");
@@ -35,7 +36,7 @@ describe("Formatter test", () => {
 
   it("Should format a string value as a number and result in an invalid cell state", () => {
     const style = new CellStyle(null, new NumberFormatter(0));
-    sheet.setColumnFormatter(0, style.formatter);
+    sheet.setGroupFormatter(0, GroupTypes.Column, style.formatter);
 
     expect(sheet.getCellInfoAt(0, 0)!.state).toBe(CellState.INVALID_FORMAT);
   });

@@ -1,5 +1,6 @@
 import Sheet from "../../../src/core/structure/sheet.ts";
 import CellStyle from "../../../src/core/structure/cellStyle.ts";
+import { GroupTypes } from "../../../src/core/structure/sheet.types.ts";
 
 describe("CellStyle", () => {
   let sheet: Sheet;
@@ -26,42 +27,42 @@ describe("CellStyle", () => {
     ];
 
     sheet.setCellCss(1, 1, styles[0].styling);
-    expect(sheet.getCellStyle(pos.columnKey!, pos.rowKey!)!).toEqual(styles[0]);
+    expect(sheet.getMergedCellStyle(pos.columnKey, pos.rowKey).styling!).toEqual(styles[0].styling);
 
     sheet.setCellCss(1, 1, new Map());
-    expect(sheet.getCellStyle(pos.columnKey!, pos.rowKey!)).toEqual(
-      sheet.defaultStyle,
+    expect(sheet.getMergedCellStyle(pos.columnKey, pos.rowKey).styling).toEqual(
+      sheet.defaultStyle.styling,
     );
+    debugger
+    sheet.setGroupCss(1, GroupTypes.Row, styles[1].styling);
+    expect(sheet.getMergedCellStyle(pos.columnKey, pos.rowKey).styling).toEqual(styles[1].styling);
 
-    sheet.setRowCss(1, styles[1].styling);
-    expect(sheet.getCellStyle(pos.columnKey!, pos.rowKey!)!).toEqual(styles[1]);
-
-    sheet.setColumnCss(1!, styles[2].styling);
-    expect(sheet.getCellStyle(pos.columnKey!, pos.rowKey!)!).toEqual(
+    sheet.setGroupCss(1!, GroupTypes.Column, styles[2].styling);
+    expect(sheet.getMergedCellStyle(pos.columnKey, pos.rowKey).styling).toEqual(
       new CellStyle(
         new Map([
           ["width", "50px"],
           ["color", "0xff0000"],
         ]),
-      ),
+      ).styling,
     );
 
     sheet.setCellCss(1, 1, styles[3].styling);
-    expect(sheet.getCellStyle(pos.columnKey!, pos.rowKey!)!).toEqual(
+    expect(sheet.getMergedCellStyle(pos.columnKey, pos.rowKey).styling).toEqual(
       new CellStyle(
         new Map([
           ["width", "50px"],
           ["color", "0xff0000"],
           ["border", "1px solid black"],
         ]),
-      ),
+      ).styling,
     );
 
     sheet.setCellCss(1, 1, new Map());
-    sheet.setRowCss(1, new Map());
-    sheet.setColumnCss(1, new Map());
-    expect(sheet.getCellStyle(pos.columnKey!, pos.rowKey!)).toEqual(
-      sheet.defaultStyle,
+    sheet.setGroupCss(1, GroupTypes.Row, new Map());
+    sheet.setGroupCss(1, GroupTypes.Column, new Map());
+    expect(sheet.getMergedCellStyle(pos.columnKey, pos.rowKey).styling).toEqual(
+      sheet.defaultStyle.styling,
     );
   });
 });
