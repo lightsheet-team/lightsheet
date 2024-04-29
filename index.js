@@ -2,7 +2,7 @@ import Lightsheet from "./src/main.ts";
 var data = [
   ["1", "=1+2/3*6+A1+test(1,2)", "img/nophoto.jpg", "Marketing"],
   ["2.44445", "400000.000000", "img/nophoto.jpg", "Marketing", "3120"],
-  ["3.555555", "Jorge", "img/nophoto.jpg", "Marketing", "3120"],
+  ["3.555555", "312", "43", "64", "3120"],
 ];
 
 const toolbar = ["undo", "redo", "save"];
@@ -31,7 +31,7 @@ const ls = new Lightsheet(
       },
       {
         position: "3",
-        css: "background-color: blue;",
+        css: "background-color: gray;",
         format: { type: "number", options: { decimal: 0 } },
       },
     ],
