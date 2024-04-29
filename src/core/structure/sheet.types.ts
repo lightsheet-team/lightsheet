@@ -21,11 +21,6 @@ export enum GroupTypes {
 }
 export type GroupType = GroupTypes;
 
-export type ElementInfo = {
-  keyPosition?: KeyPosition;
-  indexPosition?: IndexPosition;
-};
-
 export enum ShiftDirection {
   forward = "forward",
   backward = "backward",
