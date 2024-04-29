@@ -19,8 +19,7 @@ export enum GroupTypes {
   Column = 1,
   Row,
 }
-export type GroupType = GroupTypes
-
+export type GroupType = GroupTypes;
 
 export type ElementInfo = {
   keyInfo?: KeyInfo;
@@ -32,11 +31,10 @@ export enum ShiftDirection {
   backward = "backward",
 }
 
-export type Format = { type: string; options?: any }
+export type Format = { type: string; options?: any };
 
 export type StyleInfo = {
   position: string;
   css?: string;
   format?: Format;
 };
-

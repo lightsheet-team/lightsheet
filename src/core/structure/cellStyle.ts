@@ -43,11 +43,11 @@ export default class CellStyle extends Cloneable<CellStyle> {
   }
 
   clearCss() {
-    this.styling = new Map()
+    this.styling = new Map();
   }
 
   clearFormatter() {
-    this.formatter = null
+    this.formatter = null;
   }
 
   clearStylingSetBy(other: CellStyle | null) {

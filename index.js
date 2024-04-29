@@ -36,5 +36,5 @@ new Lightsheet(
       },
     ],
   },
-  document.getElementById("lightsheet")
+  document.getElementById("lightsheet"),
 );

@@ -1,7 +1,12 @@
 import UI from "./ui/render.ts";
 import { LightSheetOptions } from "./main.types.ts";
 import Sheet from "./core/structure/sheet.ts";
-import { CellInfo, Format, GroupTypes, StyleInfo } from "./core/structure/sheet.types.ts";
+import {
+  CellInfo,
+  Format,
+  GroupTypes,
+  StyleInfo,
+} from "./core/structure/sheet.types.ts";
 import Events from "./core/event/events.ts";
 import SheetHolder from "./core/structure/sheetHolder.ts";
 import { DefaultColCount, DefaultRowCount } from "./utils/constants.ts";
@@ -82,15 +87,17 @@ export default class LightSheet {
   }
 
   getFormatter(type: string, options?: any) {
-    if (type == 'number') {
-      return new NumberFormatter(options.decimal)
+    if (type == "number") {
+      return new NumberFormatter(options.decimal);
     }
-    return
+    return;
   }
 
   setCss(position: string, css: string) {
     const { row, col } = getRowColFromCellRef(position);
-    const mappedCss = css ? LightSheetHelper.GenerateStyleMapFromString(css) : null;
+    const mappedCss = css
+      ? LightSheetHelper.GenerateStyleMapFromString(css)
+      : null;
     if (row == null && col == null) {
       return;
     } else if (row != null && col != null) {
@@ -99,18 +106,19 @@ export default class LightSheet {
       this.sheet.setGroupCss(row, GroupTypes.Row, mappedCss!);
     } else if (col != null) {
       this.sheet.setGroupCss(col, GroupTypes.Column, mappedCss!);
-
     }
   }
 
   clearCss(position: string) {
-    this.setCss(position, "")
+    this.setCss(position, "");
   }
 
   setFormatting(position: string, format: Format) {
     const { row, col } = getRowColFromCellRef(position);
-    const formatter = format ? this.getFormatter(format.type, format.options) : null
-    if (!formatter) return
+    const formatter = format
+      ? this.getFormatter(format.type, format.options)
+      : null;
+    if (!formatter) return;
     if (row == null && col == null) {
       return;
     } else if (row != null && col != null) {
@@ -128,8 +136,7 @@ export default class LightSheet {
       return;
     } else if (row != null && col != null) {
       this.sheet.setCellFormatter(col, row);
-    }
-    else if (row != null) {
+    } else if (row != null) {
       this.sheet.setGroupFormatter(row, GroupTypes.Row);
     } else if (col != null) {
       this.sheet.setGroupFormatter(col, GroupTypes.Column);
@@ -138,10 +145,8 @@ export default class LightSheet {
 
   private initializeStyle() {
     this.style?.forEach((item: StyleInfo) => {
-      if (item.css)
-        this.setCss(item.position, item.css!);
-      if (item.format)
-        this.setFormatting(item.position, item.format);
+      if (item.css) this.setCss(item.position, item.css!);
+      if (item.format) this.setFormatting(item.position, item.format);
     });
   }
   showToolbar(isShown: boolean) {

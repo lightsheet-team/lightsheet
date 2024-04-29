@@ -92,9 +92,11 @@ export default class ExpressionHandler {
     const parseResult = math.parse(expression);
 
     const fromSymbol =
-      LightSheetHelper.generateColumnLabel(from.columnIndex! + 1) + (from.rowIndex! + 1);
+      LightSheetHelper.generateColumnLabel(from.columnIndex! + 1) +
+      (from.rowIndex! + 1);
     const toSymbol =
-      LightSheetHelper.generateColumnLabel(to.columnIndex! + 1) + (to.rowIndex! + 1);
+      LightSheetHelper.generateColumnLabel(to.columnIndex! + 1) +
+      (to.rowIndex! + 1);
 
     // Update each symbol in the expression.
     const transform = parseResult.transform((node) =>

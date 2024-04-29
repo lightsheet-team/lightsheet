@@ -216,7 +216,6 @@ export default class UI {
 
     const rowCount = this.getRowCount();
     for (let rowIndex = 0; rowIndex < rowCount; rowIndex++) {
-      const rowDom = this.tableBodyDom.children[rowIndex];
       this.addCell(newColumnNumber - 1, rowIndex, "");
     }
 
@@ -297,21 +296,19 @@ export default class UI {
   }
 
   getRowDom(rowIndex: number) {
-    return this.tableBodyDom.children.length < rowIndex + 1 ? null : this.tableBodyDom.children[rowIndex]
+    return this.tableBodyDom.children.length < rowIndex + 1
+      ? null
+      : this.tableBodyDom.children[rowIndex];
   }
 
-  addCell(
-    colIndex: number,
-    rowIndex: number,
-    value: any,
-  ): HTMLElement {
+  addCell(colIndex: number, rowIndex: number, value: any): HTMLElement {
     const cellDom = document.createElement("td");
     cellDom.classList.add(
       "lightsheet_table_cell",
       "lightsheet_table_row_cell",
       "lightsheet_table_td",
     );
-    const rowDom = this.tableBodyDom.children[rowIndex]
+    const rowDom = this.tableBodyDom.children[rowIndex];
     rowDom.appendChild(cellDom);
     cellDom.id = `${colIndex}_${rowIndex}`;
     cellDom.setAttribute("column-index", `${colIndex}` || "");
@@ -428,7 +425,7 @@ export default class UI {
     if (indexInfo.columnIndex != undefined && indexInfo.rowIndex != undefined) {
       const cellDom =
         this.tableBodyDom.children[indexInfo.rowIndex].children[
-        indexInfo.columnIndex + 1
+          indexInfo.columnIndex + 1
         ];
       const inputElement = cellDom! as HTMLElement;
       inputElement.setAttribute("style", value);
@@ -454,7 +451,8 @@ export default class UI {
   private onCoreSetCell(event: LightsheetEvent) {
     const payload = event.payload as CoreSetCellPayload;
     // Create new columns if the column index is greater than the current column count.
-    const newColumns = payload.indexInfo.columnIndex! - this.getColumnCount() + 1;
+    const newColumns =
+      payload.indexInfo.columnIndex! - this.getColumnCount() + 1;
     for (let i = 0; i < newColumns; i++) {
       this.addColumn();
     }
@@ -465,23 +463,35 @@ export default class UI {
     }
 
     // Get HTML elements and (new) IDs for the payload's cell and row.
-    const cellInputDom = this.getElementInfoForSetCell(payload.indexInfo.columnIndex!, payload.indexInfo.rowIndex!, payload.formattedValue);
+    const cellInputDom = this.getElementInfoForSetCell(
+      payload.indexInfo.columnIndex!,
+      payload.indexInfo.rowIndex!,
+      payload.formattedValue,
+    );
 
     cellInputDom.setAttribute("rawValue", payload.rawValue);
     cellInputDom.setAttribute("resolvedValue", payload.formattedValue);
     cellInputDom.value = payload.formattedValue;
   }
 
-  private getElementInfoForSetCell = (columnIndex: number, rowIndex: number, formattedValue: string) => {
+  private getElementInfoForSetCell = (
+    columnIndex: number,
+    rowIndex: number,
+    formattedValue: string,
+  ) => {
     let cellDom;
     if (this.tableBodyDom.children.length < rowIndex + 1) {
-      this.addRow()
-      cellDom = this.addCell(columnIndex, rowIndex, formattedValue)
+      this.addRow();
+      cellDom = this.addCell(columnIndex, rowIndex, formattedValue);
     } else {
-      if (this.tableBodyDom.children[rowIndex].children.length < columnIndex + 2) {
-        cellDom = this.addCell(columnIndex, rowIndex, formattedValue)
-      }
-      else cellDom = this.tableBodyDom.children[rowIndex].children[columnIndex + 1]
+      if (
+        this.tableBodyDom.children[rowIndex].children.length <
+        columnIndex + 2
+      ) {
+        cellDom = this.addCell(columnIndex, rowIndex, formattedValue);
+      } else
+        cellDom =
+          this.tableBodyDom.children[rowIndex].children[columnIndex + 1];
     }
     return cellDom.firstChild! as HTMLInputElement;
   };
@@ -560,7 +570,8 @@ export default class UI {
     const withinY =
       (cellRowIndex >= selectionStart.rowIndex! &&
         cellRowIndex <= selectionEnd.rowIndex!) ||
-      (cellRowIndex <= selectionStart.rowIndex! && cellRowIndex >= selectionEnd.rowIndex!);
+      (cellRowIndex <= selectionStart.rowIndex! &&
+        cellRowIndex >= selectionEnd.rowIndex!);
 
     return withinX && withinY;
   }
@@ -586,9 +597,9 @@ export default class UI {
       this.selectedCellsContainer.selectionStart =
         (colIndex != null || undefined) && (rowIndex != null || undefined)
           ? {
-            rowIndex: rowIndex,
-            columnIndex: colIndex,
-          }
+              rowIndex: rowIndex,
+              columnIndex: colIndex,
+            }
           : null;
     }
   }
@@ -599,15 +610,15 @@ export default class UI {
     this.selectedCellsContainer.selectionEnd =
       (colIndex != null || undefined) && (rowIndex != null || undefined)
         ? {
-          rowIndex: rowIndex,
-          columnIndex: colIndex,
-        }
+            rowIndex: rowIndex,
+            columnIndex: colIndex,
+          }
         : null;
     if (
       this.selectedCellsContainer.selectionStart &&
       this.selectedCellsContainer.selectionEnd &&
       this.selectedCellsContainer.selectionStart !==
-      this.selectedCellsContainer.selectionEnd
+        this.selectedCellsContainer.selectionEnd
     ) {
       this.updateSelection();
     }

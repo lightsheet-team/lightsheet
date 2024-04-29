@@ -8,7 +8,13 @@ import {
 import Cell from "./cell/cell.ts";
 import Column from "./group/column.ts";
 import Row from "./group/row.ts";
-import { CellInfo, GroupType, GroupTypes, KeyInfo, ShiftDirection } from "./sheet.types.ts";
+import {
+  CellInfo,
+  GroupType,
+  GroupTypes,
+  KeyInfo,
+  ShiftDirection,
+} from "./sheet.types.ts";
 import ExpressionHandler from "../evaluation/expressionHandler.ts";
 import CellStyle from "./cellStyle.ts";
 import CellGroup from "./group/cellGroup.ts";
@@ -120,13 +126,15 @@ export default class Sheet {
     };
   }
 
-  public moveCell(
-    from: IndexInfo,
-    to: IndexInfo,
-    moveStyling: boolean = true,
-  ) {
-    const fromPosition = this.getCellInfoAt(from.columnIndex!, from.rowIndex!)?.position;
-    let toPosition = this.getCellInfoAt(to.columnIndex!, to.rowIndex!)?.position;
+  public moveCell(from: IndexInfo, to: IndexInfo, moveStyling: boolean = true) {
+    const fromPosition = this.getCellInfoAt(
+      from.columnIndex!,
+      from.rowIndex!,
+    )?.position;
+    let toPosition = this.getCellInfoAt(
+      to.columnIndex!,
+      to.rowIndex!,
+    )?.position;
 
     if (!fromPosition) return false;
 
@@ -170,15 +178,15 @@ export default class Sheet {
     const cell = this.getCell(colKey, rowKey)!;
     return cell
       ? {
-        rawValue: cell.rawValue,
-        resolvedValue: cell.resolvedValue,
-        formattedValue: cell.formattedValue,
-        state: cell.state,
-        position: {
-          columnKey: colKey,
-          rowKey: rowKey,
-        },
-      }
+          rawValue: cell.rawValue,
+          resolvedValue: cell.resolvedValue,
+          formattedValue: cell.formattedValue,
+          state: cell.state,
+          position: {
+            columnKey: colKey,
+            rowKey: rowKey,
+          },
+        }
       : null;
   }
 
@@ -422,7 +430,10 @@ export default class Sheet {
     return true;
   }
 
-  getMergedCellStyle(colKey?: ColumnKey | null, rowKey?: RowKey | null): CellStyle {
+  getMergedCellStyle(
+    colKey?: ColumnKey | null,
+    rowKey?: RowKey | null,
+  ): CellStyle {
     const col = colKey ? this.columns.get(colKey) : null;
     const row = rowKey ? this.rows.get(rowKey) : null;
     if (!col && !row) return this.defaultStyle;
@@ -439,8 +450,7 @@ export default class Sheet {
     return cellStyle;
   }
 
-  private getCellGroupByIndex(columnIndex: number,
-    rowIndex: number) {
+  private getCellGroupByIndex(columnIndex: number, rowIndex: number) {
     let columnKey = this.columnPositions.get(columnIndex);
     let rowKey = this.rowPositions.get(rowIndex);
 
@@ -453,21 +463,25 @@ export default class Sheet {
       column: this.columns.get(columnKey!),
       row: this.rows.get(rowKey!),
       columnKey,
-      rowKey
-    }
-
+      rowKey,
+    };
   }
 
-  setCellFormatter(columnIndex: number,
+  setCellFormatter(
+    columnIndex: number,
     rowIndex: number,
-    formatter: Formatter | null = null): void {
-    const { column, row, columnKey, rowKey } = this.getCellGroupByIndex(columnIndex, rowIndex)
+    formatter: Formatter | null = null,
+  ): void {
+    const { column, row, columnKey, rowKey } = this.getCellGroupByIndex(
+      columnIndex,
+      rowIndex,
+    );
 
     if (!column || !row) return;
 
     if (formatter == null) {
-      column.cellFormatting.get(row.key)?.clearFormatter()
-      row.cellFormatting.get(column.key)?.clearFormatter()
+      column.cellFormatting.get(row.key)?.clearFormatter();
+      row.cellFormatting.get(column.key)?.clearFormatter();
     } else {
       column.cellFormatting.set(
         row.key,
@@ -483,7 +497,7 @@ export default class Sheet {
     this.applyCellFormatter(cell!, columnKey!, rowKey!);
 
     this.deleteCellIfUnused(columnKey!, rowKey!);
-    this.emitSetCellEvent(columnIndex, rowIndex, cell)
+    this.emitSetCellEvent(columnIndex, rowIndex, cell);
   }
 
   setCellCss(
@@ -491,7 +505,10 @@ export default class Sheet {
     rowIndex: number,
     css: Map<string, string> = new Map(),
   ): void {
-    const { column, row, columnKey, rowKey } = this.getCellGroupByIndex(columnIndex, rowIndex)
+    const { column, row, columnKey, rowKey } = this.getCellGroupByIndex(
+      columnIndex,
+      rowIndex,
+    );
 
     if (!column || !row) return;
 
@@ -499,9 +516,13 @@ export default class Sheet {
       column.cellFormatting.get(row.key)?.clearCss();
       row.cellFormatting.get(column.key)?.clearCss();
       this.deleteCellIfUnused(columnKey!, rowKey!);
-      this.emitSetStyleEvent(columnIndex, rowIndex, LightSheetHelper.GenerateStyleStringFromMap(
-        this.getMergedCellStyle(columnKey).styling,
-      ))
+      this.emitSetStyleEvent(
+        columnIndex,
+        rowIndex,
+        LightSheetHelper.GenerateStyleStringFromMap(
+          this.getMergedCellStyle(columnKey).styling,
+        ),
+      );
       return;
     }
 
@@ -514,41 +535,75 @@ export default class Sheet {
       new CellStyle(css, row.cellFormatting.get(columnKey!)?.formatter),
     );
 
-    this.emitSetStyleEvent(columnIndex, rowIndex, LightSheetHelper.GenerateStyleStringFromMap(
-      this.getMergedCellStyle(columnKey, rowKey).styling,
-    ))
+    this.emitSetStyleEvent(
+      columnIndex,
+      rowIndex,
+      LightSheetHelper.GenerateStyleStringFromMap(
+        this.getMergedCellStyle(columnKey, rowKey).styling,
+      ),
+    );
   }
 
-  setGroupCss(groupIndex: number, groupType: GroupType, css: Map<string, string> = new Map()): void {
-    const isColumnGroup = GroupTypes.Column == groupType
-    const positions = isColumnGroup ? this.columnPositions : this.rowPositions
-    const groupKey = isColumnGroup ? positions.get(groupIndex!) as ColumnKey : positions.get(groupIndex) as RowKey;
+  setGroupCss(
+    groupIndex: number,
+    groupType: GroupType,
+    css: Map<string, string> = new Map(),
+  ): void {
+    const isColumnGroup = GroupTypes.Column == groupType;
+    const positions = isColumnGroup ? this.columnPositions : this.rowPositions;
+    const groupKey = isColumnGroup
+      ? (positions.get(groupIndex!) as ColumnKey)
+      : (positions.get(groupIndex) as RowKey);
     if (!groupKey) return;
-    const group = isColumnGroup ? this.columns.get(groupKey as ColumnKey) : this.rows.get(groupKey as RowKey);
+    const group = isColumnGroup
+      ? this.columns.get(groupKey as ColumnKey)
+      : this.rows.get(groupKey as RowKey);
     if (!group) return;
 
     if (css.size == 0) {
-      group.defaultStyle?.clearCss()
-      this.emitSetStyleEvent(isColumnGroup ? groupIndex : null, !isColumnGroup ? groupIndex : null, LightSheetHelper.GenerateStyleStringFromMap(
-        isColumnGroup ? this.getMergedCellStyle(groupKey as ColumnKey).styling : this.getMergedCellStyle(null, groupKey as RowKey).styling,
-      ))
+      group.defaultStyle?.clearCss();
+      this.emitSetStyleEvent(
+        isColumnGroup ? groupIndex : null,
+        !isColumnGroup ? groupIndex : null,
+        LightSheetHelper.GenerateStyleStringFromMap(
+          isColumnGroup
+            ? this.getMergedCellStyle(groupKey as ColumnKey).styling
+            : this.getMergedCellStyle(null, groupKey as RowKey).styling,
+        ),
+      );
     }
 
     group.defaultStyle = new CellStyle(css, group.defaultStyle?.formatter);
 
-    this.emitSetStyleEvent(isColumnGroup ? groupIndex : null, !isColumnGroup ? groupIndex : null, LightSheetHelper.GenerateStyleStringFromMap(
-      isColumnGroup ? this.getMergedCellStyle(groupKey as ColumnKey).styling : this.getMergedCellStyle(null, groupKey as RowKey).styling,
-    ))
+    this.emitSetStyleEvent(
+      isColumnGroup ? groupIndex : null,
+      !isColumnGroup ? groupIndex : null,
+      LightSheetHelper.GenerateStyleStringFromMap(
+        isColumnGroup
+          ? this.getMergedCellStyle(groupKey as ColumnKey).styling
+          : this.getMergedCellStyle(null, groupKey as RowKey).styling,
+      ),
+    );
   }
 
-  setGroupFormatter(groupIndex: number, groupType: GroupType, formatter: Formatter | null = null): void {
-    const isColumnGroup: boolean = groupType == GroupTypes.Column
-    const groupKey = isColumnGroup ? this.columnPositions.get(groupIndex) : this.rowPositions.get(groupIndex);
+  setGroupFormatter(
+    groupIndex: number,
+    groupType: GroupType,
+    formatter: Formatter | null = null,
+  ): void {
+    const isColumnGroup: boolean = groupType == GroupTypes.Column;
+    const groupKey = isColumnGroup
+      ? this.columnPositions.get(groupIndex)
+      : this.rowPositions.get(groupIndex);
     if (!groupKey) return;
-    const group = isColumnGroup ? this.columns.get(groupKey as ColumnKey) : this.rows.get(groupKey as RowKey);
+    const group = isColumnGroup
+      ? this.columns.get(groupKey as ColumnKey)
+      : this.rows.get(groupKey as RowKey);
     if (!group) return;
 
-    const cellStyle = new CellStyle(group.defaultStyle?.styling!, formatter);
+    const cellStyle = group.defaultStyle?.styling
+      ? new CellStyle(group.defaultStyle?.styling, formatter)
+      : new CellStyle(null, formatter);
 
     this.setCellGroupStyle(group, cellStyle);
   }
@@ -579,14 +634,22 @@ export default class Sheet {
       const cell = this.cellData.get(group.cellIndex.get(opposingKey)!)!;
       if (group instanceof Column) {
         this.applyCellFormatter(cell, group.key, opposingKey as RowKey);
-        this.emitSetCellEvent(this.getColumnIndex(group.key as ColumnKey)!, this.getRowIndex(opposingKey as RowKey)!, cell)
+        this.emitSetCellEvent(
+          this.getColumnIndex(group.key as ColumnKey)!,
+          this.getRowIndex(opposingKey as RowKey)!,
+          cell,
+        );
       } else {
         this.applyCellFormatter(
           cell,
           opposingKey as ColumnKey,
           group.key as RowKey,
         );
-        this.emitSetCellEvent(this.getColumnIndex(opposingKey as ColumnKey)!, this.getRowIndex(group.key as RowKey)!, cell)
+        this.emitSetCellEvent(
+          this.getColumnIndex(opposingKey as ColumnKey)!,
+          this.getRowIndex(group.key as RowKey)!,
+          cell,
+        );
       }
     }
   }
@@ -725,12 +788,8 @@ export default class Sheet {
     return valueChanged;
   }
 
-  private applyCellFormatter(
-    cell: Cell,
-    colKey: ColumnKey,
-    rowKey: RowKey,
-  ) {
-    if (!cell) return
+  private applyCellFormatter(cell: Cell, colKey: ColumnKey, rowKey: RowKey) {
+    if (!cell) return;
     const style = this.getMergedCellStyle(colKey, rowKey);
     let formattedValue: string | null = cell.resolvedValue;
     if (style?.formatter) {
@@ -783,7 +842,12 @@ export default class Sheet {
         ref.position.columnIndex!,
         ref.position.rowIndex!,
       );
-      if (!refSheet.getCellInfoAt(ref.position.columnIndex!, ref.position.rowIndex!)) {
+      if (
+        !refSheet.getCellInfoAt(
+          ref.position.columnIndex!,
+          ref.position.rowIndex!,
+        )
+      ) {
         refSheet.createCell(position.columnKey!, position.rowKey!, "");
       }
 
@@ -910,8 +974,6 @@ export default class Sheet {
 
     this.events.emit(new LightsheetEvent(EventType.VIEW_SET_STYLE, payload));
   }
-
-
 
   private registerEvents() {
     this.events.on(EventType.UI_SET_CELL, (event) =>
