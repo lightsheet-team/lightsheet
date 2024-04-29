@@ -114,6 +114,14 @@ export default class LightSheet {
   }
 
   setFormatting(position: string, format: Format) {
+    this.processFormatting(position, format)
+  }
+
+  clearFormatter(position: string) {
+    this.processFormatting(position, null)
+  }
+
+  private processFormatting(position: string, format: Format | null) {
     const { rowIndex, columnIndex } = GetRowColFromCellRef(position);
     const formatter = format
       ? this.getFormatter(format.type, format.options)
@@ -127,19 +135,6 @@ export default class LightSheet {
       this.sheet.setGroupFormatter(rowIndex, GroupTypes.Row, formatter);
     } else if (columnIndex != null) {
       this.sheet.setGroupFormatter(columnIndex, GroupTypes.Column, formatter);
-    }
-  }
-
-  clearFormatter(position: string) {
-    const { rowIndex, columnIndex } = GetRowColFromCellRef(position);
-    if (rowIndex == null && columnIndex == null) {
-      return;
-    } else if (rowIndex != null && columnIndex != null) {
-      this.sheet.setCellFormatter(columnIndex, rowIndex);
-    } else if (rowIndex != null) {
-      this.sheet.setGroupFormatter(rowIndex, GroupTypes.Row);
-    } else if (columnIndex != null) {
-      this.sheet.setGroupFormatter(columnIndex, GroupTypes.Column);
     }
   }
 
