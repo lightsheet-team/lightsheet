@@ -1,4 +1,4 @@
-import { IndexPosition } from "../core/event/events.types";
+import { IndexPosition } from "../utils/common.types";
 
 export type CellIdInfo = {
   keyParts: string[];

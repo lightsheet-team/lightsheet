@@ -24,7 +24,6 @@ import {
   CoreSetCellPayload,
   CoreSetStylePayload,
   EventType,
-  IndexPosition,
   UISetCellPayload,
 } from "../event/events.types.ts";
 import { CellState } from "./cell/cellState.ts";
@@ -33,6 +32,7 @@ import Formatter from "../evaluation/formatter.ts";
 import SheetHolder from "./sheetHolder.ts";
 import { CellReference } from "./cell/types.cell.ts";
 import { GenerateStyleStringFromMap } from "../../utils/helpers.ts";
+import { IndexPosition } from "../../utils/common.types.ts";
 
 export default class Sheet {
   key: SheetKey;

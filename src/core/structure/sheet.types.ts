@@ -1,6 +1,6 @@
 import { ColumnKey, RowKey } from "./key/keyTypes.ts";
 import { CellState } from "./cell/cellState.ts";
-import { IndexPosition } from "../event/events.types.ts";
+import { IndexPosition } from "../../utils/common.types.ts";
 
 export type KeyPosition = {
   columnKey?: ColumnKey;

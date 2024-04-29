@@ -19,8 +19,8 @@ import {
 
 import { CellState } from "../structure/cell/cellState.ts";
 import { CellReference } from "../structure/cell/types.cell.ts";
-import { IndexPosition } from "../event/events.types.ts";
 import { GenerateColumnLabel } from "../../utils/helpers.ts";
+import { IndexPosition } from "../../utils/common.types.ts";
 
 const math = create({
   parseDependencies,

@@ -1,4 +1,4 @@
-import { IndexPosition } from "../core/event/events.types";
+import { IndexPosition } from "./common.types";
 
 export function GenerateRowLabel(rowIndex: number): string {
   let label = "";

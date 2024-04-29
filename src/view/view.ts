@@ -5,12 +5,12 @@ import {
   CoreSetCellPayload,
   CoreSetStylePayload,
   EventType,
-  IndexPosition,
   UISetCellPayload,
 } from "../core/event/events.types.ts";
 import { ToolbarOptions } from "../main.types.ts";
 import { ToolbarItems } from "../utils/constants.ts";
 import { GenerateColumnLabel } from "../utils/helpers.ts";
+import { IndexPosition } from "../utils/common.types.ts";
 
 export default class UI {
   tableEl!: Element;

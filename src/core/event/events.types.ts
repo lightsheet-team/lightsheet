@@ -1,9 +1,5 @@
+import { IndexPosition } from "../../utils/common.types.ts";
 import { KeyPosition } from "../structure/sheet.types.ts";
-
-export type IndexPosition = {
-  columnIndex?: number | null;
-  rowIndex?: number | null;
-};
 
 export type UISetCellPayload = {
   keyPosition?: KeyPosition;
