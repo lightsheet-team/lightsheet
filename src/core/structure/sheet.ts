@@ -431,8 +431,8 @@ export default class Sheet {
   }
 
   getMergedCellStyle(
-    colKey?: ColumnKey | null,
-    rowKey?: RowKey | null,
+    colKey: ColumnKey | null = null,
+    rowKey: RowKey | null = null,
   ): CellStyle {
     const col = colKey ? this.columns.get(colKey) : null;
     const row = rowKey ? this.rows.get(rowKey) : null;
@@ -519,7 +519,7 @@ export default class Sheet {
       this.emitSetStyleEvent(
         columnIndex,
         rowIndex,
-        (this.getMergedCellStyle(columnKey).css),
+        columnKey,
       );
       return;
     }
@@ -536,7 +536,7 @@ export default class Sheet {
     this.emitSetStyleEvent(
       columnIndex,
       rowIndex,
-      this.getMergedCellStyle(columnKey, rowKey).css,
+      columnKey, rowKey,
     );
   }
 
@@ -558,27 +558,31 @@ export default class Sheet {
 
     if (!css || css.size == 0) {
       group.defaultStyle?.clearCss();
-      this.emitSetStyleEvent(
-        isColumnGroup ? groupIndex : null,
-        !isColumnGroup ? groupIndex : null,
-        isColumnGroup
-          ? this.getMergedCellStyle(groupKey as ColumnKey).css
-          : this.getMergedCellStyle(null, groupKey as RowKey).css,
-
-      );
+      isColumnGroup ?
+        this.emitSetStyleEvent(
+          groupIndex,
+          null,
+          groupKey as ColumnKey) :
+        this.emitSetStyleEvent(
+          null,
+          groupIndex,
+          null, groupKey as RowKey)
+        ;
       return;
     }
 
     group.defaultStyle = new CellStyle(css, group.defaultStyle?.formatter);
-
-    this.emitSetStyleEvent(
-      isColumnGroup ? groupIndex : null,
-      !isColumnGroup ? groupIndex : null,
-      isColumnGroup
-        ? this.getMergedCellStyle(groupKey as ColumnKey).css
-        : this.getMergedCellStyle(null, groupKey as RowKey).css,
-
-    );
+    isColumnGroup ?
+      this.emitSetStyleEvent(
+        groupIndex,
+        null,
+        groupKey as ColumnKey)
+      :
+      this.emitSetStyleEvent(
+        null,
+        groupIndex,
+        null, groupKey as RowKey
+      );
   }
 
   setGroupFormatter(
@@ -957,14 +961,15 @@ export default class Sheet {
   private emitSetStyleEvent(
     columnIndex: number | null,
     rowIndex: number | null,
-    css: Map<string, string>,
+    columnKey: ColumnKey | null = null,
+    rowKey: RowKey | null = null,
   ) {
     const payload: CoreSetStylePayload = {
       indexPosition: {
         rowIndex,
         columnIndex,
       },
-      value: GenerateStyleStringFromMap(css),
+      value: GenerateStyleStringFromMap(this.getMergedCellStyle(columnKey, rowKey).css),
     };
 
     this.events.emit(new LightsheetEvent(EventType.VIEW_SET_STYLE, payload));
