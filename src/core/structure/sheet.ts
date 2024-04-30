@@ -25,6 +25,7 @@ import { CellState } from "./cell/cellState.ts";
 import { EvaluationResult } from "../evaluation/expressionHandler.types.ts";
 import SheetHolder from "./sheetHolder.ts";
 import { CellReference } from "./cell/types.cell.ts";
+import { Coordinate } from "../../utils/common.types.ts";
 
 export default class Sheet {
   key: SheetKey;
@@ -116,6 +117,48 @@ export default class Sheet {
         columnKey: this.columns.has(colKey) ? colKey : undefined,
       },
     };
+  }
+
+  public moveCell(
+    from: Coordinate,
+    to: Coordinate,
+    moveStyling: boolean = true,
+  ) {
+    const fromPosition = this.getCellInfoAt(from.column, from.row)?.position;
+    let toPosition = this.getCellInfoAt(to.column, to.row)?.position;
+
+    if (!fromPosition) return false;
+
+    if (!toPosition) {
+      toPosition = this.initializePosition(to.column, to.row);
+    } else {
+      this.deleteCell(toPosition.columnKey!, toPosition.rowKey!);
+    }
+
+    const fromCol = this.columns.get(fromPosition.columnKey!)!;
+    const fromRow = this.rows.get(fromPosition.rowKey!)!;
+
+    const toCol = this.columns.get(toPosition.columnKey!)!;
+    const toRow = this.rows.get(toPosition.rowKey!)!;
+
+    const cellKey = fromCol.cellIndex.get(fromRow.key)!;
+    const style = fromCol.cellFormatting.get(fromRow.key);
+
+    fromCol.cellIndex.delete(fromRow.key);
+    toCol.cellIndex.set(toRow.key, cellKey);
+    fromRow.cellIndex.delete(fromCol.key);
+    toRow.cellIndex.set(toCol.key, cellKey);
+
+    if (style && moveStyling) {
+      toCol.cellFormatting.set(toRow.key, style);
+      toRow.cellFormatting.set(toCol.key, style);
+
+      fromCol.cellFormatting.delete(fromRow.key);
+      fromRow.cellFormatting.delete(fromCol.key);
+    }
+
+    this.updateCellReferenceSymbols(this.cellData.get(cellKey)!, from, to);
+    return true;
   }
 
   public getCellInfoAt(colPos: number, rowPos: number): CellInfo | null {
@@ -256,6 +299,7 @@ export default class Sheet {
         );
       }
       group.position = to;
+      this.updateReferenceSymbolsForGroup(group, from, to);
     }
 
     // We have to update all the positions to keep it consistent.
@@ -293,8 +337,9 @@ export default class Sheet {
         targetPositions.delete(currentPos);
       } else {
         targetPositions.set(currentPos, previousValue);
-        const group = target.get(previousValue);
-        group!.position = currentPos;
+        const group = target.get(previousValue)!;
+        this.updateReferenceSymbolsForGroup(group, group.position, currentPos);
+        group.position = currentPos;
       }
 
       previousValue = tempCurrent;
@@ -310,6 +355,64 @@ export default class Sheet {
     } while (tempCurrent !== undefined && previousValue !== undefined);
 
     return true;
+  }
+
+  private updateReferenceSymbolsForGroup(
+    group: CellGroup<ColumnKey | RowKey>,
+    from: number,
+    to: number,
+  ) {
+    for (const [oppositeKey, cellKey] of group!.cellIndex) {
+      const cell = this.cellData.get(cellKey)!;
+      if (!cell.referencesIn) continue; // Only cells with incoming references are affected.
+
+      // Convert the information on how the group is shifted into coordinates.
+      // from and to can refer to either a column or row position depending on the group type.
+      const oppositeGroupPos =
+        group instanceof Column
+          ? this.rows.get(oppositeKey as RowKey)!.position
+          : this.columns.get(oppositeKey as ColumnKey)!.position;
+
+      const fromCoord: Coordinate = {
+        column: group instanceof Column ? from : oppositeGroupPos!,
+        row: group instanceof Row ? from : oppositeGroupPos!,
+      };
+
+      const toCoord: Coordinate = {
+        column: group instanceof Column ? to : oppositeGroupPos!,
+        row: group instanceof Row ? to : oppositeGroupPos!,
+      };
+
+      this.updateCellReferenceSymbols(cell, fromCoord, toCoord);
+    }
+  }
+
+  private updateCellReferenceSymbols(
+    cell: Cell,
+    from: Coordinate,
+    to: Coordinate,
+  ) {
+    // Update reference symbols for all cell formulas that refer to the cell being moved.
+    for (const [refCellKey, refInfo] of cell.referencesIn) {
+      const refSheet = this.sheetHolder.getSheet(refInfo.sheetKey)!;
+      const refCell = refSheet.cellData.get(refCellKey)!;
+
+      const expr = new ExpressionHandler(refSheet, refInfo, refCell.rawValue);
+      const newValue = expr.updatePositionalReferences(from, to);
+
+      // The formula may not change if the cell is being referenced indirectly through a range.
+      if (refCell.rawValue === newValue) continue;
+      refCell.rawValue = newValue;
+
+      // Emit event for the rawValue change.
+      refSheet.emitSetCellEvent(
+        refInfo.column,
+        refInfo.row,
+        refSheet.getColumnIndex(refInfo.column)!,
+        refSheet.getRowIndex(refInfo.row)!,
+        refCell,
+      );
+    }
   }
 
   private deleteCell(colKey: ColumnKey, rowKey: RowKey): boolean {
@@ -486,10 +589,9 @@ export default class Sheet {
         rowData.set(column.position, cell.formattedValue);
       }
 
-      data.set(rowPos, rowData);
+      data.set(rowPos, new Map([...rowData.entries()].sort()));
     }
-
-    return data;
+    return new Map([...data.entries()].sort());
   }
 
   private createCell(colKey: ColumnKey, rowKey: RowKey, value: string): Cell {
@@ -543,7 +645,11 @@ export default class Sheet {
     colKey: ColumnKey,
     rowKey: RowKey,
   ): boolean {
-    const expressionHandler = new ExpressionHandler(this, cell.rawValue);
+    const expressionHandler = new ExpressionHandler(
+      this,
+      { sheetKey: this.key, column: colKey, row: rowKey },
+      cell.rawValue,
+    );
     const evalResult = expressionHandler.evaluate();
     const prevState = cell.state;
     if (!evalResult) {
