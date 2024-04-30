@@ -450,32 +450,16 @@ export default class Sheet {
     return cellStyle;
   }
 
-  private getCellGroupByIndex(columnIndex: number, rowIndex: number) {
-    let columnKey = this.columnPositions.get(columnIndex);
-    let rowKey = this.rowPositions.get(rowIndex);
-
-    if (!columnKey || !rowKey) {
-      const newCellElement = this.initializePosition(columnIndex, rowIndex);
-      columnKey = newCellElement.columnKey;
-      rowKey = newCellElement.rowKey;
-    }
-    return {
-      column: this.columns.get(columnKey!),
-      row: this.rows.get(rowKey!),
-      columnKey,
-      rowKey,
-    };
-  }
 
   setCellFormatter(
     columnIndex: number,
     rowIndex: number,
     formatter: Formatter | null = null,
   ): void {
-    const { column, row, columnKey, rowKey } = this.getCellGroupByIndex(
-      columnIndex,
-      rowIndex,
-    );
+
+    const { columnKey, rowKey } = this.initializePosition(columnIndex, rowIndex);
+    const column = this.columns.get(columnKey!);
+    const row = this.rows.get(rowKey!);
 
     if (!column || !row) return;
 
@@ -505,10 +489,9 @@ export default class Sheet {
     rowIndex: number,
     css: Map<string, string> = new Map(),
   ): void {
-    const { column, row, columnKey, rowKey } = this.getCellGroupByIndex(
-      columnIndex,
-      rowIndex,
-    );
+    const { columnKey, rowKey } = this.initializePosition(columnIndex, rowIndex);
+    const column = this.columns.get(columnKey!);
+    const row = this.rows.get(rowKey!);
 
     if (!column || !row) return;
 
@@ -912,9 +895,9 @@ export default class Sheet {
     return false;
   }
 
-  private initializePosition(colPos: number, rowPos: number): KeyPosition {
+  private initializePosition(columnPos: number, rowPos: number): KeyPosition {
     let rowKey;
-    let colKey;
+    let columnKey;
 
     // Create row and column if they don't exist yet.
     if (!this.rowPositions.has(rowPos)) {
@@ -927,18 +910,18 @@ export default class Sheet {
       rowKey = this.rowPositions.get(rowPos)!;
     }
 
-    if (!this.columnPositions.has(colPos)) {
+    if (!this.columnPositions.has(columnPos)) {
       // Create a new column
-      const col = new Column(this.defaultWidth, colPos);
+      const col = new Column(this.defaultWidth, columnPos);
       this.columns.set(col.key, col);
-      this.columnPositions.set(colPos, col.key);
+      this.columnPositions.set(columnPos, col.key);
 
-      colKey = col.key;
+      columnKey = col.key;
     } else {
-      colKey = this.columnPositions.get(colPos)!;
+      columnKey = this.columnPositions.get(columnPos)!;
     }
 
-    return { rowKey: rowKey, columnKey: colKey };
+    return { columnKey, rowKey };
   }
 
   private emitSetCellEvent(

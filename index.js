@@ -27,7 +27,7 @@ new Lightsheet(
       {
         position: "B2",
         css: "background-color: yellow;",
-        format: { type: "currency", options: { name: "EUR", decimal: 2 } },
+        format: { type: "number", options: { decimal: 2 } },
       },
       {
         position: "3",
@@ -36,5 +36,5 @@ new Lightsheet(
       },
     ],
   },
-  document.getElementById("lightsheet"),
+  document.getElementById("lightsheet")
 );
