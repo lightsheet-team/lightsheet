@@ -11,7 +11,6 @@ describe("CellStyle", () => {
 
   it("should apply cell styling rules that are properly combined by getCellStyle", () => {
     const pos = sheet.setCellAt(1, 1, "test")!.position;
-    sheet.defaultStyle = new CellStyle();
 
     const styles = [
       new CellStyle(
@@ -30,7 +29,7 @@ describe("CellStyle", () => {
 
     sheet.setCellStyle(pos.columnKey!, pos.rowKey!, null);
     expect(sheet.getCellStyle(pos.columnKey!, pos.rowKey!)).toEqual(
-      sheet.defaultStyle,
+      sheet["defaultStyle"],
     );
 
     sheet.setRowStyle(pos.rowKey!, styles[1]);
@@ -61,7 +60,7 @@ describe("CellStyle", () => {
     sheet.setRowStyle(pos.rowKey!, null);
     sheet.setColumnStyle(pos.columnKey!, null);
     expect(sheet.getCellStyle(pos.columnKey!, pos.rowKey!)).toEqual(
-      sheet.defaultStyle,
+      sheet["defaultStyle"],
     );
   });
 });

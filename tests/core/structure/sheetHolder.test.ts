@@ -46,16 +46,16 @@ describe("Multiple sheets test", () => {
     const outInfo = sheet1.setCellAt(0, 0, "=Sheet2!A1:E5");
     const refSize = { col: 5, row: 5 };
 
-    const outCellKey = sheet1
-      .columns!.get(outInfo!.position.columnKey!)!
-      .cellIndex.get(outInfo!.position.rowKey!)!;
-    const outCell = sheet1.cellData.get(outCellKey)!;
+    const outCellKey = sheet1["columns"]!.get(
+      outInfo!.position.columnKey!,
+    )!.cellIndex.get(outInfo!.position.rowKey!)!;
+    const outCell = sheet1["cellData"].get(outCellKey)!;
 
     // Check referencesIn and referencesOut
     expect(outCell.referencesOut.size).toBe(refSize.col * refSize.row);
     outCell.referencesOut.forEach((ref, refCellKey) => {
       const refSheet = window.sheetHolder.getSheet(ref.sheetKey)!;
-      expect(refSheet.cellData.get(refCellKey)!.referencesIn.size).toBe(1);
+      expect(refSheet["cellData"].get(refCellKey)!.referencesIn.size).toBe(1);
     });
 
     // Clear referencing formula.

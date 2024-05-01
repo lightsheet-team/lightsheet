@@ -23,21 +23,20 @@ import { CellReference } from "./cell/types.cell.ts";
 import { Coordinate } from "../../utils/common.types.ts";
 
 export default class Sheet {
-  key: SheetKey;
-  name: string;
-  sheetHolder: SheetHolder;
+  readonly key: SheetKey;
+  readonly name: string;
+  private readonly sheetHolder: SheetHolder;
 
-  cellData: Map<CellKey, Cell>;
+  private readonly cellData: Map<CellKey, Cell>;
 
-  defaultStyle: any;
-  settings: any;
-  rows: Map<RowKey, Row>;
-  columns: Map<ColumnKey, Column>;
-  rowPositions: Map<number, RowKey>;
-  columnPositions: Map<number, ColumnKey>;
+  private readonly rows: Map<RowKey, Row>;
+  private readonly columns: Map<ColumnKey, Column>;
+  private readonly rowPositions: Map<number, RowKey>;
+  private readonly columnPositions: Map<number, ColumnKey>;
 
-  defaultWidth: number;
-  defaultHeight: number;
+  private defaultStyle: any;
+  private defaultWidth: number;
+  private defaultHeight: number;
 
   private events: Events;
 
@@ -50,7 +49,6 @@ export default class Sheet {
     this.sheetHolder.addSheet(this);
 
     this.defaultStyle = new CellStyle(); // TODO This should be configurable.
-    this.settings = null;
     this.rows = new Map<RowKey, Row>();
     this.columns = new Map<ColumnKey, Column>();
 
