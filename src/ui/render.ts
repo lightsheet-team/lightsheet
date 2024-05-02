@@ -1,4 +1,3 @@
-import LightSheet from "../main";
 import { SelectionContainer } from "./render.types.ts";
 import LightsheetEvent from "../core/event/event.ts";
 import {
@@ -8,10 +7,11 @@ import {
   CoreDeleteCellGroupPayload,
 } from "../core/event/events.types.ts";
 import EventType from "../core/event/eventType.ts";
-import { ToolbarOptions } from "../main.types";
+import { LightSheetOptions, ToolbarOptions } from "../main.types";
 import LightSheetHelper from "../utils/helpers.ts";
 import { ToolbarItems } from "../utils/constants.ts";
 import { Coordinate } from "../utils/common.types.ts";
+import Events from "../core/event/events.ts";
 
 export default class UI {
   tableEl!: Element;
@@ -21,7 +21,6 @@ export default class UI {
   selectedCellDisplay!: HTMLElement;
   tableHeadDom!: Element;
   tableBodyDom!: Element;
-  lightSheet: LightSheet;
   selectedCell: number[];
   selectedRowNumberCell: HTMLElement | null = null;
   selectedHeaderCell: HTMLElement | null = null;
@@ -30,27 +29,28 @@ export default class UI {
   isReadOnly: boolean;
   singleSelectedCell: Coordinate | undefined;
   tableContainerDom: Element;
+  private events: Events;
 
   constructor(
     lightSheetContainerDom: Element,
-    lightSheet: LightSheet,
-    toolbarOptions?: ToolbarOptions,
+    lightSheetOptions: LightSheetOptions,
+    events: Events | null = null,
   ) {
-    this.lightSheet = lightSheet;
     this.selectedCell = [];
     this.selectedCellsContainer = {
       selectionStart: null,
       selectionEnd: null,
     };
     this.singleSelectedCell = undefined;
+    this.events = events ?? new Events();
     this.registerEvents();
     this.toolbarOptions = {
       showToolbar: false,
       element: undefined,
       items: ToolbarItems,
-      ...toolbarOptions,
+      ...lightSheetOptions.toolbarOptions,
     };
-    this.isReadOnly = lightSheet.options.isReadOnly || false;
+    this.isReadOnly = lightSheetOptions.isReadOnly || false;
     this.tableContainerDom = lightSheetContainerDom;
     lightSheetContainerDom.classList.add("lightsheet_table_container");
 
@@ -323,8 +323,6 @@ export default class UI {
     );
     rowDom.appendChild(cellDom);
     cellDom.id = `${colIndex}_${rowIndex}`;
-    cellDom.setAttribute("column-index", `${colIndex}` || "");
-    cellDom.setAttribute("row-index", `${rowIndex}` || "");
 
     const inputDom = document.createElement("input");
     inputDom.classList.add("lightsheet_table_cell_input");
@@ -419,9 +417,7 @@ export default class UI {
       indexPosition: { column: colIndex, row: rowIndex },
       rawValue,
     };
-    this.lightSheet.events.emit(
-      new LightsheetEvent(EventType.UI_SET_CELL, payload),
-    );
+    this.events.emit(new LightsheetEvent(EventType.UI_SET_CELL, payload));
   }
 
   private onDeleteButtonPressed(e: KeyboardEvent) {
@@ -434,7 +430,7 @@ export default class UI {
         indexPosition: indexOfSelectedRow,
         type: "row",
       };
-      this.lightSheet.events.emit(
+      this.events.emit(
         new LightsheetEvent(EventType.UI_DELETE_CELL_GROUP, payload),
       );
     } else if (this.selectedHeaderCell) {
@@ -446,17 +442,17 @@ export default class UI {
         indexPosition: indexOfSelectedColumn,
         type: "column",
       };
-      this.lightSheet.events.emit(
+      this.events.emit(
         new LightsheetEvent(EventType.UI_DELETE_CELL_GROUP, payload),
       );
     }
   }
 
   private registerEvents() {
-    this.lightSheet.events.on(EventType.CORE_SET_CELL, (event) => {
+    this.events.on(EventType.CORE_SET_CELL, (event) => {
       this.onCoreSetCell(event);
     });
-    this.lightSheet.events.on(EventType.CORE_DELETE_CELL_GROUP, (event) => {
+    this.events.on(EventType.CORE_DELETE_CELL_GROUP, (event) => {
       this.onCoreDeleteCellGroup(event);
     });
   }
@@ -626,21 +622,18 @@ export default class UI {
       return false;
     }
 
-    const cellColumnIndex = Number(cell.getAttribute("column-index"));
-    const cellRowIndex = Number(cell.getAttribute("row-index"));
+    const { columnIndex, rowIndex } = LightSheetHelper.getCellIndexFromTd(cell);
 
-    if (cellColumnIndex === undefined || cellRowIndex === undefined)
-      return false;
+    if (columnIndex === undefined || rowIndex === undefined) return false;
 
     const withinX =
-      (cellColumnIndex >= selectionStart.column &&
-        cellColumnIndex <= selectionEnd.column) ||
-      (cellColumnIndex <= selectionStart.column &&
-        cellColumnIndex >= selectionEnd.column);
+      (columnIndex >= selectionStart.column &&
+        columnIndex <= selectionEnd.column) ||
+      (columnIndex <= selectionStart.column &&
+        columnIndex >= selectionEnd.column);
     const withinY =
-      (cellRowIndex >= selectionStart.row &&
-        cellRowIndex <= selectionEnd.row) ||
-      (cellRowIndex <= selectionStart.row && cellRowIndex >= selectionEnd.row);
+      (rowIndex >= selectionStart.row && rowIndex <= selectionEnd.row) ||
+      (rowIndex <= selectionStart.row && rowIndex >= selectionEnd.row);
 
     return withinX && withinY;
   }
