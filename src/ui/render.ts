@@ -497,10 +497,7 @@ export default class UI {
       ".lightsheet_table_header",
     );
     columnNumberCells.forEach((cell, index) => {
-      cell.innerHTML = LightSheetHelper.generateColumnLabel(index);
-    });
-    this.lightSheet.events.on(EventType.CORE_DELETE_CELL_GROUP, (event) => {
-      this.onCoreDeleteCellGroup(event);
+      cell.innerHTML = LightSheetHelper.generateColumnLabel(index + 1);
     });
   }
 
