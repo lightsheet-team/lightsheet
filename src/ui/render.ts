@@ -314,8 +314,6 @@ export default class UI {
     );
     rowDom.appendChild(cellDom);
     cellDom.id = `${colIndex}_${rowIndex}`;
-    cellDom.setAttribute("column-index", `${colIndex}` || "");
-    cellDom.setAttribute("row-index", `${rowIndex}` || "");
 
     const inputDom = document.createElement("input");
     inputDom.classList.add("lightsheet_table_cell_input");
@@ -544,21 +542,18 @@ export default class UI {
       return false;
     }
 
-    const cellColumnIndex = Number(cell.getAttribute("column-index"));
-    const cellRowIndex = Number(cell.getAttribute("row-index"));
+    const { columnIndex, rowIndex } = LightSheetHelper.getCellIndexFromTd(cell);
 
-    if (cellColumnIndex === undefined || cellRowIndex === undefined)
-      return false;
+    if (columnIndex === undefined || rowIndex === undefined) return false;
 
     const withinX =
-      (cellColumnIndex >= selectionStart.column &&
-        cellColumnIndex <= selectionEnd.column) ||
-      (cellColumnIndex <= selectionStart.column &&
-        cellColumnIndex >= selectionEnd.column);
+      (columnIndex >= selectionStart.column &&
+        columnIndex <= selectionEnd.column) ||
+      (columnIndex <= selectionStart.column &&
+        columnIndex >= selectionEnd.column);
     const withinY =
-      (cellRowIndex >= selectionStart.row &&
-        cellRowIndex <= selectionEnd.row) ||
-      (cellRowIndex <= selectionStart.row && cellRowIndex >= selectionEnd.row);
+      (rowIndex >= selectionStart.row && rowIndex <= selectionEnd.row) ||
+      (rowIndex <= selectionStart.row && rowIndex >= selectionEnd.row);
 
     return withinX && withinY;
   }
