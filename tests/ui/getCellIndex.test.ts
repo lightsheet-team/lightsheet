@@ -17,6 +17,7 @@ describe("LightSheetHelper getCellIndexFromTd", () => {
       },
       targetElementMock,
     );
+    document.body.appendChild(targetElementMock);
   });
   afterEach(() => {
     jest.clearAllMocks();
@@ -26,7 +27,6 @@ describe("LightSheetHelper getCellIndexFromTd", () => {
     const cellInfo = lightSheet.setCellAt(1, 1, "B2");
     const cellKeyInTheDom = `${cellInfo.position.columnKey}_${cellInfo.position.rowKey}`;
 
-    await new Promise((resolve) => setTimeout(resolve, 3000));
     console.log(targetElementMock.innerHTML);
     console.log(cellKeyInTheDom);
     const cellElement = document.getElementById(cellKeyInTheDom);
