@@ -1,5 +1,5 @@
 import UI from "./ui/render.ts";
-import { LightSheetOptions } from "./main.types.ts";
+import { LightsheetOptions } from "./main.types.ts";
 import Sheet from "./core/structure/sheet.ts";
 import { CellInfo } from "./core/structure/sheet.types.ts";
 import Events from "./core/event/events.ts";
@@ -14,9 +14,9 @@ import { RowKey, ColumnKey } from "./core/structure/key/keyTypes.ts";
 import CellStyle from "./core/structure/cellStyle.ts";
 import { Coordinate } from "./utils/common.types.ts";
 
-export default class LightSheet {
+export default class Lightsheet {
   private ui: UI | undefined;
-  options: LightSheetOptions;
+  options: LightsheetOptions;
   private sheet: Sheet;
   sheetHolder: SheetHolder;
   private events: Events;
@@ -24,7 +24,7 @@ export default class LightSheet {
   isReady: boolean = false;
 
   constructor(
-    options: LightSheetOptions,
+    options: LightsheetOptions,
     targetElement: Element | null = null,
   ) {
     this.options = {

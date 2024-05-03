@@ -1,5 +1,5 @@
 // TODO We should reconsider the role/scope of this type
-export type LightSheetOptions = {
+export type LightsheetOptions = {
   sheetName: string;
   data?: any[];
   onCellChange?: (colIndex: number, rowIndex: number, value: any) => void;

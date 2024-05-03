@@ -18,7 +18,7 @@ import {
 } from "./expressionHandler.types.ts";
 
 import { CellState } from "../structure/cell/cellState.ts";
-import LightSheetHelper from "../../utils/helpers.ts";
+import LightsheetHelper from "../../utils/helpers.ts";
 import { Coordinate } from "../../utils/common.types.ts";
 import { CellReference } from "../structure/cell/types.cell.ts";
 import SheetHolder from "../structure/sheetHolder.ts";
@@ -93,9 +93,9 @@ export default class ExpressionHandler {
     const parseResult = math.parse(expression);
 
     const fromSymbol =
-      LightSheetHelper.generateColumnLabel(from.column + 1) + (from.row + 1);
+      LightsheetHelper.generateColumnLabel(from.column + 1) + (from.row + 1);
     const toSymbol =
-      LightSheetHelper.generateColumnLabel(to.column + 1) + (to.row + 1);
+      LightsheetHelper.generateColumnLabel(to.column + 1) + (to.row + 1);
 
     // Update each symbol in the expression.
     const transform = parseResult.transform((node) =>

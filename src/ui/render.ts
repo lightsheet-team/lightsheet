@@ -5,8 +5,8 @@ import {
   UISetCellPayload,
 } from "../core/event/events.types.ts";
 import EventType from "../core/event/eventType.ts";
-import { LightSheetOptions, ToolbarOptions } from "../main.types";
-import LightSheetHelper from "../utils/helpers.ts";
+import { LightsheetOptions, ToolbarOptions } from "../main.types";
+import LightsheetHelper from "../utils/helpers.ts";
 import { ToolbarItems } from "../utils/constants.ts";
 import { Coordinate } from "../utils/common.types.ts";
 import Events from "../core/event/events.ts";
@@ -31,7 +31,7 @@ export default class UI {
 
   constructor(
     lightSheetContainerDom: Element,
-    lightSheetOptions: LightSheetOptions,
+    lightSheetOptions: LightsheetOptions,
     events: Events | null = null,
   ) {
     this.selectedCell = [];
@@ -207,7 +207,7 @@ export default class UI {
 
     const newColumnNumber = this.getColumnCount() + 1;
     const newHeaderValue =
-      LightSheetHelper.generateColumnLabel(newColumnNumber);
+      LightsheetHelper.generateColumnLabel(newColumnNumber);
 
     headerCellDom.textContent = newHeaderValue;
     headerCellDom.onclick = (e: MouseEvent) =>

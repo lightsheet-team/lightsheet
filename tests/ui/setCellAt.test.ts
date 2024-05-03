@@ -1,16 +1,16 @@
-import LightSheet from "../../src/main";
+import Lightsheet from "../../src/main";
 
-describe("LightSheet setCellAt", () => {
-  let lightSheet: LightSheet;
+describe("Lightsheet setCellAt", () => {
+  let lightSheet: Lightsheet;
   let targetElementMock: HTMLElement;
 
   beforeEach(() => {
     // Mocking UI and target element
     targetElementMock = document.createElement("div");
 
-    // Creating instance of LightSheet with mocked dependencies
+    // Creating instance of Lightsheet with mocked dependencies
     window.sheetHolder?.clear();
-    lightSheet = new LightSheet(
+    lightSheet = new Lightsheet(
       {
         sheetName: "Sheet",
       },
