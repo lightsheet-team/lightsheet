@@ -463,21 +463,13 @@ export default class Sheet {
 
     if (!column || !row) return;
 
-    if (formatter == null) {
-      column.cellFormatting.get(row.key)?.clearFormatter();
-      row.cellFormatting.get(column.key)?.clearFormatter();
-    } else {
-      column.cellFormatting.set(
-        row.key,
-        new CellStyle(column.cellFormatting.get(rowKey!)?.css, formatter),
-      );
-      row.cellFormatting.set(
-        column.key,
-        new CellStyle(row.cellFormatting.get(columnKey!)?.css, formatter),
-      );
-    }
+    const newStyle = new CellStyle().clone(column.cellFormatting.get(row.key));
+    newStyle.formatter = formatter;
+    column.cellFormatting.set(row.key, newStyle);
+    row.cellFormatting.set(column.key, newStyle);
 
     const cell = this.getCell(columnKey!, rowKey!);
+
     this.applyCellFormatter(cell!, columnKey!, rowKey!);
 
     this.deleteCellIfUnused(columnKey!, rowKey!);
@@ -495,31 +487,17 @@ export default class Sheet {
 
     if (!column || !row) return;
 
-    if (!css || css.size == 0) {
-      column.cellFormatting.get(row.key)?.clearCss();
-      row.cellFormatting.get(column.key)?.clearCss();
-      this.deleteCellIfUnused(columnKey!, rowKey!);
-      this.emitSetStyleEvent(
-        columnIndex,
-        rowIndex,
-        columnKey,
-      );
-      return;
-    }
+    const newStyle = new CellStyle().clone(column.cellFormatting.get(row.key));
+    newStyle.css = css;
+    column.cellFormatting.set(row.key, newStyle);
+    row.cellFormatting.set(column.key, newStyle);
 
-    column.cellFormatting.set(
-      row.key,
-      new CellStyle(css, column.cellFormatting.get(rowKey!)?.formatter),
-    );
-    row.cellFormatting.set(
-      column.key,
-      new CellStyle(css, row.cellFormatting.get(columnKey!)?.formatter),
-    );
-
+    this.deleteCellIfUnused(columnKey!, rowKey!);
     this.emitSetStyleEvent(
       columnIndex,
       rowIndex,
-      columnKey, rowKey,
+      columnKey,
+      rowKey
     );
   }
 
@@ -790,7 +768,7 @@ export default class Sheet {
    * Delete a cell if it's empty, has no formatting and is not referenced by any other cell.
    */
   private deleteCellIfUnused(colKey: ColumnKey, rowKey: RowKey): boolean {
-    const cell = this.getCell(colKey, rowKey)!;
+    const cell = this.getCell(colKey, rowKey);
     if (!cell) return false;
     if (cell.rawValue != "") return false;
 
