@@ -71,7 +71,7 @@ describe("Cell moving tests", () => {
         fromCell.position.columnKey!,
         fromCell.position.rowKey!,
       ),
-    ).toEqual(sheet.defaultStyle);
+    ).toEqual(sheet["defaultStyle"]);
 
     const toCell = sheet.getCellInfoAt(3, 3)!;
     expect(

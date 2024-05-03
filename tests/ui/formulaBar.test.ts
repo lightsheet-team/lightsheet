@@ -1,5 +1,5 @@
 // Import other necessary dependencies and utilities for testing
-import LightSheet from "../../src/main";
+import Lightsheet from "../../src/main";
 
 describe("Formula", () => {
   let targetElementMock: HTMLElement;
@@ -15,7 +15,7 @@ describe("Formula", () => {
   });
 
   test("Exist formula bar in dom", () => {
-    new LightSheet(
+    new Lightsheet(
       {
         sheetName: "Sheet 1",
         data: [],
@@ -31,7 +31,7 @@ describe("Formula", () => {
   });
 
   test("Change cell content from formula bar", () => {
-    new LightSheet(
+    new Lightsheet(
       {
         sheetName: "Sheet 2",
         data: [],
@@ -80,7 +80,7 @@ describe("Formula", () => {
   });
 
   test("Change formula bar content from cell", async () => {
-    new LightSheet(
+    new Lightsheet(
       {
         sheetName: "Sheet 3",
         data: [],
@@ -117,7 +117,7 @@ describe("Formula", () => {
   });
 
   test("Hide formula bar when read only mode is on", () => {
-    new LightSheet(
+    new Lightsheet(
       {
         sheetName: "Sheet 4",
         data: [],
@@ -133,7 +133,7 @@ describe("Formula", () => {
   });
 
   test("Show formula bar when read only mode is off", () => {
-    new LightSheet(
+    new Lightsheet(
       {
         sheetName: "Sheet 5",
         data: [],
@@ -149,7 +149,7 @@ describe("Formula", () => {
   });
 
   test("Display the raw value of the cell", () => {
-    new LightSheet(
+    new Lightsheet(
       {
         sheetName: "Sheet 6",
         data: [

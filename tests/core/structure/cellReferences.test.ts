@@ -18,10 +18,10 @@ describe("Cell references", () => {
 
   it("should create cells with references which are reflected by cell.referencesIn and cell.referencesOut", () => {
     const getCellReference = (cInfo: CellInfo) => {
-      const cKey = sheet.columns
+      const cKey = sheet["columns"]
         .get(cInfo.position.columnKey!)!
         .cellIndex.get(cInfo.position.rowKey!)!;
-      return sheet.cellData.get(cKey)!;
+      return sheet["cellData"].get(cKey)!;
     };
 
     const cells = [

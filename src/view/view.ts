@@ -1,16 +1,12 @@
-import LightSheet from "../main.ts";
-import { SelectionContainer } from "./view.types.ts";
-import LightsheetEvent from "../core/event/event.ts";
-import {
-  CoreSetCellPayload,
-  CoreSetStylePayload,
-  EventType,
-  UISetCellPayload,
-} from "../core/event/events.types.ts";
-import { ToolbarOptions } from "../main.types.ts";
-import { ToolbarItems } from "../utils/constants.ts";
-import { GenerateColumnLabel } from "../utils/helpers.ts";
-import { IndexPosition } from "../utils/common.types.ts";
+import Event from "../core/event/event";
+import Events from "../core/event/events";
+import { UISetCellPayload, EventType, CoreSetStylePayload, CoreSetCellPayload } from "../core/event/events.types";
+import { ToolbarOptions, LightsheetOptions } from "../main.types";
+import { IndexPosition } from "../utils/common.types";
+import { ToolbarItems } from "../utils/constants";
+import { GenerateColumnLabel } from "../utils/helpers";
+import { SelectionContainer } from "./view.types";
+
 
 export default class UI {
   tableEl!: Element;
@@ -20,7 +16,6 @@ export default class UI {
   selectedCellDisplay!: HTMLElement;
   tableHeadDom!: Element;
   tableBodyDom!: Element;
-  lightSheet: LightSheet;
   selectedCell: number[];
   selectedRowNumberCell: HTMLElement | null = null;
   selectedHeaderCell: HTMLElement | null = null;
@@ -28,28 +23,29 @@ export default class UI {
   toolbarOptions: ToolbarOptions;
   isReadOnly: boolean;
   singleSelectedCell: IndexPosition | undefined;
-  tableContainerDom: any;
+  tableContainerDom: Element;
+  private events: Events;
 
   constructor(
     lightSheetContainerDom: Element,
-    lightSheet: LightSheet,
-    toolbarOptions?: ToolbarOptions,
+    lightSheetOptions: LightsheetOptions,
+    events: Events | null = null,
   ) {
-    this.lightSheet = lightSheet;
     this.selectedCell = [];
     this.selectedCellsContainer = {
       selectionStart: null,
       selectionEnd: null,
     };
     this.singleSelectedCell = undefined;
+    this.events = events ?? new Events();
     this.registerEvents();
     this.toolbarOptions = {
       showToolbar: false,
       element: undefined,
       items: ToolbarItems,
-      ...toolbarOptions,
+      ...lightSheetOptions.toolbarOptions,
     };
-    this.isReadOnly = lightSheet.options.isReadOnly || false;
+    this.isReadOnly = lightSheetOptions.isReadOnly || false;
     this.tableContainerDom = lightSheetContainerDom;
     lightSheetContainerDom.classList.add("lightsheet_table_container");
 
@@ -405,16 +401,14 @@ export default class UI {
       indexPosition: { columnIndex, rowIndex },
       rawValue,
     };
-    this.lightSheet.events.emit(
-      new LightsheetEvent(EventType.VIEW_SET_CELL, payload),
-    );
+    this.events.emit(new Event(EventType.VIEW_SET_CELL, payload));
   }
 
   private registerEvents() {
-    this.lightSheet.events.on(EventType.CORE_SET_CELL, (event) => {
+    this.events.on(EventType.CORE_SET_CELL, (event) => {
       this.onCoreSetCell(event);
     });
-    this.lightSheet.events.on(EventType.VIEW_SET_STYLE, (event) => {
+    this.events.on(EventType.VIEW_SET_STYLE, (event) => {
       this.onCoreSetStyle(event.payload);
     });
   }

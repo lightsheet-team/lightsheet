@@ -12,7 +12,6 @@ describe("CellStyle", () => {
 
   it("should apply cell styling rules that are properly combined by getCellStyle", () => {
     const pos = sheet.setCellAt(1, 1, "test")!.position;
-    sheet.defaultStyle = new CellStyle();
 
     const styles = [
       new CellStyle(

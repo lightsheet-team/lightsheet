@@ -21,6 +21,10 @@ import { CellState } from "../structure/cell/cellState.ts";
 import { CellReference } from "../structure/cell/types.cell.ts";
 import { GenerateColumnLabel } from "../../utils/helpers.ts";
 import { IndexPosition } from "../../utils/common.types.ts";
+import LightsheetHelper from "../../utils/helpers.ts";
+import { Coordinate } from "../../utils/common.types.ts";
+import { CellReference } from "../structure/cell/types.cell.ts";
+import SheetHolder from "../structure/sheetHolder.ts";
 
 const math = create({
   parseDependencies,
@@ -188,7 +192,7 @@ export default class ExpressionHandler {
         throw new Error("Invalid sheet reference: " + symbol);
 
       const sheetName = parts[0];
-      const refSheet = this.sheet.sheetHolder.getSheetByName(sheetName);
+      const refSheet = SheetHolder.getInstance().getSheetByName(sheetName);
       if (!refSheet) throw new Error("Invalid sheet reference: " + symbol);
       targetSheet = refSheet;
       symbol = parts[1];

@@ -1,6 +1,6 @@
-import LightSheet from "../../src/main";
+import Lightsheet from "../../src/main";
 
-describe("LightSheet", () => {
+describe("Lightsheet", () => {
   let targetElementMock: HTMLElement;
 
   beforeEach(() => {
@@ -14,7 +14,7 @@ describe("LightSheet", () => {
   });
 
   test("All input elements within the table have readonly property set to true when isReadOnly is true", () => {
-    new LightSheet(
+    new Lightsheet(
       {
         data: [],
         sheetName: "Sheet",
@@ -37,7 +37,7 @@ describe("LightSheet", () => {
   });
 
   test("All input elements within the table have readonly property set to true when isReadOnly is false", () => {
-    new LightSheet(
+    new Lightsheet(
       {
         data: [],
         sheetName: "Sheet",
