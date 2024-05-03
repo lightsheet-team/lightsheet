@@ -507,28 +507,20 @@ export default class Sheet {
     groupType: GroupType,
     css: Map<string, string> = new Map(),
   ): void {
-    const isColumnGroup = GroupTypes.Column == groupType;
-    const positions = isColumnGroup ? this.columnPositions : this.rowPositions;
+    const isColumnGroup = groupType == GroupTypes.Column;
     const groupKey = isColumnGroup
-      ? (positions.get(groupIndex!) as ColumnKey)
-      : (positions.get(groupIndex) as RowKey);
+      ? this.columnPositions.get(groupIndex)
+      : this.rowPositions.get(groupIndex);
     if (!groupKey) return;
+
     const group = isColumnGroup
       ? this.columns.get(groupKey as ColumnKey)
       : this.rows.get(groupKey as RowKey);
     if (!group) return;
 
-    if (!css || css.size == 0) {
-      group.defaultStyle?.clearCss();
-      isColumnGroup
-        ? this.emitSetStyleEvent(groupIndex, null, groupKey as ColumnKey)
-        : this.emitSetStyleEvent(null, groupIndex, null, groupKey as RowKey);
-      return;
-    }
-
     group.defaultStyle = new CellStyle(css, group.defaultStyle?.formatter);
     isColumnGroup
-      ? this.emitSetStyleEvent(groupIndex, null, groupKey as ColumnKey)
+      ? this.emitSetStyleEvent(groupIndex, null, groupKey as ColumnKey, null)
       : this.emitSetStyleEvent(null, groupIndex, null, groupKey as RowKey);
   }
 
@@ -547,9 +539,7 @@ export default class Sheet {
       : this.rows.get(groupKey as RowKey);
     if (!group) return;
 
-    const cellStyle = group.defaultStyle?.css
-      ? new CellStyle(group.defaultStyle?.css, formatter)
-      : new CellStyle(null, formatter);
+    const cellStyle = new CellStyle(group.defaultStyle?.css, formatter);
 
     this.setCellGroupStyle(group, cellStyle);
   }
