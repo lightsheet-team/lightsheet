@@ -135,11 +135,11 @@ export default class Lightsheet {
   }
 
   setFormatting(position: string, format: Format) {
-    this.processFormatting(position, format)
+    this.processFormatting(position, format);
   }
 
   clearFormatter(position: string) {
-    this.processFormatting(position, null)
+    this.processFormatting(position, null);
   }
 
   private processFormatting(position: string, format: Format | null) {
@@ -181,7 +181,6 @@ export default class Lightsheet {
     return this.sheet.getCellInfoAt(colPos, rowPos);
   }
 
-
   moveColumn(from: number, to: number): boolean {
     return this.sheet.moveColumn(from, to);
   }
@@ -190,7 +189,11 @@ export default class Lightsheet {
     return this.sheet.moveRow(from, to);
   }
 
-  moveCell(from: IndexPosition, to: IndexPosition, moveStyling: boolean = true) {
+  moveCell(
+    from: IndexPosition,
+    to: IndexPosition,
+    moveStyling: boolean = true,
+  ) {
     this.sheet.moveCell(from, to, moveStyling);
   }
 

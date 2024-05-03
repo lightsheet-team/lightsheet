@@ -26,9 +26,9 @@ describe("CellStyle", () => {
     ];
 
     sheet.setCellCss(1, 1, styles[0].css);
-    expect(
-      sheet.getMergedCellStyle(pos.columnKey, pos.rowKey).css!,
-    ).toEqual(styles[0].css);
+    expect(sheet.getMergedCellStyle(pos.columnKey, pos.rowKey).css!).toEqual(
+      styles[0].css,
+    );
 
     sheet.setCellCss(1, 1, new Map());
     expect(sheet.getMergedCellStyle(pos.columnKey, pos.rowKey).css).toEqual(

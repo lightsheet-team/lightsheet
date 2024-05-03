@@ -1,4 +1,4 @@
 export type IndexPosition = {
-    columnIndex?: number | null;
-    rowIndex?: number | null;
+  columnIndex?: number | null;
+  rowIndex?: number | null;
 };

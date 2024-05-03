@@ -1,12 +1,16 @@
 import Event from "../core/event/event";
 import Events from "../core/event/events";
-import { UISetCellPayload, EventType, CoreSetStylePayload, CoreSetCellPayload } from "../core/event/events.types";
+import {
+  UISetCellPayload,
+  EventType,
+  CoreSetStylePayload,
+  CoreSetCellPayload,
+} from "../core/event/events.types";
 import { ToolbarOptions, LightsheetOptions } from "../main.types";
 import { IndexPosition } from "../utils/common.types";
 import { ToolbarItems } from "../utils/constants";
 import { GenerateColumnLabel } from "../utils/helpers";
 import { SelectionContainer } from "./view.types";
-
 
 export default class UI {
   tableEl!: Element;
@@ -415,10 +419,13 @@ export default class UI {
 
   private onCoreSetStyle(event: CoreSetStylePayload) {
     const { indexPosition, value } = event;
-    if (indexPosition.columnIndex != undefined && indexPosition.rowIndex != undefined) {
+    if (
+      indexPosition.columnIndex != undefined &&
+      indexPosition.rowIndex != undefined
+    ) {
       const cellDom =
         this.tableBodyDom.children[indexPosition.rowIndex].children[
-        indexPosition.columnIndex + 1
+          indexPosition.columnIndex + 1
         ];
       const inputElement = cellDom! as HTMLElement;
       inputElement.setAttribute("style", value);
@@ -590,9 +597,9 @@ export default class UI {
       this.selectedCellsContainer.selectionStart =
         (colIndex != null || undefined) && (rowIndex != null || undefined)
           ? {
-            rowIndex: rowIndex,
-            columnIndex: colIndex,
-          }
+              rowIndex: rowIndex,
+              columnIndex: colIndex,
+            }
           : null;
     }
   }
@@ -603,15 +610,15 @@ export default class UI {
     this.selectedCellsContainer.selectionEnd =
       (colIndex != null || undefined) && (rowIndex != null || undefined)
         ? {
-          rowIndex: rowIndex,
-          columnIndex: colIndex,
-        }
+            rowIndex: rowIndex,
+            columnIndex: colIndex,
+          }
         : null;
     if (
       this.selectedCellsContainer.selectionStart &&
       this.selectedCellsContainer.selectionEnd &&
       this.selectedCellsContainer.selectionStart !==
-      this.selectedCellsContainer.selectionEnd
+        this.selectedCellsContainer.selectionEnd
     ) {
       this.updateSelection();
     }

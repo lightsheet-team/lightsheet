@@ -192,7 +192,11 @@ describe("Events", () => {
       preEventCallback,
       EventState.PRE_EVENT,
     );
-    events.on(EventType.VIEW_SET_CELL, postEventCallback, EventState.POST_EVENT);
+    events.on(
+      EventType.VIEW_SET_CELL,
+      postEventCallback,
+      EventState.POST_EVENT,
+    );
 
     const preEvent = new Event(
       EventType.VIEW_SET_CELL,

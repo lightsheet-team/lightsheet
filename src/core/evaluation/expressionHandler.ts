@@ -18,11 +18,8 @@ import {
 } from "./expressionHandler.types.ts";
 
 import { CellState } from "../structure/cell/cellState.ts";
-import { CellReference } from "../structure/cell/types.cell.ts";
 import { GenerateColumnLabel } from "../../utils/helpers.ts";
 import { IndexPosition } from "../../utils/common.types.ts";
-import LightsheetHelper from "../../utils/helpers.ts";
-import { Coordinate } from "../../utils/common.types.ts";
 import { CellReference } from "../structure/cell/types.cell.ts";
 import SheetHolder from "../structure/sheetHolder.ts";
 

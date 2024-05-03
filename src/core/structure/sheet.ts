@@ -124,7 +124,11 @@ export default class Sheet {
     };
   }
 
-  public moveCell(from: IndexPosition, to: IndexPosition, moveStyling: boolean = true) {
+  public moveCell(
+    from: IndexPosition,
+    to: IndexPosition,
+    moveStyling: boolean = true,
+  ) {
     const fromPosition = this.getCellInfoAt(
       from.columnIndex!,
       from.rowIndex!,
@@ -176,15 +180,15 @@ export default class Sheet {
     const cell = this.getCell(colKey, rowKey)!;
     return cell
       ? {
-        rawValue: cell.rawValue,
-        resolvedValue: cell.resolvedValue,
-        formattedValue: cell.formattedValue,
-        state: cell.state,
-        position: {
-          columnKey: colKey,
-          rowKey: rowKey,
-        },
-      }
+          rawValue: cell.rawValue,
+          resolvedValue: cell.resolvedValue,
+          formattedValue: cell.formattedValue,
+          state: cell.state,
+          position: {
+            columnKey: colKey,
+            rowKey: rowKey,
+          },
+        }
       : null;
   }
 
@@ -448,14 +452,15 @@ export default class Sheet {
     return cellStyle;
   }
 
-
   setCellFormatter(
     columnIndex: number,
     rowIndex: number,
     formatter: Formatter | null = null,
   ): void {
-
-    const { columnKey, rowKey } = this.initializePosition(columnIndex, rowIndex);
+    const { columnKey, rowKey } = this.initializePosition(
+      columnIndex,
+      rowIndex,
+    );
     const column = this.columns.get(columnKey!);
     const row = this.rows.get(rowKey!);
 
@@ -479,7 +484,10 @@ export default class Sheet {
     rowIndex: number,
     css: Map<string, string> = new Map(),
   ): void {
-    const { columnKey, rowKey } = this.initializePosition(columnIndex, rowIndex);
+    const { columnKey, rowKey } = this.initializePosition(
+      columnIndex,
+      rowIndex,
+    );
     const column = this.columns.get(columnKey!);
     const row = this.rows.get(rowKey!);
 
@@ -491,12 +499,7 @@ export default class Sheet {
     row.cellFormatting.set(column.key, newStyle);
 
     this.deleteCellIfUnused(columnKey!, rowKey!);
-    this.emitSetStyleEvent(
-      columnIndex,
-      rowIndex,
-      columnKey,
-      rowKey
-    );
+    this.emitSetStyleEvent(columnIndex, rowIndex, columnKey, rowKey);
   }
 
   setGroupCss(
@@ -517,31 +520,16 @@ export default class Sheet {
 
     if (!css || css.size == 0) {
       group.defaultStyle?.clearCss();
-      isColumnGroup ?
-        this.emitSetStyleEvent(
-          groupIndex,
-          null,
-          groupKey as ColumnKey) :
-        this.emitSetStyleEvent(
-          null,
-          groupIndex,
-          null, groupKey as RowKey)
-        ;
+      isColumnGroup
+        ? this.emitSetStyleEvent(groupIndex, null, groupKey as ColumnKey)
+        : this.emitSetStyleEvent(null, groupIndex, null, groupKey as RowKey);
       return;
     }
 
     group.defaultStyle = new CellStyle(css, group.defaultStyle?.formatter);
-    isColumnGroup ?
-      this.emitSetStyleEvent(
-        groupIndex,
-        null,
-        groupKey as ColumnKey)
-      :
-      this.emitSetStyleEvent(
-        null,
-        groupIndex,
-        null, groupKey as RowKey
-      );
+    isColumnGroup
+      ? this.emitSetStyleEvent(groupIndex, null, groupKey as ColumnKey)
+      : this.emitSetStyleEvent(null, groupIndex, null, groupKey as RowKey);
   }
 
   setGroupFormatter(
@@ -919,7 +907,9 @@ export default class Sheet {
         rowIndex,
         columnIndex,
       },
-      value: GenerateStyleStringFromMap(this.getMergedCellStyle(columnKey, rowKey).css),
+      value: GenerateStyleStringFromMap(
+        this.getMergedCellStyle(columnKey, rowKey).css,
+      ),
     };
 
     this.events.emit(new LightsheetEvent(EventType.VIEW_SET_STYLE, payload));
