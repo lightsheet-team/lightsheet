@@ -42,14 +42,6 @@ export default class CellStyle extends Cloneable<CellStyle> {
     return this;
   }
 
-  clearCss() {
-    this.css = new Map();
-  }
-
-  clearFormatter() {
-    this.formatter = null;
-  }
-
   clearStylingSetBy(other: CellStyle | null) {
     if (!other) return false;
     let isEmpty = true;
