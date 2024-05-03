@@ -590,25 +590,16 @@ export default class Sheet {
     // Apply new formatter to all cells in this group.
     for (const [opposingKey] of group.cellIndex) {
       const cell = this.cellData.get(group.cellIndex.get(opposingKey)!)!;
-      if (group instanceof Column) {
-        this.applyCellFormatter(cell, group.key, opposingKey as RowKey);
-        this.emitSetCellEvent(
-          this.getColumnIndex(group.key as ColumnKey)!,
-          this.getRowIndex(opposingKey as RowKey)!,
-          cell,
-        );
-      } else {
-        this.applyCellFormatter(
-          cell,
-          opposingKey as ColumnKey,
-          group.key as RowKey,
-        );
-        this.emitSetCellEvent(
-          this.getColumnIndex(opposingKey as ColumnKey)!,
-          this.getRowIndex(group.key as RowKey)!,
-          cell,
-        );
-      }
+      const colKey = (
+        group instanceof Column ? group.key : opposingKey
+      ) as ColumnKey;
+      const rowKey = (group instanceof Row ? group.key : opposingKey) as RowKey;
+      this.applyCellFormatter(cell, colKey, rowKey);
+      this.emitSetCellEvent(
+        this.getColumnIndex(colKey)!,
+        this.getRowIndex(rowKey)!,
+        cell,
+      );
     }
   }
 
