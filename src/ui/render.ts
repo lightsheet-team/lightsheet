@@ -535,7 +535,7 @@ export default class UI {
   }
 
   removeCellRangeSelection() {
-    const cells = Array.from(document.querySelectorAll("td"));
+    const cells = Array.from(this.tableContainerDom.querySelectorAll("td"));
     cells.forEach((cell) =>
       cell.classList.remove("lightsheet_table_selected_cell_range"),
     );
@@ -568,7 +568,7 @@ export default class UI {
 
   updateSelection() {
     this.removeCellRangeSelection();
-    const cells = Array.from(document.querySelectorAll("td"));
+    const cells = Array.from(this.tableContainerDom.querySelectorAll("td"));
     cells.forEach((cell) => {
       if (
         cell.classList.contains("lightsheet_table_header") ||
