@@ -1,4 +1,8 @@
 # lightsheet
+Lightsheet is a lite Excel like JavaScript component for organizes data into spreadsheet elements, with the aim of providing common spreadsheet function such as sorting, filtering, formatting, formulas. Lightsheet aims to be as lightweight as possible and therefore, Lightsheet doesn't use any Js framework like vue or react. 
+
+![G24-ProjPoster-v1-1](https://github.com/lightsheet-team/lightsheet/assets/47510107/c46feaa0-e424-4575-b0d6-7d24c47e3ee0)
+
 
 ## Developer guide
 ### How to run for developement
