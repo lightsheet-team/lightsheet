@@ -25,6 +25,7 @@ export default class UI {
   selectedCellsContainer: SelectionContainer;
   toolbarOptions: ToolbarOptions;
   isReadOnly: boolean;
+  sheetName: string;
   singleSelectedCell: Coordinate | undefined;
   tableContainerDom: Element;
   private events: Events;
@@ -49,6 +50,8 @@ export default class UI {
       ...lightSheetOptions.toolbarOptions,
     };
     this.isReadOnly = lightSheetOptions.isReadOnly || false;
+    this.sheetName = lightSheetOptions.sheetName;
+
     this.tableContainerDom = lightSheetContainerDom;
     lightSheetContainerDom.classList.add("lightsheet_table_container");
 
@@ -257,7 +260,7 @@ export default class UI {
 
   private createRowElement(labelCount: number): HTMLElement {
     const rowDom = document.createElement("tr");
-    rowDom.id = `row_${labelCount}`;
+    rowDom.id = this.getIndexedRowId(labelCount);
     const rowNumberCell = document.createElement("td");
     rowNumberCell.innerHTML = `${labelCount + 1}`; // Row numbers start from 1
     rowNumberCell.classList.add(
@@ -313,7 +316,7 @@ export default class UI {
       "lightsheet_table_td",
     );
     rowDom.appendChild(cellDom);
-    cellDom.id = `${colIndex}_${rowIndex}`;
+    cellDom.id = this.getIndexedCellId(colIndex, rowIndex);
     cellDom.setAttribute("column-index", `${colIndex}` || "");
     cellDom.setAttribute("row-index", `${rowIndex}` || "");
 
@@ -456,24 +459,24 @@ export default class UI {
       colKey && rowKey ? `${colKey!.toString()}_${rowKey!.toString()}` : null;
 
     // Get the cell by either column and row key or position.
-    // TODO Index-based ID may not be unique if there are multiple sheets.
     const cellDom =
       (cellDomKey && document.getElementById(cellDomKey)) ||
-      document.getElementById(`${columnIndex}_${rowIndex}`);
+      document.getElementById(this.getIndexedCellId(columnIndex, rowIndex));
 
     const newCellDomId = payload.clearCell
-      ? `${columnIndex}_${rowIndex}`
+      ? this.getIndexedCellId(columnIndex, rowIndex)
       : `${colKey}_${rowKey}`;
 
-    const newRowDomId = payload.clearRow ? `row_${rowIndex}` : rowKey!;
+    const newRowDomId = payload.clearRow
+      ? this.getIndexedRowId(rowIndex)
+      : rowKey!;
 
     let rowDom: HTMLElement | null = null;
     if (rowKey) {
       rowDom = document.getElementById(rowKey);
     }
     if (!rowDom) {
-      const rowId = `row_${rowIndex}`;
-      rowDom = document.getElementById(rowId);
+      rowDom = document.getElementById(this.getIndexedRowId(rowIndex));
     }
 
     return {
@@ -532,7 +535,7 @@ export default class UI {
   }
 
   removeCellRangeSelection() {
-    const cells = Array.from(document.querySelectorAll("td"));
+    const cells = Array.from(this.tableContainerDom.querySelectorAll("td"));
     cells.forEach((cell) =>
       cell.classList.remove("lightsheet_table_selected_cell_range"),
     );
@@ -565,7 +568,7 @@ export default class UI {
 
   updateSelection() {
     this.removeCellRangeSelection();
-    const cells = Array.from(document.querySelectorAll("td"));
+    const cells = Array.from(this.tableContainerDom.querySelectorAll("td"));
     cells.forEach((cell) => {
       if (
         cell.classList.contains("lightsheet_table_header") ||
@@ -609,5 +612,13 @@ export default class UI {
     ) {
       this.updateSelection();
     }
+  }
+
+  private getIndexedRowId(rowIndex: number) {
+    return `${this.sheetName}_row_${rowIndex}`;
+  }
+
+  private getIndexedCellId(colIndex: number, rowIndex: number) {
+    return `${this.sheetName}_${colIndex}_${rowIndex}`;
   }
 }
