@@ -1,5 +1,6 @@
 import Sheet from "../../../src/core/structure/sheet.ts";
 import CellStyle from "../../../src/core/structure/cellStyle.ts";
+import { GroupTypes } from "../../../src/core/structure/sheet.types.ts";
 
 describe("CellStyle", () => {
   let sheet: Sheet;
@@ -24,43 +25,46 @@ describe("CellStyle", () => {
       new CellStyle(new Map([["border", "1px solid black"]])),
     ];
 
-    sheet.setCellStyle(pos.columnKey!, pos.rowKey!, styles[0]);
-    expect(sheet.getCellStyle(pos.columnKey!, pos.rowKey!)!).toEqual(styles[0]);
-
-    sheet.setCellStyle(pos.columnKey!, pos.rowKey!, null);
-    expect(sheet.getCellStyle(pos.columnKey!, pos.rowKey!)).toEqual(
-      sheet["defaultStyle"],
+    sheet.setCellCss(1, 1, styles[0].css);
+    expect(sheet.getMergedCellStyle(pos.columnKey, pos.rowKey).css!).toEqual(
+      styles[0].css,
     );
 
-    sheet.setRowStyle(pos.rowKey!, styles[1]);
-    expect(sheet.getCellStyle(pos.columnKey!, pos.rowKey!)!).toEqual(styles[1]);
+    sheet.setCellCss(1, 1, new Map());
+    expect(sheet.getMergedCellStyle(pos.columnKey, pos.rowKey).css).toEqual(
+      sheet.defaultStyle.css,
+    );
+    sheet.setGroupCss(1, GroupTypes.Row, styles[1].css);
+    expect(sheet.getMergedCellStyle(pos.columnKey, pos.rowKey).css).toEqual(
+      styles[1].css,
+    );
 
-    sheet.setColumnStyle(pos.columnKey!, styles[2]);
-    expect(sheet.getCellStyle(pos.columnKey!, pos.rowKey!)!).toEqual(
+    sheet.setGroupCss(1!, GroupTypes.Column, styles[2].css);
+    expect(sheet.getMergedCellStyle(pos.columnKey, pos.rowKey).css).toEqual(
       new CellStyle(
         new Map([
           ["width", "50px"],
           ["color", "0xff0000"],
         ]),
-      ),
+      ).css,
     );
 
-    sheet.setCellStyle(pos.columnKey!, pos.rowKey!, styles[3]);
-    expect(sheet.getCellStyle(pos.columnKey!, pos.rowKey!)!).toEqual(
+    sheet.setCellCss(1, 1, styles[3].css);
+    expect(sheet.getMergedCellStyle(pos.columnKey, pos.rowKey).css).toEqual(
       new CellStyle(
         new Map([
           ["width", "50px"],
           ["color", "0xff0000"],
           ["border", "1px solid black"],
         ]),
-      ),
+      ).css,
     );
 
-    sheet.setCellStyle(pos.columnKey!, pos.rowKey!, null);
-    sheet.setRowStyle(pos.rowKey!, null);
-    sheet.setColumnStyle(pos.columnKey!, null);
-    expect(sheet.getCellStyle(pos.columnKey!, pos.rowKey!)).toEqual(
-      sheet["defaultStyle"],
+    sheet.setCellCss(1, 1, new Map());
+    sheet.setGroupCss(1, GroupTypes.Row, new Map());
+    sheet.setGroupCss(1, GroupTypes.Column, new Map());
+    expect(sheet.getMergedCellStyle(pos.columnKey, pos.rowKey).css).toEqual(
+      sheet.defaultStyle.css,
     );
   });
 });

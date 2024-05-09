@@ -1,5 +1,5 @@
-import EventType from "./eventType";
 import EventState from "./eventState";
+import { EventType } from "./events.types";
 
 export default class Event {
   eventType: EventType;

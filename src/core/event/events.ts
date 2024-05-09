@@ -1,6 +1,6 @@
-import EventType from "./eventType";
 import Event from "./event";
 import EventState from "./eventState";
+import { EventType } from "./events.types";
 
 export type ListenerFunction = (event: Event) => void;
 

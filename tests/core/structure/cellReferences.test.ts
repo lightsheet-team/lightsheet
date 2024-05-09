@@ -1,7 +1,6 @@
 import Sheet from "../../../src/core/structure/sheet";
 import { CellState } from "../../../src/core/structure/cell/cellState.ts";
 import { CellInfo } from "../../../src/core/structure/sheet.types.ts";
-import CellStyle from "../../../src/core/structure/cellStyle.ts";
 
 describe("Cell references", () => {
   let sheet: Sheet;
@@ -107,17 +106,12 @@ describe("Cell references", () => {
   });
 
   it("should create an empty cell with styling", () => {
-    const b2 = sheet.getCellInfoAt(1, 1)!;
-    sheet.setCellStyle(
-      b2.position!.columnKey!,
-      b2.position!.rowKey!,
-      new CellStyle(new Map([["width", "50px"]])),
-    );
+    sheet.setCellCss(1, 1, new Map<string, string>([["width", "50px;"]]));
 
     sheet.setCellAt(1, 1, "");
 
     // Clearing the style should result in the cell being deleted.
-    sheet.setCellStyle(b2!.position.columnKey!, b2!.position.rowKey!, null);
+    sheet.setCellCss(1, 1, new Map<string, string>());
     expect(sheet.getCellInfoAt(1, 1)).toBeNull();
   });
 

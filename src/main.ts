@@ -1,18 +1,26 @@
-import UI from "./ui/render.ts";
-import { LightsheetOptions } from "./main.types.ts";
+import UI from "./view/view.ts";
 import Sheet from "./core/structure/sheet.ts";
-import { CellInfo } from "./core/structure/sheet.types.ts";
+import {
+  CellInfo,
+  Format,
+  GroupTypes,
+  StyleInfo,
+} from "./core/structure/sheet.types.ts";
 import Events from "./core/event/events.ts";
 import { ListenerFunction } from "./core/event/events.ts";
 import EventState from "./core/event/eventState.ts";
-import EventType from "./core/event/eventType.ts";
 import SheetHolder from "./core/structure/sheetHolder.ts";
 import { DefaultColCount, DefaultRowCount } from "./utils/constants.ts";
 import ExpressionHandler from "./core/evaluation/expressionHandler.ts";
 import { CellReference } from "./core/structure/cell/types.cell.ts";
-import { RowKey, ColumnKey } from "./core/structure/key/keyTypes.ts";
-import CellStyle from "./core/structure/cellStyle.ts";
-import { Coordinate } from "./utils/common.types.ts";
+import NumberFormatter from "./core/evaluation/numberFormatter.ts";
+import {
+  GenerateStyleMapFromString,
+  GetRowColFromCellRef,
+} from "./utils/helpers.ts";
+import { LightsheetOptions } from "./main.types.ts";
+import { EventType } from "./core/event/events.types.ts";
+import { IndexPosition } from "./utils/common.types.ts";
 
 export default class Lightsheet {
   private ui: UI | undefined;
@@ -20,6 +28,7 @@ export default class Lightsheet {
   private sheet: Sheet;
   sheetHolder: SheetHolder;
   private events: Events;
+  style?: any = null;
   onCellChange?;
   isReady: boolean = false;
 
@@ -37,7 +46,7 @@ export default class Lightsheet {
     this.events = new Events();
     this.sheetHolder = SheetHolder.getInstance();
     this.sheet = new Sheet(options.sheetName, this.events);
-
+    this.style = options.style;
     if (targetElement) {
       this.ui = new UI(targetElement, this.options, this.events);
 
@@ -61,7 +70,7 @@ export default class Lightsheet {
     if (options.onCellChange) {
       this.onCellChange = options.onCellChange;
     }
-
+    this.initializeStyle();
     if (options.onReady) options.onReady = this.options.onReady;
     this.onTableReady();
   }
@@ -100,56 +109,76 @@ export default class Lightsheet {
     this.options.isReadOnly = isReadOnly;
   }
 
-  showToolbar(isShown: boolean) {
-    this.ui?.showToolbar(isShown);
+  getFormatter(type: string, options?: any) {
+    if (type == "number") {
+      return new NumberFormatter(options.decimal);
+    }
+    return;
   }
 
-  getKey() {
-    return this.sheet.key;
+  setCss(position: string, css: string) {
+    const { rowIndex, columnIndex } = GetRowColFromCellRef(position);
+    const mappedCss = css ? GenerateStyleMapFromString(css) : null;
+    if (rowIndex == null && columnIndex == null) {
+      return;
+    } else if (rowIndex != null && columnIndex != null) {
+      this.sheet.setCellCss(columnIndex, rowIndex, mappedCss!);
+    } else if (rowIndex != null) {
+      this.sheet.setGroupCss(rowIndex, GroupTypes.Row, mappedCss!);
+    } else if (columnIndex != null) {
+      this.sheet.setGroupCss(columnIndex, GroupTypes.Column, mappedCss!);
+    }
+  }
+
+  clearCss(position: string) {
+    this.setCss(position, "");
+  }
+
+  setFormatting(position: string, format: Format) {
+    this.processFormatting(position, format);
+  }
+
+  clearFormatter(position: string) {
+    this.processFormatting(position, null);
+  }
+
+  private processFormatting(position: string, format: Format | null) {
+    const { rowIndex, columnIndex } = GetRowColFromCellRef(position);
+    const formatter = format
+      ? this.getFormatter(format.type, format.options)
+      : null;
+    if (!formatter) return;
+    if (rowIndex == null && columnIndex == null) {
+      return;
+    } else if (rowIndex != null && columnIndex != null) {
+      this.sheet.setCellFormatter(columnIndex, rowIndex, formatter);
+    } else if (rowIndex != null) {
+      this.sheet.setGroupFormatter(rowIndex, GroupTypes.Row, formatter);
+    } else if (columnIndex != null) {
+      this.sheet.setGroupFormatter(columnIndex, GroupTypes.Column, formatter);
+    }
+  }
+
+  private initializeStyle() {
+    this.style?.forEach((item: StyleInfo) => {
+      if (item.css) this.setCss(item.position, item.css!);
+      if (item.format) this.setFormatting(item.position, item.format);
+    });
+  }
+  showToolbar(isShown: boolean) {
+    this.ui?.showToolbar(isShown);
   }
 
   getName() {
     return this.options.sheetName;
   }
 
-  setCellAt(columnIndex: number, rowIndex: number, value: any): CellInfo {
+  setCell(columnIndex: number, rowIndex: number, value: any): CellInfo {
     return this.sheet.setCellAt(columnIndex, rowIndex, value.toString());
-  }
-
-  setCell(colKey: ColumnKey, rowKey: RowKey, formula: string): CellInfo | null {
-    return this.sheet.setCell(colKey, rowKey, formula);
   }
 
   getCellInfoAt(colPos: number, rowPos: number): CellInfo | null {
     return this.sheet.getCellInfoAt(colPos, rowPos);
-  }
-
-  getRowIndex(rowKey: RowKey): number | undefined {
-    return this.sheet.getRowIndex(rowKey);
-  }
-
-  getColumnIndex(colKey: ColumnKey): number | undefined {
-    return this.sheet.getColumnIndex(colKey);
-  }
-
-  getCellStyle(colKey?: ColumnKey, rowKey?: RowKey): CellStyle {
-    return this.sheet.getCellStyle(colKey, rowKey);
-  }
-
-  setCellStyle(
-    colKey: ColumnKey,
-    rowKey: RowKey,
-    style: CellStyle | null,
-  ): boolean {
-    return this.sheet.setCellStyle(colKey, rowKey, style);
-  }
-
-  setRowStyle(rowkey: RowKey, cellStyle: CellStyle): boolean {
-    return this.sheet.setRowStyle(rowkey, cellStyle);
-  }
-
-  setColumnStyle(columnKey: ColumnKey, cellStyle: CellStyle): boolean {
-    return this.sheet.setColumnStyle(columnKey, cellStyle);
   }
 
   moveColumn(from: number, to: number): boolean {
@@ -160,7 +189,11 @@ export default class Lightsheet {
     return this.sheet.moveRow(from, to);
   }
 
-  moveCell(from: Coordinate, to: Coordinate, moveStyling: boolean = true) {
+  moveCell(
+    from: IndexPosition,
+    to: IndexPosition,
+    moveStyling: boolean = true,
+  ) {
     this.sheet.moveCell(from, to, moveStyling);
   }
 

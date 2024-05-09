@@ -1,4 +1,4 @@
-export type Coordinate = {
-  row: number;
-  column: number;
+export type IndexPosition = {
+  columnIndex?: number | null;
+  rowIndex?: number | null;
 };

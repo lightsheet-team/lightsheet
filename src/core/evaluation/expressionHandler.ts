@@ -18,8 +18,8 @@ import {
 } from "./expressionHandler.types.ts";
 
 import { CellState } from "../structure/cell/cellState.ts";
-import LightsheetHelper from "../../utils/helpers.ts";
-import { Coordinate } from "../../utils/common.types.ts";
+import { GenerateColumnLabel } from "../../utils/helpers.ts";
+import { IndexPosition } from "../../utils/common.types.ts";
 import { CellReference } from "../structure/cell/types.cell.ts";
 import SheetHolder from "../structure/sheetHolder.ts";
 
@@ -86,16 +86,16 @@ export default class ExpressionHandler {
     }
   }
 
-  updatePositionalReferences(from: Coordinate, to: Coordinate) {
+  updatePositionalReferences(from: IndexPosition, to: IndexPosition) {
     if (!this.rawValue.startsWith("=")) return this.rawValue;
 
     const expression = this.rawValue.substring(1);
     const parseResult = math.parse(expression);
 
     const fromSymbol =
-      LightsheetHelper.generateColumnLabel(from.column + 1) + (from.row + 1);
+      GenerateColumnLabel(from.columnIndex! + 1) + (from.rowIndex! + 1);
     const toSymbol =
-      LightsheetHelper.generateColumnLabel(to.column + 1) + (to.row + 1);
+      GenerateColumnLabel(to.columnIndex! + 1) + (to.rowIndex! + 1);
 
     // Update each symbol in the expression.
     const transform = parseResult.transform((node) =>
@@ -212,7 +212,7 @@ export default class ExpressionHandler {
 
           this.cellRefHolder.push({
             sheetKey: targetSheet.key,
-            position: { column: j, row: i },
+            position: { columnIndex: j, rowIndex: i },
           });
           values.push(cellInfo?.resolvedValue ?? "");
         }
@@ -230,8 +230,8 @@ export default class ExpressionHandler {
     this.cellRefHolder.push({
       sheetKey: targetSheet.key,
       position: {
-        column: colIndex,
-        row: rowIndex,
+        columnIndex: colIndex,
+        rowIndex: rowIndex,
       },
     });
     return cellInfo?.resolvedValue ?? "";

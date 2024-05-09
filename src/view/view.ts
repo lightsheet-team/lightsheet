@@ -1,15 +1,16 @@
-import { SelectionContainer } from "./render.types.ts";
-import LightsheetEvent from "../core/event/event.ts";
+import Event from "../core/event/event";
+import Events from "../core/event/events";
 import {
-  CoreSetCellPayload,
   UISetCellPayload,
-} from "../core/event/events.types.ts";
-import EventType from "../core/event/eventType.ts";
-import { LightsheetOptions, ToolbarOptions } from "../main.types";
-import LightsheetHelper from "../utils/helpers.ts";
-import { ToolbarItems } from "../utils/constants.ts";
-import { Coordinate } from "../utils/common.types.ts";
-import Events from "../core/event/events.ts";
+  EventType,
+  CoreSetStylePayload,
+  CoreSetCellPayload,
+} from "../core/event/events.types";
+import { ToolbarOptions, LightsheetOptions } from "../main.types";
+import { IndexPosition } from "../utils/common.types";
+import { ToolbarItems } from "../utils/constants";
+import { GenerateColumnLabel } from "../utils/helpers";
+import { SelectionContainer } from "./view.types";
 
 export default class UI {
   tableEl!: Element;
@@ -25,7 +26,7 @@ export default class UI {
   selectedCellsContainer: SelectionContainer;
   toolbarOptions: ToolbarOptions;
   isReadOnly: boolean;
-  singleSelectedCell: Coordinate | undefined;
+  singleSelectedCell: IndexPosition | undefined;
   tableContainerDom: Element;
   private events: Events;
 
@@ -166,8 +167,8 @@ export default class UI {
       const newValue = this.formulaInput.value;
       if (event.key === "Enter") {
         if (this.singleSelectedCell) {
-          const colIndex = this.singleSelectedCell.column;
-          const rowIndex = this.singleSelectedCell.row;
+          const colIndex = this.singleSelectedCell.columnIndex!;
+          const rowIndex = this.singleSelectedCell.rowIndex!;
           this.onUICellValueChange(newValue, colIndex, rowIndex);
         }
         this.formulaInput.blur();
@@ -184,8 +185,8 @@ export default class UI {
     this.formulaInput.onblur = () => {
       const newValue = this.formulaInput.value;
       if (this.singleSelectedCell) {
-        const colIndex = this.singleSelectedCell.column;
-        const rowIndex = this.singleSelectedCell.row;
+        const colIndex = this.singleSelectedCell.columnIndex!;
+        const rowIndex = this.singleSelectedCell.rowIndex!;
         this.onUICellValueChange(newValue, colIndex, rowIndex);
       }
     };
@@ -206,8 +207,7 @@ export default class UI {
     );
 
     const newColumnNumber = this.getColumnCount() + 1;
-    const newHeaderValue =
-      LightsheetHelper.generateColumnLabel(newColumnNumber);
+    const newHeaderValue = GenerateColumnLabel(newColumnNumber);
 
     headerCellDom.textContent = newHeaderValue;
     headerCellDom.onclick = (e: MouseEvent) =>
@@ -215,8 +215,7 @@ export default class UI {
 
     const rowCount = this.getRowCount();
     for (let rowIndex = 0; rowIndex < rowCount; rowIndex++) {
-      const rowDom = this.tableBodyDom.children[rowIndex];
-      this.addCell(rowDom, newColumnNumber - 1, rowIndex, "");
+      this.addCell(newColumnNumber - 1, rowIndex, "");
     }
 
     this.tableHeadDom.children[0].appendChild(headerCellDom);
@@ -250,7 +249,7 @@ export default class UI {
 
     const columnCount = this.getColumnCount();
     for (let columnIndex = 0; columnIndex < columnCount; columnIndex++) {
-      this.addCell(rowDom, columnIndex, rowCount, "");
+      this.addCell(columnIndex, rowCount, "");
     }
     return rowDom;
   }
@@ -295,23 +294,20 @@ export default class UI {
     return rowDom;
   }
 
-  getRow(rowKey: string): HTMLElement | null {
-    return document.getElementById(rowKey);
+  getRowDom(rowIndex: number) {
+    return this.tableBodyDom.children.length < rowIndex + 1
+      ? null
+      : this.tableBodyDom.children[rowIndex];
   }
 
-  addCell(
-    rowDom: Element,
-    colIndex: number,
-    rowIndex: number,
-    value: any,
-    columnKey?: string,
-  ): HTMLElement {
+  addCell(colIndex: number, rowIndex: number, value: any): HTMLElement {
     const cellDom = document.createElement("td");
     cellDom.classList.add(
       "lightsheet_table_cell",
       "lightsheet_table_row_cell",
       "lightsheet_table_td",
     );
+    const rowDom = this.tableBodyDom.children[rowIndex];
     rowDom.appendChild(cellDom);
     cellDom.id = `${colIndex}_${rowIndex}`;
     cellDom.setAttribute("column-index", `${colIndex}` || "");
@@ -324,7 +320,6 @@ export default class UI {
     cellDom.appendChild(inputDom);
 
     if (value) {
-      cellDom.id = `${columnKey}_${rowDom.id}`;
       inputDom.value = value;
     }
 
@@ -359,8 +354,8 @@ export default class UI {
       }
 
       this.singleSelectedCell = {
-        column: Number(colIndex),
-        row: Number(rowIndex),
+        columnIndex: Number(colIndex),
+        rowIndex: Number(rowIndex),
       };
 
       if (this.formulaBarDom) {
@@ -405,83 +400,100 @@ export default class UI {
     }
   }
 
-  onUICellValueChange(rawValue: string, colIndex: number, rowIndex: number) {
+  onUICellValueChange(rawValue: string, columnIndex: number, rowIndex: number) {
     const payload: UISetCellPayload = {
-      indexPosition: { column: colIndex, row: rowIndex },
+      indexPosition: { columnIndex, rowIndex },
       rawValue,
     };
-    this.events.emit(new LightsheetEvent(EventType.UI_SET_CELL, payload));
+    this.events.emit(new Event(EventType.VIEW_SET_CELL, payload));
   }
 
   private registerEvents() {
     this.events.on(EventType.CORE_SET_CELL, (event) => {
       this.onCoreSetCell(event);
     });
+    this.events.on(EventType.VIEW_SET_STYLE, (event) => {
+      this.onCoreSetStyle(event.payload);
+    });
+  }
+
+  private onCoreSetStyle(event: CoreSetStylePayload) {
+    const { indexPosition, value } = event;
+    if (
+      indexPosition.columnIndex != undefined &&
+      indexPosition.rowIndex != undefined
+    ) {
+      const cellDom =
+        this.tableBodyDom.children[indexPosition.rowIndex].children[
+          indexPosition.columnIndex + 1
+        ];
+      const inputElement = cellDom! as HTMLElement;
+      inputElement.setAttribute("style", value);
+    } else if (indexPosition.columnIndex || indexPosition.columnIndex === 0) {
+      for (let i = 0; i < this.tableBodyDom.children.length; i++) {
+        this.tableBodyDom.children[i].children[
+          indexPosition.columnIndex + 1
+        ].setAttribute("style", value);
+      }
+    } else {
+      for (
+        let i = 1;
+        i < this.tableBodyDom.children[indexPosition.rowIndex!].children.length;
+        i++
+      ) {
+        this.tableBodyDom.children[indexPosition.rowIndex!].children[
+          i
+        ].setAttribute("style", value);
+      }
+    }
   }
 
   private onCoreSetCell(event: LightsheetEvent) {
     const payload = event.payload as CoreSetCellPayload;
     // Create new columns if the column index is greater than the current column count.
-    const newColumns = payload.indexPosition.column - this.getColumnCount() + 1;
+    const newColumns =
+      payload.indexPosition.columnIndex! - this.getColumnCount() + 1;
     for (let i = 0; i < newColumns; i++) {
       this.addColumn();
     }
 
-    const newRows = payload.indexPosition.row - this.getRowCount() + 1;
+    const newRows = payload.indexPosition.rowIndex! - this.getRowCount() + 1;
     for (let i = 0; i < newRows; i++) {
       this.addRow();
     }
 
     // Get HTML elements and (new) IDs for the payload's cell and row.
-    const elInfo = this.getElementInfoForSetCell(payload);
+    const cellInputDom = this.getElementInfoForSetCell(
+      payload.indexPosition.columnIndex!,
+      payload.indexPosition.rowIndex!,
+      payload.formattedValue,
+    );
 
-    elInfo.cellDom!.id = elInfo.cellDomId;
-    elInfo.rowDom!.id = elInfo.rowDomId;
-
-    // Update input element with values from the core.
-    const inputEl = elInfo.cellDom!.firstChild! as HTMLInputElement;
-    inputEl.setAttribute("rawValue", payload.rawValue);
-    inputEl.setAttribute("resolvedValue", payload.formattedValue);
-    inputEl.value = payload.formattedValue;
+    cellInputDom.setAttribute("rawValue", payload.rawValue);
+    cellInputDom.setAttribute("resolvedValue", payload.formattedValue);
+    cellInputDom.value = payload.formattedValue;
   }
 
-  private getElementInfoForSetCell = (payload: CoreSetCellPayload) => {
-    const colKey = payload.keyPosition.columnKey?.toString();
-    const rowKey = payload.keyPosition.rowKey?.toString();
-
-    const columnIndex = payload.indexPosition.column;
-    const rowIndex = payload.indexPosition.row;
-
-    const cellDomKey =
-      colKey && rowKey ? `${colKey!.toString()}_${rowKey!.toString()}` : null;
-
-    // Get the cell by either column and row key or position.
-    // TODO Index-based ID may not be unique if there are multiple sheets.
-    const cellDom =
-      (cellDomKey && document.getElementById(cellDomKey)) ||
-      document.getElementById(`${columnIndex}_${rowIndex}`);
-
-    const newCellDomId = payload.clearCell
-      ? `${columnIndex}_${rowIndex}`
-      : `${colKey}_${rowKey}`;
-
-    const newRowDomId = payload.clearRow ? `row_${rowIndex}` : rowKey!;
-
-    let rowDom: HTMLElement | null = null;
-    if (rowKey) {
-      rowDom = document.getElementById(rowKey);
+  private getElementInfoForSetCell = (
+    columnIndex: number,
+    rowIndex: number,
+    formattedValue: string,
+  ) => {
+    let cellDom;
+    if (this.tableBodyDom.children.length < rowIndex + 1) {
+      this.addRow();
+      cellDom = this.addCell(columnIndex, rowIndex, formattedValue);
+    } else {
+      if (
+        this.tableBodyDom.children[rowIndex].children.length <
+        columnIndex + 2
+      ) {
+        cellDom = this.addCell(columnIndex, rowIndex, formattedValue);
+      } else
+        cellDom =
+          this.tableBodyDom.children[rowIndex].children[columnIndex + 1];
     }
-    if (!rowDom) {
-      const rowId = `row_${rowIndex}`;
-      rowDom = document.getElementById(rowId);
-    }
-
-    return {
-      cellDom: cellDom,
-      cellDomId: newCellDomId,
-      rowDom: rowDom,
-      rowDomId: newRowDomId,
-    };
+    return cellDom.firstChild! as HTMLInputElement;
   };
 
   getColumnCount() {
@@ -551,14 +563,15 @@ export default class UI {
       return false;
 
     const withinX =
-      (cellColumnIndex >= selectionStart.column &&
-        cellColumnIndex <= selectionEnd.column) ||
-      (cellColumnIndex <= selectionStart.column &&
-        cellColumnIndex >= selectionEnd.column);
+      (cellColumnIndex >= selectionStart.columnIndex! &&
+        cellColumnIndex <= selectionEnd.columnIndex!) ||
+      (cellColumnIndex <= selectionStart.columnIndex! &&
+        cellColumnIndex >= selectionEnd.columnIndex!);
     const withinY =
-      (cellRowIndex >= selectionStart.row &&
-        cellRowIndex <= selectionEnd.row) ||
-      (cellRowIndex <= selectionStart.row && cellRowIndex >= selectionEnd.row);
+      (cellRowIndex >= selectionStart.rowIndex! &&
+        cellRowIndex <= selectionEnd.rowIndex!) ||
+      (cellRowIndex <= selectionStart.rowIndex! &&
+        cellRowIndex >= selectionEnd.rowIndex!);
 
     return withinX && withinY;
   }
@@ -584,8 +597,8 @@ export default class UI {
       this.selectedCellsContainer.selectionStart =
         (colIndex != null || undefined) && (rowIndex != null || undefined)
           ? {
-              row: rowIndex,
-              column: colIndex,
+              rowIndex: rowIndex,
+              columnIndex: colIndex,
             }
           : null;
     }
@@ -597,8 +610,8 @@ export default class UI {
     this.selectedCellsContainer.selectionEnd =
       (colIndex != null || undefined) && (rowIndex != null || undefined)
         ? {
-            row: rowIndex,
-            column: colIndex,
+            rowIndex: rowIndex,
+            columnIndex: colIndex,
           }
         : null;
     if (

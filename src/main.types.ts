@@ -2,6 +2,8 @@
 export type LightsheetOptions = {
   sheetName: string;
   data?: any[];
+
+  style?: any;
   onCellChange?: (colIndex: number, rowIndex: number, value: any) => void;
   onCellClick?: (colIndex: number, rowIndex: number) => void;
   onReady?: () => void;

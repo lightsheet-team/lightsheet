@@ -8,19 +8,31 @@ import {
 import Cell from "./cell/cell.ts";
 import Column from "./group/column.ts";
 import Row from "./group/row.ts";
-import { CellInfo, PositionInfo, ShiftDirection } from "./sheet.types.ts";
+import {
+  CellInfo,
+  GroupType,
+  GroupTypes,
+  KeyPosition,
+  ShiftDirection,
+} from "./sheet.types.ts";
 import ExpressionHandler from "../evaluation/expressionHandler.ts";
 import CellStyle from "./cellStyle.ts";
 import CellGroup from "./group/cellGroup.ts";
 import Events from "../event/events.ts";
 import LightsheetEvent from "../event/event.ts";
-import { CoreSetCellPayload, UISetCellPayload } from "../event/events.types.ts";
-import EventType from "../event/eventType.ts";
+import {
+  CoreSetCellPayload,
+  CoreSetStylePayload,
+  EventType,
+  UISetCellPayload,
+} from "../event/events.types.ts";
 import { CellState } from "./cell/cellState.ts";
 import { EvaluationResult } from "../evaluation/expressionHandler.types.ts";
+import Formatter from "../evaluation/formatter.ts";
 import SheetHolder from "./sheetHolder.ts";
 import { CellReference } from "./cell/types.cell.ts";
-import { Coordinate } from "../../utils/common.types.ts";
+import { GenerateStyleStringFromMap } from "../../utils/helpers.ts";
+import { IndexPosition } from "../../utils/common.types.ts";
 
 export default class Sheet {
   readonly key: SheetKey;
@@ -98,7 +110,7 @@ export default class Sheet {
       this.resolveCell(cell!, colKey, rowKey);
     }
 
-    this.emitSetCellEvent(colKey, rowKey, colIndex, rowIndex, cell);
+    this.emitSetCellEvent(colIndex, rowIndex, cell);
 
     return {
       rawValue: cell ? cell.rawValue : undefined,
@@ -113,17 +125,23 @@ export default class Sheet {
   }
 
   public moveCell(
-    from: Coordinate,
-    to: Coordinate,
+    from: IndexPosition,
+    to: IndexPosition,
     moveStyling: boolean = true,
   ) {
-    const fromPosition = this.getCellInfoAt(from.column, from.row)?.position;
-    let toPosition = this.getCellInfoAt(to.column, to.row)?.position;
+    const fromPosition = this.getCellInfoAt(
+      from.columnIndex!,
+      from.rowIndex!,
+    )?.position;
+    let toPosition = this.getCellInfoAt(
+      to.columnIndex!,
+      to.rowIndex!,
+    )?.position;
 
     if (!fromPosition) return false;
 
     if (!toPosition) {
-      toPosition = this.initializePosition(to.column, to.row);
+      toPosition = this.initializePosition(to.columnIndex!, to.rowIndex!);
     } else {
       this.deleteCell(toPosition.columnKey!, toPosition.rowKey!);
     }
@@ -331,14 +349,14 @@ export default class Sheet {
           ? this.rows.get(oppositeKey as RowKey)!.position
           : this.columns.get(oppositeKey as ColumnKey)!.position;
 
-      const fromCoord: Coordinate = {
-        column: group instanceof Column ? from : oppositeGroupPos!,
-        row: group instanceof Row ? from : oppositeGroupPos!,
+      const fromCoord: IndexPosition = {
+        columnIndex: group instanceof Column ? from : oppositeGroupPos!,
+        rowIndex: group instanceof Row ? from : oppositeGroupPos!,
       };
 
-      const toCoord: Coordinate = {
-        column: group instanceof Column ? to : oppositeGroupPos!,
-        row: group instanceof Row ? to : oppositeGroupPos!,
+      const toCoord: IndexPosition = {
+        columnIndex: group instanceof Column ? to : oppositeGroupPos!,
+        rowIndex: group instanceof Row ? to : oppositeGroupPos!,
       };
 
       this.updateCellReferenceSymbols(cell, fromCoord, toCoord);
@@ -347,8 +365,8 @@ export default class Sheet {
 
   private updateCellReferenceSymbols(
     cell: Cell,
-    from: Coordinate,
-    to: Coordinate,
+    from: IndexPosition,
+    to: IndexPosition,
   ) {
     // Update reference symbols for all cell formulas that refer to the cell being moved.
     for (const [refCellKey, refInfo] of cell.referencesIn) {
@@ -364,8 +382,6 @@ export default class Sheet {
 
       // Emit event for the rawValue change.
       refSheet.emitSetCellEvent(
-        refInfo.column,
-        refInfo.row,
         refSheet.getColumnIndex(refInfo.column)!,
         refSheet.getRowIndex(refInfo.row)!,
         refCell,
@@ -416,7 +432,10 @@ export default class Sheet {
     return true;
   }
 
-  getCellStyle(colKey?: ColumnKey, rowKey?: RowKey): CellStyle {
+  getMergedCellStyle(
+    colKey: ColumnKey | null = null,
+    rowKey: RowKey | null = null,
+  ): CellStyle {
     const col = colKey ? this.columns.get(colKey) : null;
     const row = rowKey ? this.rows.get(rowKey) : null;
     if (!col && !row) return this.defaultStyle;
@@ -433,46 +452,96 @@ export default class Sheet {
     return cellStyle;
   }
 
-  setCellStyle(
-    colKey: ColumnKey,
-    rowKey: RowKey,
-    style: CellStyle | null,
-  ): boolean {
-    const col = this.columns.get(colKey);
-    const row = this.rows.get(rowKey);
-    if (!col || !row) return false;
+  setCellFormatter(
+    columnIndex: number,
+    rowIndex: number,
+    formatter: Formatter | null = null,
+  ): void {
+    const { columnKey, rowKey } = this.initializePosition(
+      columnIndex,
+      rowIndex,
+    );
+    const column = this.columns.get(columnKey!);
+    const row = this.rows.get(rowKey!);
 
-    if (style == null) {
-      return this.clearCellStyle(colKey, rowKey);
-    }
+    if (!column || !row) return;
 
-    // TODO Style could be non-null but empty; should we allow this?
-    style = new CellStyle().clone(style);
+    const newStyle = new CellStyle().clone(column.cellFormatting.get(row.key));
+    newStyle.formatter = formatter;
+    column.cellFormatting.set(row.key, newStyle);
+    row.cellFormatting.set(column.key, newStyle);
 
-    col.cellFormatting.set(row.key, style);
-    row.cellFormatting.set(col.key, style);
+    const cell = this.getCell(columnKey!, rowKey!);
 
-    if (style.formatter) {
-      this.applyCellFormatter(this.getCell(colKey, rowKey)!, colKey, rowKey);
-    }
+    this.applyCellFormatter(cell!, columnKey!, rowKey!);
 
-    return true;
+    this.deleteCellIfUnused(columnKey!, rowKey!);
+    this.emitSetCellEvent(columnIndex, rowIndex, cell);
   }
 
-  setColumnStyle(colKey: ColumnKey, style: CellStyle | null): boolean {
-    const col = this.columns.get(colKey);
-    if (!col) return false;
+  setCellCss(
+    columnIndex: number,
+    rowIndex: number,
+    css: Map<string, string> = new Map(),
+  ): void {
+    const { columnKey, rowKey } = this.initializePosition(
+      columnIndex,
+      rowIndex,
+    );
+    const column = this.columns.get(columnKey!);
+    const row = this.rows.get(rowKey!);
 
-    this.setCellGroupStyle(col, style);
-    return true;
+    if (!column || !row) return;
+
+    const newStyle = new CellStyle().clone(column.cellFormatting.get(row.key));
+    newStyle.css = css;
+    column.cellFormatting.set(row.key, newStyle);
+    row.cellFormatting.set(column.key, newStyle);
+
+    this.deleteCellIfUnused(columnKey!, rowKey!);
+    this.emitSetStyleEvent(columnIndex, rowIndex, columnKey, rowKey);
   }
 
-  setRowStyle(rowKey: RowKey, style: CellStyle | null): boolean {
-    const row = this.rows.get(rowKey);
-    if (!row) return false;
+  setGroupCss(
+    groupIndex: number,
+    groupType: GroupType,
+    css: Map<string, string> = new Map(),
+  ): void {
+    const isColumnGroup = groupType == GroupTypes.Column;
+    const groupKey = isColumnGroup
+      ? this.columnPositions.get(groupIndex)
+      : this.rowPositions.get(groupIndex);
+    if (!groupKey) return;
 
-    this.setCellGroupStyle(row, style);
-    return true;
+    const group = isColumnGroup
+      ? this.columns.get(groupKey as ColumnKey)
+      : this.rows.get(groupKey as RowKey);
+    if (!group) return;
+
+    group.defaultStyle = new CellStyle(css, group.defaultStyle?.formatter);
+    isColumnGroup
+      ? this.emitSetStyleEvent(groupIndex, null, groupKey as ColumnKey, null)
+      : this.emitSetStyleEvent(null, groupIndex, null, groupKey as RowKey);
+  }
+
+  setGroupFormatter(
+    groupIndex: number,
+    groupType: GroupType,
+    formatter: Formatter | null = null,
+  ): void {
+    const isColumnGroup: boolean = groupType == GroupTypes.Column;
+    const groupKey = isColumnGroup
+      ? this.columnPositions.get(groupIndex)
+      : this.rowPositions.get(groupIndex);
+    if (!groupKey) return;
+    const group = isColumnGroup
+      ? this.columns.get(groupKey as ColumnKey)
+      : this.rows.get(groupKey as RowKey);
+    if (!group) return;
+
+    const cellStyle = new CellStyle(group.defaultStyle?.css, formatter);
+
+    this.setCellGroupStyle(group, cellStyle);
   }
 
   private setCellGroupStyle(
@@ -482,7 +551,6 @@ export default class Sheet {
     style = style ? new CellStyle().clone(style) : null;
     const formatterChanged = style?.formatter != group.defaultStyle?.formatter;
     group.defaultStyle = style;
-
     // Iterate through formatted cells in this group and clear any styling properties set by the new style.
     for (const [opposingKey, cellStyle] of group.cellFormatting) {
       const shouldClear = cellStyle.clearStylingSetBy(style);
@@ -497,18 +565,18 @@ export default class Sheet {
     }
 
     if (!formatterChanged) return;
-
     // Apply new formatter to all cells in this group.
     for (const [opposingKey] of group.cellIndex) {
       const cell = this.cellData.get(group.cellIndex.get(opposingKey)!)!;
-      if (group instanceof Column) {
-        this.applyCellFormatter(cell, group.key, opposingKey as RowKey);
-        continue;
-      }
-      this.applyCellFormatter(
+      const colKey = (
+        group instanceof Column ? group.key : opposingKey
+      ) as ColumnKey;
+      const rowKey = (group instanceof Row ? group.key : opposingKey) as RowKey;
+      this.applyCellFormatter(cell, colKey, rowKey);
+      this.emitSetCellEvent(
+        this.getColumnIndex(colKey)!,
+        this.getRowIndex(rowKey)!,
         cell,
-        opposingKey as ColumnKey,
-        group.key as RowKey,
       );
     }
   }
@@ -637,8 +705,6 @@ export default class Sheet {
       // Emit event if the referred cell's value has changed (for the referring sheet's events).
       if (refUpdated) {
         referringSheet.emitSetCellEvent(
-          refInfo.column,
-          refInfo.row,
           referringSheet.getColumnIndex(refInfo.column)!,
           referringSheet.getRowIndex(refInfo.row)!,
           referringCell,
@@ -649,12 +715,9 @@ export default class Sheet {
     return valueChanged;
   }
 
-  private applyCellFormatter(
-    cell: Cell,
-    colKey: ColumnKey,
-    rowKey: RowKey,
-  ): boolean {
-    const style = this.getCellStyle(colKey, rowKey);
+  private applyCellFormatter(cell: Cell, colKey: ColumnKey, rowKey: RowKey) {
+    if (!cell) return;
+    const style = this.getMergedCellStyle(colKey, rowKey);
     let formattedValue: string | null = cell.resolvedValue;
     if (style?.formatter) {
       formattedValue = style.formatter.format(formattedValue);
@@ -665,14 +728,15 @@ export default class Sheet {
     }
 
     cell.formattedValue = formattedValue;
-    return true;
+    return;
   }
 
   /**
    * Delete a cell if it's empty, has no formatting and is not referenced by any other cell.
    */
   private deleteCellIfUnused(colKey: ColumnKey, rowKey: RowKey): boolean {
-    const cell = this.getCell(colKey, rowKey)!;
+    const cell = this.getCell(colKey, rowKey);
+    if (!cell) return false;
     if (cell.rawValue != "") return false;
 
     // Check if this cell is referenced by anything.
@@ -702,10 +766,15 @@ export default class Sheet {
 
       // Initialize the referred cell if it doesn't exist yet.
       const position = refSheet.initializePosition(
-        ref.position.column,
-        ref.position.row,
+        ref.position.columnIndex!,
+        ref.position.rowIndex!,
       );
-      if (!refSheet.getCellInfoAt(ref.position.column, ref.position.row)) {
+      if (
+        !refSheet.getCellInfoAt(
+          ref.position.columnIndex!,
+          ref.position.rowIndex!,
+        )
+      ) {
         refSheet.createCell(position.columnKey!, position.rowKey!, "");
       }
 
@@ -771,9 +840,9 @@ export default class Sheet {
     return false;
   }
 
-  private initializePosition(colPos: number, rowPos: number): PositionInfo {
+  private initializePosition(columnPos: number, rowPos: number): KeyPosition {
     let rowKey;
-    let colKey;
+    let columnKey;
 
     // Create row and column if they don't exist yet.
     if (!this.rowPositions.has(rowPos)) {
@@ -786,47 +855,58 @@ export default class Sheet {
       rowKey = this.rowPositions.get(rowPos)!;
     }
 
-    if (!this.columnPositions.has(colPos)) {
+    if (!this.columnPositions.has(columnPos)) {
       // Create a new column
-      const col = new Column(this.defaultWidth, colPos);
+      const col = new Column(this.defaultWidth, columnPos);
       this.columns.set(col.key, col);
-      this.columnPositions.set(colPos, col.key);
+      this.columnPositions.set(columnPos, col.key);
 
-      colKey = col.key;
+      columnKey = col.key;
     } else {
-      colKey = this.columnPositions.get(colPos)!;
+      columnKey = this.columnPositions.get(columnPos)!;
     }
 
-    return { rowKey: rowKey, columnKey: colKey };
+    return { columnKey, rowKey };
   }
 
   private emitSetCellEvent(
-    colKey: ColumnKey,
-    rowKey: RowKey,
-    colPos: number,
-    rowPos: number,
+    columnIndex: number,
+    rowIndex: number,
     cell: Cell | null,
   ) {
     const payload: CoreSetCellPayload = {
-      keyPosition: {
-        rowKey: rowKey,
-        columnKey: colKey,
-      },
       indexPosition: {
-        column: colPos,
-        row: rowPos,
+        columnIndex,
+        rowIndex,
       },
       rawValue: cell ? cell.rawValue : "",
       formattedValue: cell ? cell.formattedValue : "",
-      clearCell: cell == null,
-      clearRow: this.rows.get(rowKey) == null,
     };
 
     this.events.emit(new LightsheetEvent(EventType.CORE_SET_CELL, payload));
   }
 
+  private emitSetStyleEvent(
+    columnIndex: number | null,
+    rowIndex: number | null,
+    columnKey: ColumnKey | null = null,
+    rowKey: RowKey | null = null,
+  ) {
+    const payload: CoreSetStylePayload = {
+      indexPosition: {
+        rowIndex,
+        columnIndex,
+      },
+      value: GenerateStyleStringFromMap(
+        this.getMergedCellStyle(columnKey, rowKey).css,
+      ),
+    };
+
+    this.events.emit(new LightsheetEvent(EventType.VIEW_SET_STYLE, payload));
+  }
+
   private registerEvents() {
-    this.events.on(EventType.UI_SET_CELL, (event) =>
+    this.events.on(EventType.VIEW_SET_CELL, (event) =>
       this.handleUISetCell(event),
     );
   }
@@ -842,8 +922,8 @@ export default class Sheet {
       );
     } else if (payload.indexPosition) {
       this.setCellAt(
-        payload.indexPosition.column,
-        payload.indexPosition.row,
+        payload.indexPosition.columnIndex!,
+        payload.indexPosition.rowIndex!,
         payload.rawValue,
       );
     } else {
