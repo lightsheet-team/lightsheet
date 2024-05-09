@@ -9,4 +9,16 @@ export default class LightsheetHelper {
     }
     return label || "A"; // Return "A" if index is 0
   };
+  static getChildIndex = (node: HTMLElement) => {
+    return Array.prototype.indexOf.call(node.parentNode?.childNodes, node);
+  };
+  static getCellIndexFromTd = (cell: HTMLElement) => {
+    // minus 1 to adjust for the header row
+    const columnIndex = LightSheetHelper.getChildIndex(cell) - 1;
+    const rowIndex = LightSheetHelper.getChildIndex(cell.parentElement!);
+    return {
+      columnIndex,
+      rowIndex,
+    };
+  };
 }

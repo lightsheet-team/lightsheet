@@ -3,6 +3,8 @@ import LightsheetEvent from "../core/event/event.ts";
 import {
   CoreSetCellPayload,
   UISetCellPayload,
+  UIDeleteCellGroupPayload,
+  CoreDeleteCellGroupPayload,
 } from "../core/event/events.types.ts";
 import EventType from "../core/event/eventType.ts";
 import { LightsheetOptions, ToolbarOptions } from "../main.types";
@@ -86,7 +88,14 @@ export default class UI {
 
     //tbody
     this.tableBodyDom = document.createElement("tbody");
-    tableDom.appendChild(this.tableBodyDom);
+    this.tableEl.appendChild(this.tableBodyDom);
+
+    // Add event listener for keydown event
+    document.onkeydown = (e: KeyboardEvent) => {
+      if (e.key === "Delete") {
+        this.onDeleteButtonPressed(e);
+      }
+    };
   }
 
   private createToolbar() {
@@ -314,8 +323,6 @@ export default class UI {
     );
     rowDom.appendChild(cellDom);
     cellDom.id = `${colIndex}_${rowIndex}`;
-    cellDom.setAttribute("column-index", `${colIndex}` || "");
-    cellDom.setAttribute("row-index", `${rowIndex}` || "");
 
     const inputDom = document.createElement("input");
     inputDom.classList.add("lightsheet_table_cell_input");
@@ -413,9 +420,80 @@ export default class UI {
     this.events.emit(new LightsheetEvent(EventType.UI_SET_CELL, payload));
   }
 
+  private onDeleteButtonPressed(e: KeyboardEvent) {
+    if (this.selectedRowNumberCell) {
+      e.preventDefault();
+      const indexOfSelectedRow = LightSheetHelper.getChildIndex(
+        this.selectedRowNumberCell.parentElement!,
+      );
+      const payload: UIDeleteCellGroupPayload = {
+        indexPosition: indexOfSelectedRow,
+        type: "row",
+      };
+      this.events.emit(
+        new LightsheetEvent(EventType.UI_DELETE_CELL_GROUP, payload),
+      );
+    } else if (this.selectedHeaderCell) {
+      e.preventDefault();
+      const indexOfSelectedColumn = LightSheetHelper.getChildIndex(
+        this.selectedHeaderCell,
+      );
+      const payload: UIDeleteCellGroupPayload = {
+        indexPosition: indexOfSelectedColumn,
+        type: "column",
+      };
+      this.events.emit(
+        new LightsheetEvent(EventType.UI_DELETE_CELL_GROUP, payload),
+      );
+    }
+  }
+
   private registerEvents() {
     this.events.on(EventType.CORE_SET_CELL, (event) => {
       this.onCoreSetCell(event);
+    });
+    this.events.on(EventType.CORE_DELETE_CELL_GROUP, (event) => {
+      this.onCoreDeleteCellGroup(event);
+    });
+  }
+
+  private onCoreDeleteCellGroup(event: LightsheetEvent) {
+    const payload = event.payload as CoreDeleteCellGroupPayload;
+    if (payload.type === "row") {
+      this.removeRow(payload.indexPosition);
+    } else {
+      this.removeColumn(payload.indexPosition);
+    }
+  }
+
+  private removeRow(index: number) {
+    this.tableBodyDom.children[index].remove();
+    this.updateRowNumberLabels();
+  }
+
+  private updateRowNumberLabels() {
+    const rowNumberCells = this.tableBodyDom.querySelectorAll(
+      ".lightsheet_table_row_number",
+    );
+    rowNumberCells.forEach((cell, index) => {
+      cell.innerHTML = `${index + 1}`;
+    });
+  }
+
+  private removeColumn(index: number) {
+    this.tableBodyDom.querySelectorAll("tr").forEach((row) => {
+      row.children[index].remove();
+    });
+    this.tableHeadDom.children[0].children[index].remove();
+    this.updateColumnNumberLabels();
+  }
+
+  private updateColumnNumberLabels() {
+    const columnNumberCells = this.tableHeadDom.querySelectorAll(
+      ".lightsheet_table_header",
+    );
+    columnNumberCells.forEach((cell, index) => {
+      cell.innerHTML = LightSheetHelper.generateColumnLabel(index + 1);
     });
   }
 
@@ -544,21 +622,18 @@ export default class UI {
       return false;
     }
 
-    const cellColumnIndex = Number(cell.getAttribute("column-index"));
-    const cellRowIndex = Number(cell.getAttribute("row-index"));
+    const { columnIndex, rowIndex } = LightSheetHelper.getCellIndexFromTd(cell);
 
-    if (cellColumnIndex === undefined || cellRowIndex === undefined)
-      return false;
+    if (columnIndex === undefined || rowIndex === undefined) return false;
 
     const withinX =
-      (cellColumnIndex >= selectionStart.column &&
-        cellColumnIndex <= selectionEnd.column) ||
-      (cellColumnIndex <= selectionStart.column &&
-        cellColumnIndex >= selectionEnd.column);
+      (columnIndex >= selectionStart.column &&
+        columnIndex <= selectionEnd.column) ||
+      (columnIndex <= selectionStart.column &&
+        columnIndex >= selectionEnd.column);
     const withinY =
-      (cellRowIndex >= selectionStart.row &&
-        cellRowIndex <= selectionEnd.row) ||
-      (cellRowIndex <= selectionStart.row && cellRowIndex >= selectionEnd.row);
+      (rowIndex >= selectionStart.row && rowIndex <= selectionEnd.row) ||
+      (rowIndex <= selectionStart.row && rowIndex >= selectionEnd.row);
 
     return withinX && withinY;
   }

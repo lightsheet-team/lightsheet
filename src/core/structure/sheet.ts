@@ -14,7 +14,12 @@ import CellStyle from "./cellStyle.ts";
 import CellGroup from "./group/cellGroup.ts";
 import Events from "../event/events.ts";
 import LightsheetEvent from "../event/event.ts";
-import { CoreSetCellPayload, UISetCellPayload } from "../event/events.types.ts";
+import {
+  CoreDeleteCellGroupPayload,
+  CoreSetCellPayload,
+  UIDeleteCellGroupPayload,
+  UISetCellPayload,
+} from "../event/events.types.ts";
 import EventType from "../event/eventType.ts";
 import { CellState } from "./cell/cellState.ts";
 import { EvaluationResult } from "../evaluation/expressionHandler.types.ts";
@@ -203,11 +208,43 @@ export default class Sheet {
   }
 
   deleteColumn(position: number): boolean {
-    return this.deleteCellGroup(position, this.columns, this.columnPositions);
+    const isSuccessful = this.deleteCellGroup(
+      position,
+      this.columns,
+      this.columnPositions,
+    );
+
+    if (isSuccessful) {
+      const payload: CoreDeleteCellGroupPayload = {
+        indexPosition: position,
+        type: "column",
+      };
+      this.events.emit(
+        new LightsheetEvent(EventType.CORE_DELETE_CELL_GROUP, payload),
+      );
+    }
+
+    return isSuccessful;
   }
 
   deleteRow(position: number): boolean {
-    return this.deleteCellGroup(position, this.rows, this.rowPositions);
+    //TODO: Emit event for deleting row
+    const hasChanged = this.deleteCellGroup(
+      position,
+      this.rows,
+      this.rowPositions,
+    );
+
+    if (hasChanged) {
+      const payload: CoreDeleteCellGroupPayload = {
+        indexPosition: position,
+        type: "row",
+      };
+      this.events.emit(
+        new LightsheetEvent(EventType.CORE_DELETE_CELL_GROUP, payload),
+      );
+    }
+    return hasChanged;
   }
 
   private deleteCellGroup(
@@ -218,7 +255,8 @@ export default class Sheet {
     const groupKey = targetPositions.get(position);
     const lastPosition = Math.max(...targetPositions.keys());
 
-    if (groupKey !== undefined) {
+    const doesTargetExist = groupKey !== undefined;
+    if (doesTargetExist) {
       const group = target.get(groupKey);
       // Delete all cells in this group.
       for (const [oppositeKey] of group!.cellIndex) {
@@ -228,7 +266,8 @@ export default class Sheet {
       }
     }
 
-    if (position !== lastPosition) {
+    const isShiftingNeeded = position !== lastPosition;
+    if (isShiftingNeeded) {
       this.shiftCellGroups(
         lastPosition,
         ShiftDirection.backward,
@@ -236,7 +275,8 @@ export default class Sheet {
         targetPositions,
       );
     }
-    return true;
+
+    return doesTargetExist || isShiftingNeeded;
   }
 
   private moveCellGroup(
@@ -829,6 +869,18 @@ export default class Sheet {
     this.events.on(EventType.UI_SET_CELL, (event) =>
       this.handleUISetCell(event),
     );
+    this.events.on(EventType.UI_DELETE_CELL_GROUP, (event) =>
+      this.handleUIDeleteCellGroup(event),
+    );
+  }
+
+  private handleUIDeleteCellGroup(event: LightsheetEvent) {
+    const payload = event.payload as UIDeleteCellGroupPayload;
+    if (payload.type === "column") {
+      this.deleteColumn(payload.indexPosition);
+    } else {
+      this.deleteRow(payload.indexPosition);
+    }
   }
 
   private handleUISetCell(event: LightsheetEvent) {
